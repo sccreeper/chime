@@ -1,0 +1,9 @@
+version: '3'
+services:
+  chime:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - ~/chime:/var/lib/chime
+    restart: unless-stopped
