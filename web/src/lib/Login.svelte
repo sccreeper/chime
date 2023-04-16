@@ -1,4 +1,7 @@
 <script>
+    import Main from "./Main.svelte";
+    import { view } from "./stores";
+
     
     let username = "";
     let password = "";
@@ -25,8 +28,12 @@
                 login_status = "Login details correct. Loading..."
                 status_colour = "text-lime-400"
 
-                document.cookie = JSON.stringify(data)
-            }
+                let expiry = new Date(Date.now() + (3600 * 24 * 7 * 1000)).toUTCString();
+                document.cookie =  `session=${JSON.stringify(data)}; expires=${expiry}`
+
+                view.set(Main)
+            
+            }   
 
         })
 
