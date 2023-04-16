@@ -16,7 +16,7 @@ type user_model struct {
 	ID           int64 `gorm:"primaryKey"`
 	Username     string
 	Password     string
-	Salt         int64
+	Salt         []byte
 	IsAdmin      int64
 	SettingsJSON string
 	Favourites   string

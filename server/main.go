@@ -11,9 +11,20 @@ import (
 	"gorm.io/gorm"
 )
 
+var homepage []byte
+
 // Contains code for API paths and delgates them to seperate methods.
 
 func main() {
+
+	// Load homepage
+
+	homepage_bytes, err := os.ReadFile("/dist/index.html")
+	if err != nil {
+		panic(err)
+	}
+
+	homepage = homepage_bytes
 
 	// Load database
 
@@ -49,6 +60,12 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
+	})
+
+	r.Static("/assets/", "/dist/assets/")
+
+	r.GET("/", func(ctx *gin.Context) {
+		ctx.Data(http.StatusOK, "text/html; charset=utf-8", homepage)
 	})
 
 	// Streaming

@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/base64"
-	"encoding/binary"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -39,8 +39,8 @@ func verify_user(session_id string, user_id int64) bool {
 // Handles authentication
 func handle_auth(ctx *gin.Context) {
 
-	var username string = ctx.PostForm("username")
-	var password string = ctx.PostForm("password")
+	var username string = ctx.PostForm("u")
+	var password string = ctx.PostForm("p")
 	var count int64
 
 	// See if user exists
@@ -57,13 +57,11 @@ func handle_auth(ctx *gin.Context) {
 
 		// Hash password & compare
 
-		var salt uint64 = uint64(user.Salt)
-		var salt_bytes []byte = make([]byte, 8)
-		binary.LittleEndian.PutUint64(salt_bytes, salt)
-
-		hash, _ := scrypt.Key([]byte(password), salt_bytes, 1<<15, 8, 1, 64)
+		hash, _ := scrypt.Key([]byte(password), user.Salt, 1<<15, 8, 1, 64)
 
 		if base64.StdEncoding.EncodeToString(hash) == user.Password {
+
+			fmt.Println("Hello World")
 
 			// Create new session
 
@@ -74,7 +72,7 @@ func handle_auth(ctx *gin.Context) {
 
 				session_id = uuid.NewString()
 
-				if _, ok := sessions[session_id]; ok {
+				if _, exists := sessions[session_id]; !exists {
 					found = true
 				}
 
@@ -91,6 +89,10 @@ func handle_auth(ctx *gin.Context) {
 				"session_id": session_id,
 				"time":       sessions[session_id].Time,
 				"user_id":    user.ID,
+			})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{
+				"status": "incorrect",
 			})
 		}
 

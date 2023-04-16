@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input {
+
+  @apply text-black;
+  @apply p-3;
+  @apply rounded-sm;
+
+}
+
+button {
+
+  @apply bg-yellow-600;
+  @apply text-white;
+  @apply hover:bg-yellow-700;
+  @apply transition-all;
+  @apply rounded-lg;
+  @apply p-2;
+
+}

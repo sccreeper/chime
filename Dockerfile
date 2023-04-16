@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache go ffmpeg
+RUN apk add --no-cache go ffmpeg nodejs npm
 
 WORKDIR /app
 
@@ -10,5 +10,17 @@ RUN go mod download
 COPY . ./
 
 RUN go build -o /chime ./server/.
+
+WORKDIR /app/web
+
+RUN npm install
+RUN npx vite build
+
+RUN mkdir /dist/
+RUN mkdir /dist/assets/
+RUN cp ./dist/index.html /dist/index.html
+RUN cp -r ./dist/assets/* /dist/assets/
+
+WORKDIR /
 
 CMD [ "/chime" ]

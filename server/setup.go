@@ -91,7 +91,7 @@ func first_time_setup(admin_pass string, in_docker bool) {
 		ID:           admin_id,
 		Username:     "admin",
 		Password:     base64.StdEncoding.EncodeToString(hash),
-		Salt:         int64(salt),
+		Salt:         salt_bytes,
 		IsAdmin:      1,
 		SettingsJSON: "",
 		Favourites:   "",
