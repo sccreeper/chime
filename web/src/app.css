@@ -22,3 +22,7 @@ button {
   @apply p-2;
 
 }
+
+#app {
+  height: 100%;
+}

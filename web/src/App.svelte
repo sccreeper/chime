@@ -7,8 +7,6 @@
   view.set(Login)
 </script>
 
-<main>
-  <svelte:component this={$view}></svelte:component>
-</main>
+<svelte:component this={$view}></svelte:component>
 
 

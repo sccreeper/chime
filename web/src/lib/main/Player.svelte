@@ -42,7 +42,7 @@
 
 </script>
 
-<div class="grid grid-rows-1 player-grid justify-items-center items-center m-3">
+<div class="grid grid-rows-1 player-grid justify-items-center items-center flex-none">
 
     <div class="grid grid-rows-2">
 
