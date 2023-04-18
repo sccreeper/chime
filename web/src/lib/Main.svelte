@@ -1,7 +1,9 @@
 <script>
+    import Player from "./main/Player.svelte";
+
     
 </script>
 
 <div>
-     <h1>Logged in!</h1>
+     <Player/>
 </div>
