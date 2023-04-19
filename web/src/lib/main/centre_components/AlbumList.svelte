@@ -62,6 +62,7 @@
     @apply h-full;
     @apply select-none;
     @apply m-2;
+    @apply overflow-y-scroll;
 
 }
 
