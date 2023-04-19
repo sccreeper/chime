@@ -21,7 +21,7 @@
 
 </script>
 
-<div class="grid-top flex-none">
+<div class="grid-top flex-none m-2">
 
     <div class="w-3/4 grid grid-cols-2 grid-rows-1 grid-search">
 
@@ -29,7 +29,7 @@
         <MinorButton icon="search" callback={executeSearch}/>
 
     </div>
-    <div class="grid grid-cols-3 grid-rows-1 gap-2 items-center justify-items-center text-xl">
+    <div class="grid grid-cols-3 grid-rows-1 gap-4 items-center justify-items-center text-xl">
         <MinorButton icon="upload" callback={upload}/>
         <MinorButton icon="gear-fill" callback={settings}/>
         <MinorButton icon="person-circle" callback={profile}/>

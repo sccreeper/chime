@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,9 +14,16 @@ import (
 )
 
 type session struct {
-	ID     string `json:"id" binding:"required"`
+	ID     string `json:"session_id" binding:"required"`
 	Time   int64  `json:"time" binding:"required"`
-	UserID int64  `json:"user_id" binding:"required"`
+	UserID string `json:"user_id" binding:"required"`
+}
+
+type login_repsonse struct {
+	Status string `json:"status"`
+	ID     string `json:"session_id" binding:"required"`
+	Time   int64  `json:"time" binding:"required"`
+	UserID string `json:"user_id" binding:"required"`
 }
 
 var sessions map[string]session
@@ -24,11 +33,26 @@ func init() {
 }
 
 // See if user ID matches session and if session actually exists.
-func verify_user(session_id string, user_id int64) bool {
+func verify_user(session_id string, user_id string) bool {
+
+	fmt.Println(session_id)
+	fmt.Println(user_id)
+
+	var keys []string
+
+	for k, _ := range sessions {
+		keys = append(keys, k)
+	}
+
+	fmt.Println(keys)
 
 	if _, ok := sessions[session_id]; !ok {
+		fmt.Println("doesn't exist")
+
 		return false
 	} else if sessions[session_id].UserID != user_id {
+		fmt.Println("incorrect user id")
+
 		return false
 	} else {
 		return true
@@ -81,15 +105,23 @@ func handle_auth(ctx *gin.Context) {
 			sessions[session_id] = session{
 				ID:     session_id,
 				Time:   time.Now().Unix(),
-				UserID: user.ID,
+				UserID: strconv.FormatInt(user.ID, 16),
 			}
 
-			ctx.JSON(http.StatusOK, gin.H{
-				"status":     "correct",
-				"session_id": session_id,
-				"time":       sessions[session_id].Time,
-				"user_id":    user.ID,
-			})
+			var response login_repsonse = login_repsonse{
+				Status: "correct",
+				ID:     session_id,
+				Time:   sessions[session_id].Time,
+				UserID: strconv.FormatInt(user.ID, 16),
+			}
+
+			response_bytes, err := json.Marshal(response)
+			if err != nil {
+				ctx.AbortWithStatus(http.StatusInternalServerError)
+			}
+
+			ctx.Data(http.StatusOK, gin.MIMEJSON, response_bytes)
+
 		} else {
 			ctx.JSON(http.StatusOK, gin.H{
 				"status": "incorrect",

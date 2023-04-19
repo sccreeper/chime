@@ -1,6 +1,6 @@
 <script>
     import Main from "./Main.svelte";
-    import { view } from "./stores";
+    import { session_object, view } from "./stores";
 
     
     let username = "";
@@ -31,6 +31,7 @@
                 let expiry = new Date(Date.now() + (3600 * 24 * 7 * 1000)).toUTCString();
                 document.cookie =  `session=${JSON.stringify(data)}; expires=${expiry}`
 
+                session_object.set(data)
                 view.set(Main)
             
             }   

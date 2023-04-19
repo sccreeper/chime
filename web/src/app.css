@@ -1,8 +1,13 @@
 @import "bootstrap-icons/font/bootstrap-icons.css";
+@import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@100;200;300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: 'Anuphan', sans-serif;
+}
 
 input {
 
@@ -25,4 +30,11 @@ button {
 
 #app {
   height: 100%;
+}
+
+::selection {
+
+  @apply bg-yellow-500;
+  @apply text-white;
+
 }

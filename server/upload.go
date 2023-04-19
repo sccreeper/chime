@@ -51,12 +51,17 @@ func handle_upload(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 	}
 
+	owner_id, err := strconv.ParseInt(request_body.Session.UserID, 16, 64)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+	}
+
 	if metadata.Title() == "" {
 		database.Table(table_tracks).Create(&track_model{
 			ID:      generate_id(table_tracks),
 			Name:    file.Filename,
 			AlbumID: 1,
-			Owner:   request_body.Session.UserID,
+			Owner:   owner_id,
 		})
 
 	} else {
@@ -80,7 +85,7 @@ func handle_upload(ctx *gin.Context) {
 				Cover:   "",
 				Tracks:  strconv.Itoa(int(track_id)),
 				Dates:   strconv.Itoa(metadata.Year()),
-				Owner:   request_body.Session.UserID,
+				Owner:   owner_id,
 			})
 
 			// TODO: Add track to new album.

@@ -42,7 +42,7 @@
 
 </script>
 
-<div class="grid grid-rows-1 player-grid justify-items-center items-center flex-none">
+<div class="grid grid-rows-1 player-grid justify-items-center items-center flex-none m-2">
 
     <div class="grid grid-rows-2">
 
@@ -74,9 +74,9 @@
     <!-- Seek -->
 
     <div class="grid grid-cols-3 grid-rows-1 seek-grid w-full h-full items-center justify-items-center">
-        <p class="duration">{convertDuration($position)}</p>
+        <p class="duration select-none">{convertDuration($position)}</p>
         <input class="seek w-full" type="range" max={$duration} bind:value={$position}/>
-        <p class="duration">{convertDuration($duration)}</p>
+        <p class="duration select-none">{convertDuration($duration)}</p>
     </div>
 
 </div>

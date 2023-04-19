@@ -78,23 +78,24 @@ func main() {
 
 	// Download methods for streaming locally
 	r.GET("/api/download/:track_id")
-	r.GET("/api/download_playlist/:track_id")
+	r.GET("/api/download_collection/:track_id")
 
 	//Download methods for original files
 	r.GET("/api/download_original/:track_id")
 	r.GET("/api/download_playlist_original/:track_id")
 
 	//Get track & playlist info
-	r.GET("/api/album")
+	r.GET("/api/playlist")
 	r.GET("/api/track")
+	r.POST("/api/get_collections", handle_get_collections)
 
-	// Modify playlists & albums
+	// Modify playlists & albums (collections)
 
-	r.POST("/api/playlist/remove")
-	r.POST("/api/playlist/add")
-	r.POST("/api/playlist/move")
-	r.POST("/api/playlist/change_title")
-	r.POST("/api/playlist/change_cover")
+	r.POST("/api/collection/remove")
+	r.POST("/api/collection/add")
+	r.POST("/api/collection/move")
+	r.POST("/api/collection/change_title")
+	r.POST("/api/collection/change_cover")
 
 	//Search
 
