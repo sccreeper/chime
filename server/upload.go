@@ -82,7 +82,7 @@ func handle_upload(ctx *gin.Context) {
 				ID:      album_id,
 				Name:    metadata.Album(),
 				IsAlbum: 1,
-				Cover:   "",
+				Cover:   0,
 				Tracks:  strconv.Itoa(int(track_id)),
 				Dates:   strconv.Itoa(metadata.Year()),
 				Owner:   owner_id,

@@ -101,7 +101,7 @@ func first_time_setup(admin_pass string, in_docker bool) {
 		ID:      1,
 		Name:    "Unsorted",
 		IsAlbum: 0,
-		Cover:   "",
+		Cover:   0,
 		Tracks:  "",
 		Dates:   "",
 		Owner:   admin_id,

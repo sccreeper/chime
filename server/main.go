@@ -85,7 +85,7 @@ func main() {
 	r.GET("/api/download_playlist_original/:track_id")
 
 	//Get track & playlist info
-	r.GET("/api/playlist")
+	r.POST("/api/get_collection", handle_get_collection)
 	r.GET("/api/track")
 	r.POST("/api/get_collections", handle_get_collections)
 

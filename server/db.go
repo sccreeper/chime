@@ -26,7 +26,7 @@ type playlist_model struct {
 	gorm.Model
 	ID      int64 `gorm:"primaryKey"`
 	Name    string
-	Cover   string
+	Cover   int64
 	IsAlbum int64
 	Tracks  string
 	Dates   string

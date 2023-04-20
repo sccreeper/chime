@@ -1,5 +1,7 @@
 <script>
-    import AlbumList from "./centre_components/AlbumList.svelte";
+    import { current_album } from "../stores";
+import AlbumList from "./centre_components/AlbumList.svelte";
+    import AlbumView from "./centre_components/AlbumView.svelte";
 
 </script>
 <div class="flex h-full grow overflow-hidden">
@@ -8,6 +10,17 @@
     </div>
 
     <div class="grow centre">
+
+        {#if ($current_album == 0)}
+        <div class="flex justify-items-center items-center w-full h-full">
+
+            <h3>Not viewing anything. Click on an album or playlist to get started.</h3>
+        
+        </div>
+        {:else}
+        <AlbumView/>
+        {/if}
+
 
     </div>
 

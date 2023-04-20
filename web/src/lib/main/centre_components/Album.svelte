@@ -20,6 +20,7 @@ function open_album() {
     p {
         @apply text-gray-300;
         @apply transition-all;
+        cursor: pointer;
     }
 
     p:hover {
