@@ -24,13 +24,14 @@ type user_model struct {
 
 type playlist_model struct {
 	gorm.Model
-	ID      int64 `gorm:"primaryKey"`
-	Name    string
-	Cover   int64
-	IsAlbum int64
-	Tracks  string
-	Dates   string
-	Owner   int64
+	ID          int64 `gorm:"primaryKey"`
+	Name        string
+	Description string
+	Cover       int64
+	IsAlbum     int64
+	Tracks      string
+	Dates       string
+	Owner       int64
 }
 
 type track_model struct {

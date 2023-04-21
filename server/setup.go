@@ -98,13 +98,14 @@ func first_time_setup(admin_pass string, in_docker bool) {
 	})
 
 	db.Table(table_playlists).Create(&playlist_model{
-		ID:      1,
-		Name:    "Unsorted",
-		IsAlbum: 0,
-		Cover:   0,
-		Tracks:  "",
-		Dates:   "",
-		Owner:   admin_id,
+		ID:          1,
+		Name:        "Unsorted",
+		IsAlbum:     1,
+		Cover:       0,
+		Tracks:      "",
+		Dates:       "",
+		Owner:       admin_id,
+		Description: "Default album for tracks that don't have any metadata.",
 	})
 
 	// Create default config.toml

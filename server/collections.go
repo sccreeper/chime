@@ -30,11 +30,12 @@ type collection_query struct {
 }
 
 type collection_response struct {
-	Title   string           `json:"title"`
-	Cover   string           `json:"cover"`
-	IsAlbum bool             `json:"is_album"`
-	Tracks  []track_response `json:"tracks"`
-	Dates   []string         `json:"dates"`
+	Title       string           `json:"title"`
+	Cover       string           `json:"cover"`
+	IsAlbum     bool             `json:"is_album"`
+	Tracks      []track_response `json:"tracks"`
+	Dates       []string         `json:"dates"`
+	Description string           `json:"description"`
 }
 
 type track_response struct {
@@ -127,6 +128,7 @@ func handle_get_collection(ctx *gin.Context) {
 	// Add values
 	response_struct.Title = collection.Name
 	response_struct.Cover = strconv.FormatInt(collection.Cover, 16)
+	response_struct.Description = collection.Description
 
 	if collection.IsAlbum == 1 {
 		response_struct.IsAlbum = true
