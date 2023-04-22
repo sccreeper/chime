@@ -22,13 +22,13 @@ func handle_upload(ctx *gin.Context) {
 
 	ctx.Request.ParseMultipartForm(int64(math.Pow10(8) * 2.5))
 
-	session_json := ctx.Request.Form.Get("session")
+	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
+	fmt.Println(session_json)
 	json.Unmarshal([]byte(session_json), &request_body)
-
 	if !verify_user(request_body.ID, request_body.UserID) {
 		ctx.AbortWithStatus(http.StatusForbidden)
+		return
 	}
-
 	// Save file & upload IDs.
 
 	file, _ := ctx.FormFile("file")
@@ -46,16 +46,19 @@ func handle_upload(ctx *gin.Context) {
 	f, err := os.Open(fmt.Sprintf("/var/lib/chime/tracks/%s/%s", id_hex, filename))
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	metadata, err := tag.ReadFrom(f)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	owner_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	// If album doesn't exist then add to default "Unsorted" collection.

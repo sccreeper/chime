@@ -85,9 +85,9 @@ func main() {
 	r.GET("/api/download_playlist_original/:track_id")
 
 	//Get track & playlist info
-	r.POST("/api/get_collection", handle_get_collection)
+	r.GET("/api/get_collection/:collection_id", handle_get_collection)
 	r.GET("/api/track")
-	r.POST("/api/get_collections", handle_get_collections)
+	r.GET("/api/get_collections", handle_get_collections)
 
 	// Modify playlists & albums (collections)
 

@@ -10,10 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type collection_list_query struct {
-	Session session `json:"session" binding:"required"`
-}
-
 type single_collection struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -25,8 +21,7 @@ type collection_list_response struct {
 }
 
 type collection_query struct {
-	Session session `json:"session" binding:"required"`
-	AlbumID string  `json:"album_id" binding"required"`
+	AlbumID string `uri:"collection_id" binding"required"`
 }
 
 type collection_response struct {
@@ -51,26 +46,28 @@ type track_response struct {
 
 func handle_get_collections(ctx *gin.Context) {
 
-	var request_body collection_list_query
+	var request_body session
 
-	ctx.BindJSON(&request_body)
+	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
+	fmt.Println(session_json)
+	json.Unmarshal([]byte(session_json), &request_body)
 
-	if !verify_user(request_body.Session.ID, request_body.Session.UserID) {
+	if !verify_user(request_body.ID, request_body.UserID) {
 		ctx.AbortWithStatus(http.StatusForbidden)
+		return
 	}
 
 	var collections = []playlist_model{}
 
-	owner_id, err := strconv.ParseInt(request_body.Session.UserID, 16, 64)
+	owner_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	database.Table("playlists").
 		Select("name", "is_album", "id").
 		Where("owner = ?", owner_id).Find(&collections)
-
-	fmt.Print("")
 
 	response := collection_list_response{}
 
@@ -92,6 +89,7 @@ func handle_get_collections(ctx *gin.Context) {
 	resp_json, err := json.Marshal(response)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
 	} else {
 		ctx.Data(http.StatusOK, gin.MIMEJSON, resp_json)
 	}
@@ -102,21 +100,31 @@ func handle_get_collection(ctx *gin.Context) {
 
 	// Verify user & extract request body
 
-	var request_body collection_query
+	var request_body session
 
-	ctx.BindJSON(&request_body)
-
-	if !verify_user(request_body.Session.ID, request_body.Session.UserID) {
+	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
+	fmt.Println(session_json)
+	json.Unmarshal([]byte(session_json), &request_body)
+	if !verify_user(request_body.ID, request_body.UserID) {
 		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	var query_params collection_query
+	err := ctx.BindUri(&query_params)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
 	}
 
 	// Query database for playlist
 
 	var collection playlist_model
 
-	album_id, err := strconv.ParseInt(request_body.AlbumID, 16, 64)
+	album_id, err := strconv.ParseInt(query_params.AlbumID, 16, 64)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	database.Table("playlists").Select("*").
@@ -173,6 +181,7 @@ func handle_get_collection(ctx *gin.Context) {
 	resp_bytes, err := json.Marshal(response_struct)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
 	} else {
 		ctx.Data(http.StatusOK, gin.MIMEJSON, resp_bytes)
 	}
@@ -188,12 +197,6 @@ func handle_get_cover(ctx *gin.Context) {
 	// Verify user
 
 	var request_body session
-
-	for _, v := range ctx.Request.Cookies() {
-
-		fmt.Println(v.Name)
-
-	}
 
 	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
 	fmt.Println(session_json)

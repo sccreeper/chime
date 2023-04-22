@@ -13,12 +13,8 @@
     let title_font = "4.5vw";
 
     function updateView(album_id) {
-        fetch("/api/get_collection", {
-            method: "POST",
-            body: JSON.stringify({
-                session: get(session_object),
-                album_id: album_id,
-            }),
+        fetch(`/api/get_collection/${album_id}`, {
+            method: "GET",
         })
             .then((response) => response.json())
             .then((data) => {

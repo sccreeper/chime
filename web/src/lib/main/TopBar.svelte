@@ -22,7 +22,6 @@
                 const element = files[i];
                 
                 let data = new FormData();
-                data.append("session", JSON.stringify(get(session_object)))
                 data.append("file", element)
 
                 fetch("/api/upload", {

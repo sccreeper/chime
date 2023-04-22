@@ -5,12 +5,9 @@
     import Album from "./Album.svelte";
 
     function loadAlbums() {
-        
-        let session = JSON.stringify({session : get(session_object)})
 
         fetch("/api/get_collections", {
-            method: "POST",
-            body: session
+            method: "GET",
         }).then((response) => response.json()).then((data) => {
             album_list.set(data)
         })
