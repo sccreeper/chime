@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"os"
-	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 
@@ -12,36 +14,36 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type single_upload struct {
-	Session session `json:"session" binding:"required"`
-}
-
 func handle_upload(ctx *gin.Context) {
 
-	var request_body single_upload
+	// Parse form and verify user
 
-	ctx.BindJSON(&request_body)
+	var request_body session
 
-	if !verify_user(request_body.Session.ID, request_body.Session.UserID) {
+	ctx.Request.ParseMultipartForm(int64(math.Pow10(8) * 2.5))
+
+	session_json := ctx.Request.Form.Get("session")
+	json.Unmarshal([]byte(session_json), &request_body)
+
+	if !verify_user(request_body.ID, request_body.UserID) {
 		ctx.AbortWithStatus(http.StatusForbidden)
 	}
 
+	// Save file & upload IDs.
+
 	file, _ := ctx.FormFile("file")
-	id := generate_id("tracks")
+	filename := path.Base(file.Filename)
 
-	os.Mkdir(fmt.Sprintf("/var/lib/chime/tracks/%d/original", id), os.ModeDir)
-	os.Mkdir(fmt.Sprintf("/var/lib/chime/tracks/%d/streamable", id), os.ModeDir)
+	track_id := generate_id(table_tracks)
 
-	ctx.SaveUploadedFile(file, fmt.Sprintf("/var/lib/chime/tracks/%d/original/%s", id, file.Filename))
+	id_hex := strconv.FormatInt(track_id, 16)
 
-	// Convert to ogg for streamning on all platforms.
-
-	cmd := exec.Command("ffmpeg", "-i", fmt.Sprintf("/var/lib/chime/tracks/%d/original/%s", id, file.Filename), "-c:a", "copy", fmt.Sprintf("/var/lib/chime/tracks/%d/streamable/%d.ogg", id, id))
-	cmd.Run()
+	os.Mkdir(fmt.Sprintf("/var/lib/chime/tracks/%s/", id_hex), os.ModeDir)
+	ctx.SaveUploadedFile(file, fmt.Sprintf("/var/lib/chime/tracks/%s/%s", id_hex, filename))
 
 	// Execute database operations
 
-	f, err := os.Open(fmt.Sprintf("/var/lib/chime/tracks/%d/original/%s", id, file.Filename))
+	f, err := os.Open(fmt.Sprintf("/var/lib/chime/tracks/%s/%s", id_hex, filename))
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 	}
@@ -51,15 +53,18 @@ func handle_upload(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 	}
 
-	owner_id, err := strconv.ParseInt(request_body.Session.UserID, 16, 64)
+	owner_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 	}
 
+	// If album doesn't exist then add to default "Unsorted" collection.
+
 	if metadata.Title() == "" {
 		database.Table(table_tracks).Create(&track_model{
-			ID:      generate_id(table_tracks),
-			Name:    file.Filename,
+			ID:      track_id,
+			Name:    filename,
+			Artist:  "Unknown",
 			AlbumID: 1,
 			Owner:   owner_id,
 		})
@@ -76,42 +81,75 @@ func handle_upload(ctx *gin.Context) {
 		if count == 0 {
 
 			var album_id int64 = generate_id(table_playlists)
-			var track_id int64 = generate_id(table_tracks)
+			hex_id := strconv.FormatInt(track_id, 10)
+			var cover_id int64 = generate_id(table_covers)
+
+			// Create cover record
+
+			if metadata.Picture() == nil {
+				cover_id = 0
+			} else {
+				os.WriteFile(fmt.Sprintf("/var/lib/chime/covers/%s", strconv.FormatInt(cover_id, 16)), metadata.Picture().Data, 0666)
+
+				database.Table(table_covers).Create(&cover_model{
+					ID:      cover_id,
+					AlbumID: album_id,
+					Owner:   owner_id,
+				})
+			}
 
 			database.Table(table_playlists).Create(&playlist_model{
 				ID:      album_id,
 				Name:    metadata.Album(),
 				IsAlbum: 1,
-				Cover:   0,
-				Tracks:  strconv.Itoa(int(track_id)),
+				Cover:   cover_id,
+				Tracks:  hex_id,
 				Dates:   strconv.Itoa(metadata.Year()),
 				Owner:   owner_id,
 			})
 
-			// TODO: Add track to new album.
+			database.Table(table_tracks).Create(&track_model{
+				ID:      track_id,
+				Name:    metadata.Title(),
+				Artist:  metadata.Artist(),
+				AlbumID: album_id,
+				Cover:   cover_id,
+				Owner:   owner_id,
+			})
 
 		} else {
 
 			var track_id int64 = generate_id(table_tracks)
-			var playlist playlist_model
+			var collection playlist_model
 			var new_track_list string
 
-			database.Table(table_playlists).Where("name = ? AND is_album = 1", album_title).First(&playlist)
+			database.Table(table_playlists).Where("name = ? AND is_album = 1", album_title).First(&collection)
 
-			if len(strings.Split(playlist.Tracks, ",")) == 0 {
+			if len(strings.Split(collection.Tracks, ",")) == 0 {
 				new_track_list += strconv.Itoa(int(track_id))
 			} else {
-				new_track_list += fmt.Sprintf("%s,%d", playlist.Tracks, track_id)
+				new_track_list += fmt.Sprintf("%s,%d", collection.Tracks, track_id)
 			}
 
-			database.Table(table_playlists).Model(&playlist).Updates(playlist_model{Tracks: new_track_list})
+			// Create track record
+
+			database.Table(table_tracks).Create(&track_model{
+				ID:      track_id,
+				Name:    metadata.Title(),
+				Artist:  metadata.Artist(),
+				AlbumID: collection.ID,
+				Cover:   collection.Cover,
+				Owner:   owner_id,
+			})
+
+			// Update album list
+
+			database.Table(table_playlists).Model(&collection).Updates(&playlist_model{Tracks: new_track_list})
 
 		}
 
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"status": "ok",
-	})
+	ctx.Data(http.StatusOK, "text/plain", []byte{})
 
 }

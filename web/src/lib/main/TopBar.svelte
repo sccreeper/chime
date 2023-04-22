@@ -1,4 +1,6 @@
 <script>
+    import { get } from "svelte/store";
+    import { session_object } from "../stores";
     import MinorButton from "./general/MinorButton.svelte";
 
     let searchValue = ""
@@ -9,6 +11,35 @@
 
     function upload() {
         
+        let file_form = document.createElement("input")
+        file_form.setAttribute("type", "file")
+
+        file_form.addEventListener("change", () => {
+
+            let files = file_form.files;
+            
+            for (let i = 0; i < files.length; i++) {
+                const element = files[i];
+                
+                let data = new FormData();
+                data.append("session", JSON.stringify(get(session_object)))
+                data.append("file", element)
+
+                fetch("/api/upload", {
+                    method: "POST",
+                    body: data,
+                }).then(response => {
+                    if (response.ok) {
+                        console.log("Added track successfully!")
+                    }
+                })
+
+            }
+
+        })
+
+        file_form.click()
+
     }
 
     function settings() {

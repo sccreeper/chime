@@ -27,12 +27,18 @@
                 album_description = data.description;
                 is_album = (data.is_album == 1) ? true : false
 
-                if (album_title.length < 25) {
-                    title_font = "4.5vw";
-                } else if (album_title.length < 40) {
-                    title_font = "3vw";
-                } else if (album_title.length < 100) {
+                if (data.cover == "0" || data.cover == "00") {
+                    album_cover_src = ""
+                } else {
+                    album_cover_src = `/api/collection/get_cover/${data.cover}`
+                }
+
+                if (album_title.length > 100) {
                     title_font = "1vw";
+                } else if (album_title.length > 50) {
+                    title_font = "3vw";
+                } else if (album_title.length <= 25) {
+                    title_font = "4.5vw";
                 }
 
             });

@@ -50,6 +50,5 @@ type cover_model struct {
 	gorm.Model
 	ID      int64 `gorm:"primaryKey"`
 	AlbumID int64
-	Path    string
 	Owner   int64
 }

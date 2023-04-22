@@ -96,6 +96,7 @@ func main() {
 	r.POST("/api/collection/move")
 	r.POST("/api/collection/change_title")
 	r.POST("/api/collection/change_cover")
+	r.GET("/api/collection/get_cover/:cover_id", handle_get_cover)
 
 	//Search
 

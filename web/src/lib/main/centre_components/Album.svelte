@@ -21,6 +21,7 @@ function open_album() {
         @apply text-gray-300;
         @apply transition-all;
         cursor: pointer;
+        text-overflow: ellipsis;
     }
 
     p:hover {

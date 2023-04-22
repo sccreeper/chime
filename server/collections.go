@@ -178,3 +178,62 @@ func handle_get_collection(ctx *gin.Context) {
 	}
 
 }
+
+type get_cover_query struct {
+	CoverID string `uri:"cover_id" binding:"required"`
+}
+
+func handle_get_cover(ctx *gin.Context) {
+
+	// Verify user
+
+	var request_body session
+
+	for _, v := range ctx.Request.Cookies() {
+
+		fmt.Println(v.Name)
+
+	}
+
+	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
+	fmt.Println(session_json)
+	json.Unmarshal([]byte(session_json), &request_body)
+
+	if !verify_user(request_body.ID, request_body.UserID) {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	fmt.Println("Hello World")
+
+	// Get cover to query
+
+	var query get_cover_query
+	ctx.ShouldBindUri(&query)
+
+	cover_id, err := strconv.ParseInt(query.CoverID, 16, 64)
+	if err != nil {
+		fmt.Println(query.CoverID)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	user_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
+	if err != nil {
+		fmt.Println(request_body.UserID)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Println("Hello World 2")
+
+	var cover cover_model
+	database.Table(table_covers).Select("owner").Where("id = ?", cover_id).First(&cover)
+
+	if cover.Owner != user_id {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	} else {
+		ctx.File(fmt.Sprintf("/var/lib/chime/covers/%s", query.CoverID))
+	}
+
+}
