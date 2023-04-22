@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gin-contrib/gzip"
+	gzipgin "github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -54,6 +56,8 @@ func main() {
 	database, _ = gorm.Open(sqlite.Open("/var/lib/chime/data.db"), &gorm.Config{})
 
 	r := gin.Default()
+
+	r.Use(gzipgin.Gzip(gzipgin.DefaultCompression, gzip.WithExcludedPathsRegexs([]string{`(^\/api\/stream\/).`, `(^\/api\/download\/).`})))
 
 	//Base method for does server exist or not
 	r.GET("/api/ping", func(ctx *gin.Context) {
