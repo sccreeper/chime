@@ -1,8 +1,8 @@
 <script>
-    import { current_album, session_object } from "../../stores";
-    import { get } from "svelte/store";
+    import { current_album } from "../../stores";
     import Track from "./Track.svelte";
     import no_cover_image from "../../../assets/no_cover.png";
+    import HorizontalDivider from "../general/HorizontalDivider.svelte";
 
     let album_title = "";
     let album_cover_src = "";
@@ -33,6 +33,8 @@
                     title_font = "2vw"
                 } else if (album_title.length > 25) {
                     title_font = "3vw"
+                } else if (album_title.length > 15) {
+                    title_font = "3.5vw"
                 } else {
                     title_font = "4vw"
                 }
@@ -58,7 +60,7 @@
         </div>
     </div>
 
-    <hr class="m-3 h-px border-none bg-gray-600" />
+    <div class="m-2"><HorizontalDivider/></div>
 
     <div>
         {#if tracks.length == 0}

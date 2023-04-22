@@ -2,6 +2,7 @@
     import { current_album } from "../stores";
 import AlbumList from "./centre_components/AlbumList.svelte";
     import AlbumView from "./centre_components/AlbumView.svelte";
+    import DetailsView from "./centre_components/DetailsView.svelte";
 
 </script>
 <div class="flex h-full grow overflow-hidden">
@@ -25,7 +26,7 @@ import AlbumList from "./centre_components/AlbumList.svelte";
     </div>
 
     <div class="right">
-
+        <DetailsView/>
     </div>
 </div>
 
@@ -42,7 +43,7 @@ import AlbumList from "./centre_components/AlbumList.svelte";
 
     .right {
 
-        min-width: 450px;
+        width: 450px;
         background-color: rgb(45, 53, 66);
 
     }

@@ -85,12 +85,12 @@ func main() {
 	r.GET("/api/download_collection/:track_id")
 
 	//Download methods for original files
-	r.GET("/api/download_original/:track_id")
+	r.GET("/api/download_original/:track_id", handle_download_track_original)
 	r.GET("/api/download_playlist_original/:track_id")
 
 	//Get track & playlist info
 	r.GET("/api/get_collection/:collection_id", handle_get_collection)
-	r.GET("/api/track")
+	r.GET("/api/get_track_metadata/:track_id", handle_get_track_metadata)
 	r.GET("/api/get_collections", handle_get_collections)
 
 	// Modify playlists & albums (collections)

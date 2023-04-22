@@ -1,6 +1,7 @@
 // Source code for managing the player state.
 
 import { get, writable } from "svelte/store";
+import { track_metadata_view } from "./stores";
 
 export var playing = writable(false)
 export var track_id = writable(null)
@@ -61,6 +62,8 @@ volume.subscribe(() => {
 track_id.subscribe(() => {
 
     if (get(track_id) != null) {
+        track_metadata_view.set(get(track_id))
+
         player_audio.src = `/api/stream/${get(track_id)}`
         player_audio.play()
     }

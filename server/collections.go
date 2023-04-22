@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
+	"github.com/dhowden/tag"
 	"github.com/gin-gonic/gin"
 )
 
@@ -207,8 +209,6 @@ func handle_get_cover(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println("Hello World")
-
 	// Get cover to query
 
 	var query get_cover_query
@@ -227,8 +227,6 @@ func handle_get_cover(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println("Hello World 2")
-
 	var cover cover_model
 	database.Table(table_covers).Select("owner").Where("id = ?", cover_id).First(&cover)
 
@@ -238,5 +236,98 @@ func handle_get_cover(ctx *gin.Context) {
 	} else {
 		ctx.File(fmt.Sprintf("/var/lib/chime/covers/%s", query.CoverID))
 	}
+
+}
+
+type track_metadata_query struct {
+	ID string `uri:"track_id" binding:"required"`
+}
+
+type track_metadata_response struct {
+	Title        string `json:"title"`
+	AlbumName    string `json:"album_name"`
+	CoverID      string `json:"cover_id"`
+	Artist       string `json:"artist"`
+	OriginalFile string `json:"original_file"`
+	Format       string `json:"format"`
+	Duration     int    `json:"duration"`
+	Released     int    `json:"released"`
+}
+
+func handle_get_track_metadata(ctx *gin.Context) {
+
+	// Verify user
+
+	var request_body session
+
+	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
+	fmt.Println(session_json)
+	json.Unmarshal([]byte(session_json), &request_body)
+
+	if !verify_user(request_body.ID, request_body.UserID) {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	var query track_metadata_query
+
+	if err := ctx.ShouldBindUri(&query); err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	track_id, err := strconv.ParseInt(query.ID, 16, 64)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+	}
+
+	var track track_model
+	database.Table(table_tracks).Select("*").Where("id = ?", track_id).First(&track)
+
+	var response track_metadata_response = track_metadata_response{
+		Title:        track.Name,
+		CoverID:      strconv.FormatInt(track.Cover, 16),
+		Artist:       track.Artist,
+		OriginalFile: track.Original,
+		Duration:     int(track.Duration),
+		Released:     int(track.Released),
+	}
+
+	var track_album playlist_model
+	database.Table(table_playlists).Select("name").Where("id = ?", track.AlbumID).First(&track_album)
+	response.AlbumName = track_album.Name
+
+	track_file, err := os.Open(fmt.Sprintf("/var/lib/chime/tracks/%s/%s", strconv.FormatInt(track.ID, 16), track.Original))
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	metadata, err := tag.ReadFrom(track_file)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	switch metadata.FileType() {
+	case tag.FLAC:
+		response.Format = "FLAC"
+	case tag.MP3:
+		response.Format = "MP3"
+	case tag.OGG:
+		response.Format = "WAV"
+	case tag.UnknownFileType:
+		response.Format = "Uknown"
+	default:
+		response.Format = "Unsupported Format"
+	}
+
+	response_bytes, err := json.Marshal(response)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEJSON, response_bytes)
 
 }

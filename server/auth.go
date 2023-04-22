@@ -35,17 +35,6 @@ func init() {
 // See if user ID matches session and if session actually exists.
 func verify_user(session_id string, user_id string) bool {
 
-	fmt.Println(session_id)
-	fmt.Println(user_id)
-
-	var keys []string
-
-	for k, _ := range sessions {
-		keys = append(keys, k)
-	}
-
-	fmt.Println(keys)
-
 	if _, ok := sessions[session_id]; !ok {
 		fmt.Println("doesn't exist")
 

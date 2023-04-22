@@ -11,3 +11,5 @@ export const album_list = writable({
     albums : [],
     playlists: [],
 });
+
+export const track_metadata_view = writable(null);

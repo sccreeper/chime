@@ -1,0 +1,1 @@
+<hr class="m-3 h-px border-none bg-gray-600 w-full"/>
