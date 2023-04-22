@@ -29,12 +29,12 @@
                     album_cover_src = `/api/collection/get_cover/${data.cover}`
                 }
 
-                if (album_title.length > 100) {
-                    title_font = "1vw";
-                } else if (album_title.length > 50) {
-                    title_font = "3vw";
-                } else if (album_title.length <= 25) {
-                    title_font = "4.5vw";
+                if (album_title.length > 35) {
+                    title_font = "2vw"
+                } else if (album_title.length > 25) {
+                    title_font = "3vw"
+                } else {
+                    title_font = "4vw"
                 }
 
             });
@@ -52,7 +52,7 @@
             class="album-cover"
         />
 
-        <div class="flex flex-col gap-4 items-end">
+        <div class="flex flex-col gap-4 items-start">
             <h1 class="album-title" style="font-size: {title_font};">{album_title}</h1>
             <p>{album_description}</p>
         </div>
