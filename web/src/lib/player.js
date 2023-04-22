@@ -15,17 +15,55 @@ export var volume = writable(1.0)
 
 // AudioPlayer
 
-var audio = new Audio();
-audio.pause();
+export var player_audio = new Audio();
+player_audio.pause();
 
 // Duration change
 
-audio.ontimeupdate = () => {
-    position.set(audio.currentTime)
-}
+player_audio.addEventListener("timeupdate", () => {
+    position.set(player_audio.currentTime)
+})
 
-position.subscribe(onDurationChange)
-function onDurationChange() {
-    audio.currentTime = get(position);
-}
+player_audio.addEventListener("canplaythrough", () => {
+    duration.set(player_audio.duration)
+})
+
+// Playing events
+
+playing.subscribe(() => {
+
+    if (get(playing)) {
+        player_audio.play()
+        playing.set(true)
+    } else {
+        player_audio.pause()
+        playing.set(false)
+    }
+
+})
+
+player_audio.addEventListener("play", () => {
+    playing.set(true)
+})
+
+player_audio.addEventListener("pause", () => {
+    playing.set(false)
+})
+
+// Volume events
+
+volume.subscribe(() => {
+    player_audio.volume = get(volume)
+})
+
+// Track change events.
+
+track_id.subscribe(() => {
+
+    if (get(track_id) != null) {
+        player_audio.src = `/api/stream/${get(track_id)}`
+        player_audio.play()
+    }
+
+})
 

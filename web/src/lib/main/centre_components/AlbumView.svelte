@@ -68,16 +68,25 @@
             </p>
         {:else}
             <table>
-                <tr>
+                <colgroup>
+                    <col span="1" style="width: 5%;">
+                    <col span="1" style="width: 35%;">
+                    <col span="1" style="width: 15%;">
+                    <col span="1" style="width: 35%;">
+                    <col span="1" style="width: 10%;">
+                 </colgroup>
+
+                <tr class="text-left">
+                    <th>No.</th>
                     <th>Title</th>
                     <th>Artist</th>
                     <th>Album</th>
                     <th>Duration</th>
                 </tr>
-            </table>
 
-            {#each tracks as track}
+            {#each tracks as track, i}
                 <Track
+                    index={(i+1).toString()}
                     id={track.id}
                     title={track.name}
                     artist={track.artist}
@@ -85,6 +94,8 @@
                     album_name={track.album_name}
                 />
             {/each}
+
+            </table>
         {/if}
     </div>
 </div>
@@ -99,4 +110,13 @@
         width: 256px;
         min-width: 128px;
     }
+
+    table {
+        width: 100%;
+    }
+
+    th {
+        @apply font-thin;
+    }
+
 </style>

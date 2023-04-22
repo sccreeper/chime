@@ -65,11 +65,12 @@ func handle_upload(ctx *gin.Context) {
 
 	if metadata.Title() == "" {
 		database.Table(table_tracks).Create(&track_model{
-			ID:      track_id,
-			Name:    filename,
-			Artist:  "Unknown",
-			AlbumID: 1,
-			Owner:   owner_id,
+			ID:       track_id,
+			Name:     filename,
+			Artist:   "Unknown",
+			AlbumID:  1,
+			Owner:    owner_id,
+			Original: filename,
 		})
 
 	} else {
@@ -84,8 +85,8 @@ func handle_upload(ctx *gin.Context) {
 		if count == 0 {
 
 			var album_id int64 = generate_id(table_playlists)
-			hex_id := strconv.FormatInt(track_id, 10)
 			var cover_id int64 = generate_id(table_covers)
+			hex_id := strconv.FormatInt(track_id, 16)
 
 			// Create cover record
 
@@ -112,37 +113,38 @@ func handle_upload(ctx *gin.Context) {
 			})
 
 			database.Table(table_tracks).Create(&track_model{
-				ID:      track_id,
-				Name:    metadata.Title(),
-				Artist:  metadata.Artist(),
-				AlbumID: album_id,
-				Cover:   cover_id,
-				Owner:   owner_id,
+				ID:       track_id,
+				Name:     metadata.Title(),
+				Artist:   metadata.Artist(),
+				AlbumID:  album_id,
+				Cover:    cover_id,
+				Owner:    owner_id,
+				Original: filename,
 			})
 
 		} else {
 
-			var track_id int64 = generate_id(table_tracks)
 			var collection playlist_model
 			var new_track_list string
 
 			database.Table(table_playlists).Where("name = ? AND is_album = 1", album_title).First(&collection)
 
 			if len(strings.Split(collection.Tracks, ",")) == 0 {
-				new_track_list += strconv.Itoa(int(track_id))
+				new_track_list += strconv.FormatInt(track_id, 16)
 			} else {
-				new_track_list += fmt.Sprintf("%s,%d", collection.Tracks, track_id)
+				new_track_list += fmt.Sprintf("%s,%s", collection.Tracks, strconv.FormatInt(track_id, 16))
 			}
 
 			// Create track record
 
 			database.Table(table_tracks).Create(&track_model{
-				ID:      track_id,
-				Name:    metadata.Title(),
-				Artist:  metadata.Artist(),
-				AlbumID: collection.ID,
-				Cover:   collection.Cover,
-				Owner:   owner_id,
+				ID:       track_id,
+				Name:     metadata.Title(),
+				Artist:   metadata.Artist(),
+				AlbumID:  collection.ID,
+				Cover:    collection.Cover,
+				Owner:    owner_id,
+				Original: filename,
 			})
 
 			// Update album list

@@ -70,7 +70,7 @@ func main() {
 
 	// Streaming
 
-	r.GET("/api/stream/:format/:track_id")
+	r.GET("/api/stream/:track_id", handle_stream)
 
 	//Uploading tracks & albums
 

@@ -155,7 +155,7 @@ func handle_get_collection(ctx *gin.Context) {
 		var track track_model
 		var track_collection playlist_model
 
-		id, err := strconv.ParseInt(v, 10, 64)
+		id, err := strconv.ParseInt(v, 16, 64)
 		if err != nil {
 			continue
 		}

@@ -13,8 +13,9 @@
         
         let file_form = document.createElement("input")
         file_form.setAttribute("type", "file")
+        file_form.setAttribute("multiple", "")
 
-        file_form.addEventListener("change", () => {
+        file_form.addEventListener("change", async () => {
 
             let files = file_form.files;
             
@@ -24,14 +25,12 @@
                 let data = new FormData();
                 data.append("file", element)
 
-                fetch("/api/upload", {
-                    method: "POST",
-                    body: data,
-                }).then(response => {
-                    if (response.ok) {
-                        console.log("Added track successfully!")
-                    }
-                })
+                var resp = await fetch("/api/upload", {method: "POST", body: data})
+                if (resp.ok) {
+                    console.log("Uploaded track successfully!")
+                } else {
+                    console.log("There was an error uploading the track!")
+                }
 
             }
 

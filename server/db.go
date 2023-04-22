@@ -44,6 +44,7 @@ type track_model struct {
 	Duration int64
 	Cover    int64
 	Owner    int64
+	Original string
 }
 
 type cover_model struct {

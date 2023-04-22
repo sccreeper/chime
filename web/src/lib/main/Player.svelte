@@ -1,6 +1,6 @@
 <script>
     import { get } from "svelte/store";
-    import { duration, playing, position, volume } from "../player";
+    import { duration, player_audio, playing, position, volume } from "../player";
     import Toggle from "./player_components/Toggle.svelte";
     import { convertDuration } from "../util";
 
@@ -75,7 +75,17 @@
 
     <div class="grid grid-cols-3 grid-rows-1 seek-grid w-full h-full items-center justify-items-center">
         <p class="duration select-none">{convertDuration($position)}</p>
-        <input class="seek w-full" type="range" max={$duration} bind:value={$position}/>
+        <input 
+            class="seek w-full" 
+            type="range" 
+            max={$duration} 
+            bind:value={$position} 
+            on:change={(e) => { 
+                // @ts-ignore
+                player_audio.currentTime = e.target.value
+                
+                }}
+        />
         <p class="duration select-none">{convertDuration($duration)}</p>
     </div>
 
