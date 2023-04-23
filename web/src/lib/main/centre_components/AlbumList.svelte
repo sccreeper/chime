@@ -3,6 +3,7 @@
     import { album_list, session_object } from "../../stores";
     import { onMount } from "svelte";
     import Album from "./Album.svelte";
+    import Radio from "./Radio.svelte";
 
     function loadAlbums() {
 
@@ -35,6 +36,7 @@
 {/if}
 
 <strong><i class="bi bi-list"></i> Playlists</strong>
+
 {#if $album_list.playlists.length == 0}
 <p class="text-gray-300">No playlists</p>
 {:else}
@@ -50,6 +52,22 @@
 </ul>
 
 {/if}
+<strong><i class="bi bi-broadcast"></i> Radio</strong>
+
+{#if $album_list.radios.length == 0}
+<p class="text-gray-300">No radios</p>
+{:else}
+<ul>
+
+{#each get(album_list).radios as radio}
+
+<Radio radio_id={radio.id} name={radio.name}/>
+
+{/each}
+
+</ul>
+{/if}
+
 
 </div>
 

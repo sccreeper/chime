@@ -79,6 +79,7 @@ func main() {
 	//Uploading tracks & albums
 
 	r.POST("/api/upload", handle_upload)
+	r.POST("/api/add_radio", handle_add_radio)
 
 	// Download methods for streaming locally
 	r.GET("/api/download/:track_id")
@@ -92,6 +93,7 @@ func main() {
 	r.GET("/api/get_collection/:collection_id", handle_get_collection)
 	r.GET("/api/get_track_metadata/:track_id", handle_get_track_metadata)
 	r.GET("/api/get_collections", handle_get_collections)
+	r.GET("/api/get_radio/:radio_id", handle_get_radio)
 
 	// Modify playlists & albums (collections)
 

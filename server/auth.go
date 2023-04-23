@@ -34,7 +34,7 @@ func init() {
 }
 
 // See if user ID matches session and if session actually exists.
-func verify_user(request http.Request) (bool, session) {
+func verify_user(request *http.Request) (bool, session) {
 
 	if session_cookie, err := request.Cookie("session"); err != nil {
 		fmt.Println(err.Error())

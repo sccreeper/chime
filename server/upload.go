@@ -22,7 +22,7 @@ func handle_upload(ctx *gin.Context) {
 	ctx.Request.ParseMultipartForm(int64(math.Pow10(8) * 2.5))
 
 	// Verify user
-	verified, request_body := verify_user(*ctx.Request)
+	verified, request_body := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -157,6 +157,52 @@ func handle_upload(ctx *gin.Context) {
 		}
 
 	}
+
+	ctx.Data(http.StatusOK, "text/plain", []byte{})
+
+}
+
+type add_radio_query struct {
+	Name string `json:"name" binding:"required"`
+	URL  string `json:"url" binding:"required"`
+}
+
+func handle_add_radio(ctx *gin.Context) {
+
+	var request_body session
+
+	// Verify user
+	verified, request_body := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	// Parse request
+
+	var query add_radio_query
+
+	if err := ctx.ShouldBindJSON(&query); err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+	}
+
+	radio_id := generate_id(table_radio)
+
+	user_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	database.Table(table_radio).Create(&radio_model{
+		ID:    radio_id,
+		URL:   query.URL,
+		Name:  query.Name,
+		Owner: user_id,
+
+		CoverID:     0,
+		Description: "",
+	})
 
 	ctx.Data(http.StatusOK, "text/plain", []byte{})
 

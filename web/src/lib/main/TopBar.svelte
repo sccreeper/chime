@@ -1,7 +1,7 @@
 <script>
-    import { get } from "svelte/store";
-    import { session_object } from "../stores";
     import MinorButton from "./general/MinorButton.svelte";
+    import { openModal } from 'svelte-modals'
+    import UploadModal from "./modals/UploadModal.svelte";
 
     let searchValue = ""
 
@@ -9,35 +9,8 @@
         
     }
 
-    function upload() {
-        
-        let file_form = document.createElement("input")
-        file_form.setAttribute("type", "file")
-        file_form.setAttribute("multiple", "")
-
-        file_form.addEventListener("change", async () => {
-
-            let files = file_form.files;
-            
-            for (let i = 0; i < files.length; i++) {
-                const element = files[i];
-                
-                let data = new FormData();
-                data.append("file", element)
-
-                var resp = await fetch("/api/upload", {method: "POST", body: data})
-                if (resp.ok) {
-                    console.log("Uploaded track successfully!")
-                } else {
-                    console.log("There was an error uploading the track!")
-                }
-
-            }
-
-        })
-
-        file_form.click()
-
+    function upload_modal() {
+        openModal(UploadModal)
     }
 
     function settings() {
@@ -59,7 +32,7 @@
 
     </div>
     <div class="grid grid-cols-3 grid-rows-1 gap-4 items-center justify-items-center text-xl">
-        <MinorButton icon="upload" callback={upload}/>
+        <MinorButton icon="plus-lg" callback={upload_modal}/>
         <MinorButton icon="gear-fill" callback={settings}/>
         <MinorButton icon="person-circle" callback={profile}/>
     </div>

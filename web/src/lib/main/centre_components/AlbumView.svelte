@@ -1,5 +1,5 @@
 <script>
-    import { current_album } from "../../stores";
+    import { active_view } from "../../stores";
     import Track from "./Track.svelte";
     import no_cover_image from "../../../assets/no_cover.png";
     import HorizontalDivider from "../general/HorizontalDivider.svelte";
@@ -12,8 +12,8 @@
 
     let title_font = "4.5vw";
 
-    function updateView(album_id) {
-        fetch(`/api/get_collection/${album_id}`, {
+    function updateView(data) {
+        fetch(`/api/get_collection/${data.id}`, {
             method: "GET",
         })
             .then((response) => response.json())
@@ -44,7 +44,7 @@
 
     
 
-    current_album.subscribe((value) => updateView(value));
+    active_view.subscribe((value) => updateView(value));
 </script>
 
 <div class="m-2">

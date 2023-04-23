@@ -20,6 +20,7 @@ type single_collection struct {
 type collection_list_response struct {
 	Albums    []single_collection `json:"albums"`
 	Playlists []single_collection `json:"playlists"`
+	Radios    []single_collection `json:"radios"`
 }
 
 type collection_query struct {
@@ -49,13 +50,14 @@ type track_response struct {
 func handle_get_collections(ctx *gin.Context) {
 
 	// Verify user
-	verified, request_body := verify_user(*ctx.Request)
+	verified, request_body := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
 	var collections = []playlist_model{}
+	var radios = []radio_model{}
 
 	owner_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
 	if err != nil {
@@ -63,24 +65,30 @@ func handle_get_collections(ctx *gin.Context) {
 		return
 	}
 
-	database.Table("playlists").
+	database.Table(table_playlists).
 		Select("name", "is_album", "id").
 		Where("owner = ?", owner_id).Find(&collections)
+	database.Table(table_radio).Select("name", "id").Where("owner = ?", owner_id).Find(&radios)
 
 	response := collection_list_response{}
 
 	response.Albums = make([]single_collection, 0)
 	response.Playlists = make([]single_collection, 0)
+	response.Radios = make([]single_collection, 0)
 
 	for _, v := range collections {
 
 		if v.IsAlbum == 1 {
-
 			response.Albums = append(response.Albums, single_collection{Name: v.Name, ID: strconv.FormatInt(v.ID, 16)})
-
 		} else {
 			response.Playlists = append(response.Playlists, single_collection{Name: v.Name, ID: strconv.FormatInt(v.ID, 16)})
 		}
+
+	}
+
+	for _, v := range radios {
+
+		response.Radios = append(response.Radios, single_collection{Name: v.Name, ID: strconv.FormatInt(v.ID, 16)})
 
 	}
 
@@ -97,7 +105,7 @@ func handle_get_collections(ctx *gin.Context) {
 func handle_get_collection(ctx *gin.Context) {
 
 	// Verify user & extract request body
-	verified, _ := verify_user(*ctx.Request)
+	verified, _ := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -188,7 +196,7 @@ type get_cover_query struct {
 func handle_get_cover(ctx *gin.Context) {
 
 	// Verify user
-	verified, request_body := verify_user(*ctx.Request)
+	verified, request_body := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -242,8 +250,7 @@ func handle_get_track_metadata(ctx *gin.Context) {
 
 	// Verify user
 
-	// Verify user
-	verified, _ := verify_user(*ctx.Request)
+	verified, _ := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -309,5 +316,70 @@ func handle_get_track_metadata(ctx *gin.Context) {
 	}
 
 	ctx.Data(http.StatusOK, gin.MIMEJSON, response_bytes)
+
+}
+
+type get_radio_query struct {
+	ID string `uri:"radio_id" binding:"required"`
+}
+
+type get_radio_response struct {
+	Name        string `json:"name"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+	Cover       string `json:"cover_id"`
+}
+
+func handle_get_radio(ctx *gin.Context) {
+
+	// Verify user & request
+
+	verified, r := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	var query get_radio_query
+
+	if err := ctx.ShouldBindUri(&query); err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	radio_id, err := strconv.ParseInt(query.ID, 16, 64)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	owner_id, err := strconv.ParseInt(r.UserID, 16, 64)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	var radio radio_model
+	database.Table(table_radio).Select("*").Where("id = ?", radio_id).First(&radio)
+
+	if radio.Owner != owner_id {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	resp := get_radio_response{
+		Name:        radio.Name,
+		Description: radio.Description,
+		Cover:       strconv.FormatInt(radio.CoverID, 16),
+		URL:         radio.URL,
+	}
+
+	resp_bytes, err := json.Marshal(resp)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEJSON, resp_bytes)
 
 }

@@ -11,7 +11,7 @@
 </script>
 
 <tr>
-    <td><TrackPlay index={index} _track_id={id}/></td>
+    <td><TrackPlay index={index} track_id={id}/></td>
     <td class="font-semibold">{title}</td>
     <td class="text-xs">{artist}</td>
     <td class="text-xs">{album_name}</td>

@@ -52,6 +52,7 @@ func first_time_setup(admin_pass string, in_docker bool) {
 	db.Table(table_playlists).AutoMigrate(&playlist_model{})
 	db.Table(table_tracks).AutoMigrate(&track_model{})
 	db.Table(table_covers).AutoMigrate(&cover_model{})
+	db.Table(table_radio).AutoMigrate(&radio_model{})
 
 	log.Println("Creating admin user account...")
 

@@ -1,3 +1,3 @@
 package main
 
-// Handles source code for playlist, album & track info.
+// Handles source code for editing playlist, album, track & radio info.

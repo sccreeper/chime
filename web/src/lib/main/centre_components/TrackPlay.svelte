@@ -1,14 +1,14 @@
 <script>
-    import { track_id } from "../../player";
+    import { audio_source } from "../../player";
 
 
-    export let _track_id = ""
+    export let track_id = ""
     export let index = ""
 
     let mouse_over = false
 
     function click() {
-        track_id.set(_track_id)
+        audio_source.set({type: "track", source: track_id})
     }
 
 </script>

@@ -17,7 +17,7 @@ type stream_param struct {
 func handle_stream(ctx *gin.Context) {
 
 	// Verify user
-	verified, request_body := verify_user(*ctx.Request)
+	verified, request_body := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -81,7 +81,7 @@ func handle_download_track_original(ctx *gin.Context) {
 	// TODO: Remove this boilerplate everywhere.
 
 	// Verify user
-	verified, request_body := verify_user(*ctx.Request)
+	verified, request_body := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return

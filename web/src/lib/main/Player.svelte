@@ -1,8 +1,9 @@
 <script>
     import { get } from "svelte/store";
-    import { duration, player_audio, playing, position, volume } from "../player";
+    import { duration, player_audio, playing, playing_radio, position, volume } from "../player";
     import Toggle from "./player_components/Toggle.svelte";
     import { convertDuration } from "../util";
+    import { active_view } from "../stores";
 
     function skipForward(params) {
         
@@ -73,6 +74,14 @@
 
     <!-- Seek -->
 
+    {#if $playing_radio}
+
+        <div class="flex justify-center items-center w-full h-full">
+            <p class="text-slate-400">Listening to internet radio.</p>
+        </div>
+
+    {:else}
+
     <div class="grid grid-cols-3 grid-rows-1 seek-grid w-full h-full items-center justify-items-center">
         <p class="duration select-none">{convertDuration($position)}</p>
         <input 
@@ -88,6 +97,7 @@
         />
         <p class="duration select-none">{convertDuration($duration)}</p>
     </div>
+    {/if}
 
 </div>
 

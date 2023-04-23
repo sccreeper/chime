@@ -8,3 +8,7 @@ export function convertDuration(time) {
     return `${minutes.toString().padStart(2, "0")}:${seconds.padStart(2, "0")}`
 
 }
+
+export function get_url_extension( url ) {
+    return url.split(/[#?]/)[0].split('.').pop().trim();
+}

@@ -1,19 +1,17 @@
-
 <script>
-    import { get } from "svelte/store";
-    import { current_album } from "../../stores";
+import { active_view } from "../../stores";
 
 
 export let album_id;
 export let name;
 
 function open_album() {
-    current_album.set(album_id)
+    active_view.set({name: "album", id: album_id})
 }
 
 </script>
 
-<p on:click={open_album} class="{$current_album == album_id ? 'active' : ''}">{name}</p>
+<p on:click={open_album} class="{($active_view.id == album_id && $active_view.name == "album") ? 'active' : ''}">{name}</p>
 
 <style>
 
