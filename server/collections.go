@@ -48,13 +48,9 @@ type track_response struct {
 
 func handle_get_collections(ctx *gin.Context) {
 
-	var request_body session
-
-	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
-	fmt.Println(session_json)
-	json.Unmarshal([]byte(session_json), &request_body)
-
-	if !verify_user(request_body.ID, request_body.UserID) {
+	// Verify user
+	verified, request_body := verify_user(*ctx.Request)
+	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
@@ -101,13 +97,8 @@ func handle_get_collections(ctx *gin.Context) {
 func handle_get_collection(ctx *gin.Context) {
 
 	// Verify user & extract request body
-
-	var request_body session
-
-	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
-	fmt.Println(session_json)
-	json.Unmarshal([]byte(session_json), &request_body)
-	if !verify_user(request_body.ID, request_body.UserID) {
+	verified, _ := verify_user(*ctx.Request)
+	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
@@ -197,18 +188,11 @@ type get_cover_query struct {
 func handle_get_cover(ctx *gin.Context) {
 
 	// Verify user
-
-	var request_body session
-
-	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
-	fmt.Println(session_json)
-	json.Unmarshal([]byte(session_json), &request_body)
-
-	if !verify_user(request_body.ID, request_body.UserID) {
+	verified, request_body := verify_user(*ctx.Request)
+	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-
 	// Get cover to query
 
 	var query get_cover_query
@@ -258,13 +242,9 @@ func handle_get_track_metadata(ctx *gin.Context) {
 
 	// Verify user
 
-	var request_body session
-
-	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
-	fmt.Println(session_json)
-	json.Unmarshal([]byte(session_json), &request_body)
-
-	if !verify_user(request_body.ID, request_body.UserID) {
+	// Verify user
+	verified, _ := verify_user(*ctx.Request)
+	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}

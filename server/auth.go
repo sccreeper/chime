@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -33,18 +34,32 @@ func init() {
 }
 
 // See if user ID matches session and if session actually exists.
-func verify_user(session_id string, user_id string) bool {
+func verify_user(request http.Request) (bool, session) {
 
-	if _, ok := sessions[session_id]; !ok {
-		fmt.Println("doesn't exist")
-
-		return false
-	} else if sessions[session_id].UserID != user_id {
-		fmt.Println("incorrect user id")
-
-		return false
+	if session_cookie, err := request.Cookie("session"); err != nil {
+		fmt.Println(err.Error())
+		return false, session{}
 	} else {
-		return true
+
+		// "Escapes" base64
+
+		escaped, _ := base64.StdEncoding.DecodeString(
+			strings.ReplaceAll(
+				strings.ReplaceAll(
+					strings.ReplaceAll(session_cookie.Value, ".", "="),
+					"_", "+"),
+				"/", "-"))
+
+		var s session
+		json.Unmarshal(escaped, &s)
+
+		if _, ok := sessions[s.ID]; !ok {
+			return false, session{}
+		} else if sessions[s.ID].UserID != s.UserID {
+			return false, session{}
+		} else {
+			return true, s
+		}
 	}
 
 }
@@ -63,6 +78,7 @@ func handle_auth(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
 			"status": "incorrect",
 		})
+		return
 	} else {
 
 		var user user_model
@@ -107,14 +123,17 @@ func handle_auth(ctx *gin.Context) {
 			response_bytes, err := json.Marshal(response)
 			if err != nil {
 				ctx.AbortWithStatus(http.StatusInternalServerError)
+				return
 			}
 
 			ctx.Data(http.StatusOK, gin.MIMEJSON, response_bytes)
+			return
 
 		} else {
 			ctx.JSON(http.StatusOK, gin.H{
 				"status": "incorrect",
 			})
+			return
 		}
 
 	}

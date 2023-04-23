@@ -3,11 +3,9 @@ package main
 // Code for handling uploading, downloading & streaming of tracks
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,13 +17,8 @@ type stream_param struct {
 func handle_stream(ctx *gin.Context) {
 
 	// Verify user
-
-	var request_body session
-
-	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
-	fmt.Println(session_json)
-	json.Unmarshal([]byte(session_json), &request_body)
-	if !verify_user(request_body.ID, request_body.UserID) {
+	verified, request_body := verify_user(*ctx.Request)
+	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
@@ -87,14 +80,9 @@ func handle_download_track_original(ctx *gin.Context) {
 
 	// TODO: Remove this boilerplate everywhere.
 
-	// Verify user and request.
-
-	var request_body session
-
-	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
-	fmt.Println(session_json)
-	json.Unmarshal([]byte(session_json), &request_body)
-	if !verify_user(request_body.ID, request_body.UserID) {
+	// Verify user
+	verified, request_body := verify_user(*ctx.Request)
+	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}

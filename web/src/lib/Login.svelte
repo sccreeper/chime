@@ -30,7 +30,7 @@
 
                 let date = new Date()
                 date.setTime(date.getTime() + (7*24*60*60*1000))
-                document.cookie =  `session=${JSON.stringify(data)}; expires=${date.toUTCString()}; path=/; SameSite=none; Secure`
+                document.cookie =  `session=${btoa(JSON.stringify(data)).replaceAll("/", "-").replaceAll("+", "_").replaceAll("=", ".")}; expires=${date.toUTCString()}; path=/; SameSite=none; Secure`
 
                 session_object.set(data)
                 view.set(Main)

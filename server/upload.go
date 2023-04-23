@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"math"
 	"net/http"
@@ -22,10 +21,9 @@ func handle_upload(ctx *gin.Context) {
 
 	ctx.Request.ParseMultipartForm(int64(math.Pow10(8) * 2.5))
 
-	session_json := strings.Join(ctx.Request.Header["Cookie"], "")[len("session="):]
-	fmt.Println(session_json)
-	json.Unmarshal([]byte(session_json), &request_body)
-	if !verify_user(request_body.ID, request_body.UserID) {
+	// Verify user
+	verified, request_body := verify_user(*ctx.Request)
+	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
@@ -80,7 +78,12 @@ func handle_upload(ctx *gin.Context) {
 		var album_title string = metadata.Album()
 		var count int64
 
-		database.Table(table_playlists).Where("name = ? AND is_album = 1", album_title).Count(&count)
+		user_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+		}
+
+		database.Table(table_playlists).Where("name = ? AND is_album = 1 AND owner = ?", album_title, user_id).Count(&count)
 
 		if count == 0 {
 
