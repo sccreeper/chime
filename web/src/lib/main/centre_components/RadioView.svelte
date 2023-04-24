@@ -3,12 +3,13 @@
     import { active_view } from "../../stores";
     import no_cover from "../../../assets/no_cover.png";
     import { onMount } from "svelte";
-    import { audio_source } from "../../player";
+    import { audio_source, playing } from "../../player";
 
     let cover_id = ""
     let name = ""
     let description = ""
     let url = ""
+    let id = ""
 
     function load_details() {
         
@@ -20,6 +21,7 @@
             name = data.name
             description = data.description
             url = data.url
+            id = get(active_view).id
 
         })
 
@@ -29,8 +31,15 @@
         load_details()
     })
 
-    function play() {
-        audio_source.set({type: "radio", source: url})
+    function handle_click() {
+        // This radio is the radio being played.
+        if (get(playing) && get(active_view).name == "radio" && get(active_view).id == id && get(audio_source).source == url) {
+            playing.set(false)
+        
+        // This radio isn't being played, we can just set it normally.
+        } else {
+            audio_source.set({type: "radio", source: url})
+        }
     }
 
     active_view.subscribe(load_details)
@@ -48,7 +57,13 @@
             </div>
         </div>
         
-        <button on:click={play} class="mt-4"><i class="bi bi-play-fill"></i> Play</button>
+        <button on:click={handle_click} class="mt-4">
+            {#if $active_view.name == "radio" && $active_view.id == id && $playing && $audio_source.source == url}
+            <i class="bi bi-pause-fill"></i> Pause
+            {:else}
+            <i class="bi bi-play-fill"></i> Play
+            {/if}
+        </button>
     
     </div>
 
