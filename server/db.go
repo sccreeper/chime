@@ -37,12 +37,12 @@ type playlist_model struct {
 
 type track_model struct {
 	gorm.Model
-	ID       int64  `gorm:"primaryKey"`
-	Name     string // Name of track
-	Released int64  //Year released
-	Artist   string //Arist
-	AlbumID  int64  //The album this track belongs to
-	Duration int64  //The duration of the track in seconds
+	ID       int64   `gorm:"primaryKey"`
+	Name     string  // Name of track
+	Released int64   //Year released
+	Artist   string  //Arist
+	AlbumID  int64   //The album this track belongs to
+	Duration float64 //The duration of the track in seconds
 	Cover    int64
 	Owner    int64
 	Original string //The original file name, used for streaming and downloading

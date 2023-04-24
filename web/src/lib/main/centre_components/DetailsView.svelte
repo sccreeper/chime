@@ -3,6 +3,8 @@
     import HorizontalDivider from "../general/HorizontalDivider.svelte";
     import { track_metadata_view } from "../../stores";
     import MinorButton from "../general/MinorButton.svelte";
+    import { convertDuration } from "../../util";
+    import { duration } from "../../player";
 
     // Metadata object
 
@@ -15,7 +17,8 @@
         original_file: "",
         format: "",
         duration: 0,
-        released: 0
+        released: 0,
+        size: 0,
 
     } 
 
@@ -73,9 +76,10 @@
              </colgroup>
 
             <tr><td class="header">Released:</td><td>{metadata.released}</td></tr>
-            <tr><td class="header">Duration:</td><td>{metadata.duration}</td></tr>
+            <tr><td class="header">Duration:</td><td>{convertDuration(metadata.duration)}</td></tr>
             <tr><td class="header">Format:</td><td>{metadata.format}</td></tr>
             <tr><td class="header">Original file:</td><td>{metadata.original_file}</td></tr>
+            <tr><td class="header">File size:</td><td>{(metadata.size / Math.pow(10, 6)).toFixed(2)} mb</td></tr>
 
         </table>
 

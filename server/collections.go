@@ -244,6 +244,7 @@ type track_metadata_response struct {
 	Format       string `json:"format"`
 	Duration     int    `json:"duration"`
 	Released     int    `json:"released"`
+	Size         int    `json:"size"`
 }
 
 func handle_get_track_metadata(ctx *gin.Context) {
@@ -278,6 +279,7 @@ func handle_get_track_metadata(ctx *gin.Context) {
 		OriginalFile: track.Original,
 		Duration:     int(track.Duration),
 		Released:     int(track.Released),
+		Size:         int(track.Size),
 	}
 
 	var track_album playlist_model

@@ -1,16 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"math"
 	"net/http"
 	"os"
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/dhowden/tag"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
 func handle_upload(ctx *gin.Context) {
@@ -47,14 +51,30 @@ func handle_upload(ctx *gin.Context) {
 		return
 	}
 
+	f_info, err := f.Stat()
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	f_size := f_info.Size()
+
 	metadata, err := tag.ReadFrom(f)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
+	probe_ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelFn()
+
+	probe_data, err := ffprobe.ProbeURL(probe_ctx, fmt.Sprintf("/var/lib/chime/tracks/%s/%s", id_hex, filename))
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Failed to probe duration!"))
+	}
+
 	owner_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
 	if err != nil {
+		log.Println("Failed to user id string to int!")
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -69,6 +89,9 @@ func handle_upload(ctx *gin.Context) {
 			AlbumID:  1,
 			Owner:    owner_id,
 			Original: filename,
+			Size:     f_size,
+			Duration: probe_data.Format.DurationSeconds,
+			Released: 1968, //Year 2001 a Space Oddesey was released.
 		})
 
 	} else {
@@ -123,6 +146,9 @@ func handle_upload(ctx *gin.Context) {
 				Cover:    cover_id,
 				Owner:    owner_id,
 				Original: filename,
+				Size:     f_size,
+				Duration: probe_data.Format.DurationSeconds,
+				Released: int64(metadata.Year()),
 			})
 
 		} else {
@@ -148,6 +174,9 @@ func handle_upload(ctx *gin.Context) {
 				Cover:    collection.Cover,
 				Owner:    owner_id,
 				Original: filename,
+				Size:     f_size,
+				Duration: probe_data.Format.DurationSeconds,
+				Released: int64(metadata.Year()),
 			})
 
 			// Update album list
