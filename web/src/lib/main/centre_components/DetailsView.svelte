@@ -4,7 +4,8 @@
     import { track_metadata_view } from "../../stores";
     import MinorButton from "../general/MinorButton.svelte";
     import { convertDuration } from "../../util";
-    import { duration } from "../../player";
+    import { openModal } from "svelte-modals";
+    import CollectionAdd from "../modals/CollectionAdd.svelte";
 
     // Metadata object
 
@@ -56,6 +57,10 @@
 
     }
 
+    function addToPlaylist() {
+        openModal(CollectionAdd, {track_id: get(track_metadata_view)})
+    }
+
 </script>
 
 {#if $track_metadata_view == null || $track_metadata_view == ""}
@@ -64,7 +69,7 @@
 
 {:else}
 
-    <div class="flex flex-col items-center text-center m-2">
+    <div class="flex flex-col items-center text-center m-2 overflow-y-scroll h-full">
         <img src={`/api/collection/get_cover/${metadata.cover_id}`} width="300" height="300"/>
         <h1 class="mt-2">{metadata.title}</h1>
         <p class="text-gray-300">{metadata.artist} <span class="dot">●</span> {metadata.album_name}</p>
@@ -85,8 +90,10 @@
 
         <HorizontalDivider/>
 
-        <MinorButton icon="download" callback={download}/>
-
+        <div class="w-full flex-col items-center">
+            <MinorButton icon="download" callback={download}/>
+            <MinorButton icon="plus-lg" callback={addToPlaylist}/>
+        </div>
 
     </div>
 

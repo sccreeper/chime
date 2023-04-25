@@ -1,8 +1,11 @@
 package main
 
+// Handles methods for creating collections and getting collection info.
+
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -383,5 +386,155 @@ func handle_get_radio(ctx *gin.Context) {
 	}
 
 	ctx.Data(http.StatusOK, gin.MIMEJSON, resp_bytes)
+
+}
+
+type create_playlist_query struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CustomCover bool   `json:"custom_cover"`
+	IsAlbum     bool   `json:"is_album"`
+}
+
+// Create a single collection
+func handle_add_collection(ctx *gin.Context) {
+
+	// Verify user & request
+
+	verified, r := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	if err := ctx.Request.ParseMultipartForm(int64(math.Pow10(6) * 5)); err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Unable to parse form"))
+		return
+	}
+
+	var playlist create_playlist_query
+
+	if err := json.Unmarshal([]byte(ctx.PostForm("data")), &playlist); err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid request body"))
+		return
+	}
+
+	user_id, err := strconv.ParseInt(r.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: User ID invalid"))
+		return
+	}
+
+	id := generate_id(table_playlists)
+
+	var is_album int64
+
+	if playlist.IsAlbum {
+		is_album = 1
+	} else {
+		is_album = 0
+	}
+
+	// Handle cover
+
+	var cover_id int64 = 0
+
+	if playlist.CustomCover {
+
+		cover_id := generate_id(table_covers)
+
+		cover_file, err := ctx.FormFile("cover")
+		if err != nil {
+			ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: No cover in form"))
+			return
+		}
+
+		if err := ctx.SaveUploadedFile(cover_file, fmt.Sprintf("/var/lib/chime/covers/%s", strconv.FormatInt(cover_id, 16))); err != nil {
+			ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("500: Unable to save cover"))
+			return
+		}
+
+		database.Table(table_covers).Create(&cover_model{
+			ID:      cover_id,
+			AlbumID: 0,
+			Owner:   user_id,
+		})
+
+	}
+
+	// Create collection record finally.
+
+	database.Table(table_playlists).Create(&playlist_model{
+		ID:          id,
+		Owner:       user_id,
+		Name:        playlist.Name,
+		Description: playlist.Description,
+		Cover:       cover_id,
+		IsAlbum:     is_album,
+	})
+
+}
+
+type add_to_collection_query struct {
+	TrackID      string `json:"track_id"`
+	CollectionID string `json:"collection_id"`
+}
+
+// Add tracks to a collection
+func add_to_collection(ctx *gin.Context) {
+
+	// Verify user & request
+
+	verified, r := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	user_id, err := strconv.ParseInt(r.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	var query add_to_collection_query
+
+	if err := ctx.ShouldBindJSON(&query); err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Form formatted incorrectly")) //TODO: Move these to constants. Also only print long message if debug. TLDR; Shorten this boilerplate in some way.
+		return
+	}
+
+	track_id, err := strconv.ParseInt(query.TrackID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid track ID"))
+		return
+	}
+
+	collection_id, err := strconv.ParseInt(query.CollectionID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid collection ID"))
+		return
+	}
+
+	var collection playlist_model
+	var count int64
+
+	// See if track & playlist exists
+	database.Table(table_tracks).Where("id = ? AND owner = ?", track_id, user_id).Count(&count)
+	database.Table(table_playlists).Where("id = ? AND owner = ?", collection_id, user_id).Count(&count)
+
+	if count == 0 {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid ID "))
+		return
+	}
+
+	database.Table(table_playlists).Select("*").Where("id = ? AND owner = ?", collection_id, user_id).First(&collection)
+
+	tracks := strings.Split(collection.Tracks, ",")
+	tracks = append(tracks, query.TrackID)
+
+	database.Table(table_playlists).Model(&collection).Updates(&playlist_model{Tracks: strings.Join(tracks, ",")})
+
+	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
 
 }

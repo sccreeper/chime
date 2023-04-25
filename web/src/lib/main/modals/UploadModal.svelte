@@ -2,10 +2,16 @@
     import { closeModal } from 'svelte-modals'
     import HorizontalDivider from '../general/HorizontalDivider.svelte'
     import MinorButton from '../general/MinorButton.svelte';
+    import MinorButtonText from '../general/MinorButtonText.svelte';
     
     let radio_name = ""
     let radio_url = ""
     let error_message = ""
+
+    let collection_name = ""
+    let collection_description = ""
+    let collection_cover = null
+    let collection_is_album = false
 
     // Upload multiple or single files
 
@@ -58,6 +64,60 @@
 
     }
 
+    // Add collection
+
+    function addCollection() {
+      
+      let data = new FormData()
+
+      let use_custom_cover
+
+      if (collection_cover == null) {
+        use_custom_cover = false
+      } else {
+        use_custom_cover = true
+      }
+
+      data.append("data", JSON.stringify({
+
+        name: collection_name,
+        description: collection_description,
+        is_album: collection_is_album,
+        custom_cover: use_custom_cover,
+
+      }))
+
+      if (collection_cover != null) {
+        data.append("cover", collection_cover) 
+      }
+
+      fetch("/api/collection/add", {
+            method: "POST",
+            body: data
+        }).then(() => {
+
+            closeModal()
+
+        })
+
+    }
+
+    function setCoverFile() {
+      
+      let input = document.createElement("input")
+      input.setAttribute("type", "file")
+      input.setAttribute("accept", "image/png, image/jpeg, image/webp")
+
+      input.addEventListener("change", () => {
+
+        collection_cover = input.files[0]
+
+      })
+
+      input.click()
+
+    }
+
     // provided by Modals
     export let isOpen
   
@@ -82,6 +142,22 @@
         <input type="text" bind:value={radio_url}/>
         <p class="text-red-600 text-xs p-1">{error_message}</p>
         <button on:click={addRadio} class="mt-2">Add</button>
+
+        <span class="w-full"><HorizontalDivider/></span>
+
+        <p>Add collection</p>
+
+        <p class="text-xs p-1">Name</p>
+        <input type="text" bind:value={collection_name}/>
+        <p class="text-xs p-1">Description</p>
+        <input type="text" bind:value={collection_description}/>
+        <p class="text-xs p-1">Cover (optional)</p>
+        <MinorButtonText icon="upload" text="Add image" callback={setCoverFile}/>
+        <p class="text-xs p-1">Is album?</p>
+        <input type="checkbox" bind:checked={collection_is_album}/>
+
+        <button on:click={addCollection} class="mt-2">Add</button>
+
     </div>
   </div>
   {/if}

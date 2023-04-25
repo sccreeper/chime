@@ -94,15 +94,14 @@ func main() {
 	r.GET("/api/get_track_metadata/:track_id", handle_get_track_metadata)
 	r.GET("/api/get_collections", handle_get_collections)
 	r.GET("/api/get_radio/:radio_id", handle_get_radio)
+	r.GET("/api/collection/get_cover/:cover_id", handle_get_cover)
 
 	// Modify playlists & albums (collections)
 
 	r.POST("/api/collection/remove")
-	r.POST("/api/collection/add")
-	r.POST("/api/collection/move")
-	r.POST("/api/collection/change_title")
-	r.POST("/api/collection/change_cover")
-	r.GET("/api/collection/get_cover/:cover_id", handle_get_cover)
+	r.POST("/api/collection/add", handle_add_collection)
+	r.POST("/api/collection/add_track", add_to_collection)
+	r.POST("/api/collection/edit")
 
 	//Search
 

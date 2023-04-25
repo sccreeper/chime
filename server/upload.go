@@ -94,6 +94,14 @@ func handle_upload(ctx *gin.Context) {
 			Released: 1968, //Year 2001 a Space Oddesey was released.
 		})
 
+		var collection playlist_model
+		database.Table(table_playlists).Select("*").Where("id = ?", 1).First(&collection)
+
+		tracks := strings.Split(collection.Tracks, ",")
+		tracks = append(tracks, strconv.FormatInt(track_id, 16))
+
+		database.Table(table_playlists).Model(&collection).Updates(&playlist_model{Tracks: strings.Join(tracks, ",")})
+
 	} else {
 		// Assume, possibly incorrectly, that the rest of the metadata is present.
 		// Create album, or upload to existing if possible.
