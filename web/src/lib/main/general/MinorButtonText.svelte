@@ -5,21 +5,24 @@
 
 </script>
 
-<span on:click={callback}><i class="bi bi-{icon}"></i> <span class="span-text">{text}</span></span>
+<p on:click={callback}><i class="bi bi-{icon}"></i> <span class="span-text">{text}</span></p>
 
 <style>
-span {
+p {
     @apply text-lg;
     @apply text-slate-400;
     @apply transition-all;
     cursor: pointer;
+    
+
+}
+
+p:hover {
+    @apply text-yellow-500;
 }
 
 .span-text {
     @apply text-sm;
 }
 
-span:hover {
-    @apply text-yellow-500;
-}
 </style>

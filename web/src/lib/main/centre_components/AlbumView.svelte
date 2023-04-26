@@ -3,6 +3,12 @@
     import Track from "./Track.svelte";
     import no_cover_image from "../../../assets/no_cover.png";
     import HorizontalDivider from "../general/HorizontalDivider.svelte";
+    import { closeModal, openModal } from "svelte-modals";
+    import ConfirmModal from "../modals/ConfirmModal.svelte";
+    import { get } from "svelte/store";
+    import MinorButton from "../general/MinorButton.svelte";
+    import MinorButtonText from "../general/MinorButtonText.svelte";
+    import { audio_source, shuffle } from "../../player";
 
     let album_title = "";
     let album_cover_src = "";
@@ -13,38 +19,72 @@
     let title_font = "4.5vw";
 
     function updateView(data) {
-        fetch(`/api/get_collection/${data.id}`, {
-            method: "GET",
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                album_title = data.title;
-                tracks = data.tracks;
-                album_description = data.description;
-                is_album = (data.is_album == 1) ? true : false
+        if (data.name == "radio") {
+            return
+        } else {
 
-                if (data.cover == "0" || data.cover == "00") {
-                    album_cover_src = ""
-                } else {
-                    album_cover_src = `/api/collection/get_cover/${data.cover}`
-                }
+            fetch(`/api/get_collection/${data.id}`, {
+                method: "GET",
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    album_title = data.title;
+                    tracks = data.tracks;
+                    album_description = data.description;
+                    is_album = (data.is_album == 1) ? true : false
 
-                if (album_title.length > 35) {
-                    title_font = "2vw"
-                } else if (album_title.length > 25) {
-                    title_font = "3vw"
-                } else if (album_title.length > 15) {
-                    title_font = "3.5vw"
-                } else {
-                    title_font = "4vw"
-                }
+                    if (data.cover == "0" || data.cover == "00") {
+                        album_cover_src = ""
+                    } else {
+                        album_cover_src = `/api/collection/get_cover/${data.cover}`
+                    }
 
-            });
+                    if (album_title.length > 35) {
+                        title_font = "2vw"
+                    } else if (album_title.length > 25) {
+                        title_font = "3vw"
+                    } else if (album_title.length > 15) {
+                        title_font = "3.5vw"
+                    } else {
+                        title_font = "4vw"
+                    }
+
+                });
+        }
     }
 
-    
-
     active_view.subscribe((value) => updateView(value));
+
+    function deleteCollection() {
+        
+        openModal(ConfirmModal, {callback: (confirmed) => {
+
+            if (confirmed) {
+                
+                fetch("/api/collection/delete", {
+                    method: "POST",
+                    body: JSON.stringify({collection_id: get(active_view).id})
+                }).then((resp) => {
+                    closeModal()
+                })
+
+            }
+
+        }, message: "Are you sure you want to delete this collection. This will not delete it's contents."})
+
+    }
+
+    function playCollection() {
+        
+        if (tracks.length == 0) {
+            return
+        } else if (get(shuffle)) {
+            audio_source.set({type: "track", source: tracks[Math.floor(Math.random()*tracks.length)].id})
+        } else {
+            audio_source.set({type: "track", source: tracks[0].id})
+        }
+
+    }
 </script>
 
 <div class="m-2">
@@ -57,6 +97,10 @@
         <div class="flex flex-col gap-4 items-start">
             <h1 class="album-title" style="font-size: {title_font};">{album_title}</h1>
             <p>{album_description}</p>
+            <div class="flex flex-row items-center gap-3">
+                <button on:click={playCollection}><i class="bi bi-play-fill"></i> Play</button> 
+                <MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>
+            </div>
         </div>
     </div>
 

@@ -538,3 +538,80 @@ func add_to_collection(ctx *gin.Context) {
 	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
 
 }
+
+type delete_collection_query struct {
+	ID string `json:"collection_id"`
+}
+
+func handle_delete_collection(ctx *gin.Context) {
+
+	// Verify user & request
+
+	verified, r := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	var query delete_collection_query
+
+	if err := ctx.ShouldBindJSON(&query); err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad JSON"))
+		return
+	}
+
+	user_id, err := strconv.ParseInt(r.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad user ID"))
+		return
+	}
+
+	collection_id, err := strconv.ParseInt(query.ID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad collection ID"))
+		return
+	}
+
+	var collection playlist_model
+	var count int64
+
+	database.Table(table_playlists).Where("owner = ? AND id = ?", user_id, collection_id).Count(&count)
+
+	if count == 0 {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad collection ID"))
+		return
+	}
+
+	database.Table(table_playlists).Select("*").Where("owner = ? AND id = ?", user_id, collection_id).First(&collection)
+
+	if collection.IsAlbum == 1 {
+
+		var tracks []int64
+
+		for _, v := range strings.Split(collection.Tracks, ",") {
+			id, _ := strconv.ParseInt(v, 16, 64)
+			tracks = append(tracks, id)
+		}
+
+		for _, v := range tracks {
+
+			var track track_model
+			database.Table(table_tracks).Select("album").Where("id = ?", v).First(&track)
+
+			if track.AlbumID == collection_id {
+				database.Table(table_tracks).Model(&track).Updates(&track_model{AlbumID: 1})
+			} else {
+				continue
+			}
+
+		}
+
+		database.Table(table_playlists).Delete(&collection)
+
+	} else {
+		database.Table(table_playlists).Delete(&collection)
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
+
+}

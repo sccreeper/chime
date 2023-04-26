@@ -98,7 +98,8 @@ func main() {
 
 	// Modify playlists & albums (collections)
 
-	r.POST("/api/collection/remove")
+	r.POST("/api/collection/remove_track")
+	r.POST("/api/collection/delete", handle_delete_collection)
 	r.POST("/api/collection/add", handle_add_collection)
 	r.POST("/api/collection/add_track", add_to_collection)
 	r.POST("/api/collection/edit")
