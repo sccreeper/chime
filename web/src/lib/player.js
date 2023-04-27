@@ -12,6 +12,7 @@ export var audio_source = writable({type: "", source: ""})
 export var position = writable(0)
 export var duration = writable(0)
 export var track_queue = writable([])
+export var playing_collection = writable("")
 
 // Playback settings
 

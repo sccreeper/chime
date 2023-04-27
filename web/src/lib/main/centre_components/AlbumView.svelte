@@ -8,7 +8,7 @@
     import { get } from "svelte/store";
     import MinorButton from "../general/MinorButton.svelte";
     import MinorButtonText from "../general/MinorButtonText.svelte";
-    import { audio_source, shuffle } from "../../player";
+    import { audio_source, playing, playing_collection, shuffle } from "../../player";
 
     let album_title = "";
     let album_cover_src = "";
@@ -75,13 +75,19 @@
     }
 
     function playCollection() {
-        
-        if (tracks.length == 0) {
+
+        if (get(playing) && get(playing_collection) == get(active_view).id) {
+            playing.set(false)
+        } else if (tracks.length == 0) {
             return
         } else if (get(shuffle)) {
             audio_source.set({type: "track", source: tracks[Math.floor(Math.random()*tracks.length)].id})
+
+            playing_collection.set(get(active_view).id)
         } else {
             audio_source.set({type: "track", source: tracks[0].id})
+
+            playing_collection.set(get(active_view).id)
         }
 
     }
@@ -98,8 +104,8 @@
             <h1 class="album-title" style="font-size: {title_font};">{album_title}</h1>
             <p>{album_description}</p>
             <div class="flex flex-row items-center gap-3">
-                <button on:click={playCollection}><i class="bi bi-play-fill"></i> Play</button> 
-                <MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>
+                <button on:click={playCollection}>{#if $playing_collection == $active_view.id && $playing}<i class="bi bi-pause-fill"></i> Pause{:else}<i class="bi bi-play-fill"></i> Play{/if}</button> 
+                {#if $active_view.id != "1"}<MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>{/if}
             </div>
         </div>
     </div>

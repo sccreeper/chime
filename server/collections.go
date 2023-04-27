@@ -588,7 +588,9 @@ func handle_delete_collection(ctx *gin.Context) {
 
 		var tracks []int64
 
-		for _, v := range strings.Split(collection.Tracks, ",") {
+		tracks_string := strings.Split(collection.Tracks, ",")
+
+		for _, v := range tracks_string {
 			id, _ := strconv.ParseInt(v, 16, 64)
 			tracks = append(tracks, id)
 		}
@@ -596,7 +598,7 @@ func handle_delete_collection(ctx *gin.Context) {
 		for _, v := range tracks {
 
 			var track track_model
-			database.Table(table_tracks).Select("album").Where("id = ?", v).First(&track)
+			database.Table(table_tracks).Select("*").Where("id = ?", v).First(&track)
 
 			if track.AlbumID == collection_id {
 				database.Table(table_tracks).Model(&track).Updates(&track_model{AlbumID: 1})
@@ -606,10 +608,17 @@ func handle_delete_collection(ctx *gin.Context) {
 
 		}
 
-		database.Table(table_playlists).Delete(&collection)
+		var unsorted playlist_model
+		database.Table(table_playlists).Select("*").Where("id = ?", 1).First(&unsorted)
+
+		unsorted_tracks := strings.Split(unsorted.Tracks, ",")
+		unsorted_tracks = append(unsorted_tracks, tracks_string...)
+
+		database.Table(table_playlists).Model(&unsorted).Updates(&playlist_model{Tracks: strings.Join(unsorted_tracks, ",")})
+		database.Table(table_playlists).Unscoped().Delete(&collection) //.Unscoped() makes it delete permanently
 
 	} else {
-		database.Table(table_playlists).Delete(&collection)
+		database.Table(table_playlists).Unscoped().Delete(&collection)
 	}
 
 	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
