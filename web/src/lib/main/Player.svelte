@@ -1,17 +1,8 @@
 <script>
     import { get } from "svelte/store";
-    import { duration, player_audio, playing, playing_radio, position, shuffle, volume } from "../player";
+    import { duration, nextTrack, player_audio, playing, playing_radio, position, previousTrack, shuffle, volume } from "../player";
     import Toggle from "./player_components/Toggle.svelte";
     import { convertDuration } from "../util";
-    import { active_view } from "../stores";
-
-    function skipForward(params) {
-        
-    }
-
-    function skipBack(params) {
-        
-    }
 
     function toggleRepeat(state) {
         
@@ -47,7 +38,7 @@
 
         <div class="grid grid-rows-1 grid-cols-5 gap-3 items-center justify-items-center">
             <Toggle callback={(active) => shuffle.set(active)} icon="shuffle"/>
-            <button class="control-button" on:click={skipBack}><i class="bi bi-skip-backward"></i></button>
+            <button class="control-button" on:click={previousTrack}><i class="bi bi-skip-backward"></i></button>
             
             <button 
                 class="control-button" 
@@ -55,7 +46,7 @@
                     {#if !$playing}<i class="bi bi-play-fill"></i>{:else}<i class="bi bi-pause-fill"></i>{/if}
             </button>
             
-            <button class="control-button" on:click={skipForward}><i class="bi bi-skip-forward"></i></button>
+            <button class="control-button" on:click={nextTrack}><i class="bi bi-skip-forward"></i></button>
             <Toggle callback={toggleRepeat} icon="repeat"/>
         </div>
 

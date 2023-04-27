@@ -624,3 +624,61 @@ func handle_delete_collection(ctx *gin.Context) {
 	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
 
 }
+
+type get_track_ids_resp struct {
+	IDs []string `json:"ids"`
+}
+
+type get_track_ids_query struct {
+	Limit int `json:"limit"`
+}
+
+// Returns the ID of a random track from a user's library.
+func get_track_ids(ctx *gin.Context) {
+
+	// Verify user & request
+
+	verified, r := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	user_id, err := strconv.ParseInt(r.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	var query get_track_ids_query
+
+	if err := ctx.ShouldBindJSON(&query); err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	var tracks []track_model
+
+	if query.Limit == 0 {
+		database.Table(table_tracks).Select("id").Where("owner = ?", user_id).Find(&tracks)
+	} else {
+		database.Table(table_tracks).Select("id").Where("owner = ?", user_id).Limit(query.Limit).Find(&tracks)
+	}
+
+	var track_strings []string
+
+	for _, v := range tracks {
+		track_strings = append(track_strings, strconv.FormatInt(v.ID, 16))
+	}
+
+	response_struct := get_track_ids_resp{IDs: track_strings}
+
+	resp_bytes, err := json.Marshal(response_struct)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEJSON, resp_bytes)
+
+}

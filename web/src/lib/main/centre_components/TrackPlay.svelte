@@ -1,5 +1,7 @@
 <script>
-    import { audio_source } from "../../player";
+    import { get } from "svelte/store";
+    import { audio_source, playing_collection } from "../../player";
+    import { active_view } from "../../stores";
 
 
     export let track_id = ""
@@ -8,6 +10,8 @@
     let mouse_over = false
 
     function click() {
+        playing_collection.set(get(active_view).id)
+
         audio_source.set({type: "track", source: track_id})
     }
 

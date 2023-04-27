@@ -102,7 +102,11 @@ func main() {
 	r.POST("/api/collection/delete", handle_delete_collection)
 	r.POST("/api/collection/add", handle_add_collection)
 	r.POST("/api/collection/add_track", add_to_collection)
-	r.POST("/api/collection/edit")
+	r.POST("/api/library/get_track_ids", get_track_ids)
+
+	// Edit endpoints
+	r.POST("/api/edit/collection")
+	r.POST("/api/edit/track")
 
 	//Search
 
