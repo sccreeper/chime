@@ -196,7 +196,7 @@ audio_source.subscribe((val) => {
             playing_hls = false
         } else if (val.type == "radio") {
 
-            if (get_url_extension(val.source) == "m3u8") {
+            if (get_url_extension(val.source) == "m3u8" || get_url_extension(val.source) == "m3u" || get_url_extension(val.source) == "pls") {
 
                 player_audio.src = ""
                 player_audio.pause()
