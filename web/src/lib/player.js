@@ -19,6 +19,7 @@ var previous_tracks = []
 // Playback settings
 
 export var shuffle = writable(false)
+export var loop = writable(false)
 export var volume = writable(1.0)
 
 let playing_hls = false;
@@ -102,7 +103,13 @@ volume.subscribe(() => {
 
 export function nextTrack() {
 
-    if (get(shuffle) && get(playing_collection) != 0) { //Playing with shuffle
+    if (get(shuffle)) {
+        console.log("Looping")
+
+        player_audio.currentTime = 0
+        player_audio.play()
+
+    } else if (get(shuffle) && get(playing_collection) != 0) { //Playing with shuffle
 
         console.log("Playing with shuffle.")
 

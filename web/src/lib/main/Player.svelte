@@ -4,8 +4,10 @@
     import Toggle from "./player_components/Toggle.svelte";
     import { convertDuration } from "../util";
 
-    function toggleRepeat(state) {
+    function toggleRepeat() {
         
+        shuffle.set(!get(shuffle))
+
     }
 
     function mute(params) {

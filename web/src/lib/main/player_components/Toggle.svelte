@@ -15,6 +15,7 @@
 <style>
 i {
     @apply text-lg;
+    @apply cursor-pointer;
 }
 
 .inactive {
