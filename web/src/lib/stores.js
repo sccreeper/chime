@@ -19,3 +19,5 @@ export const active_view = writable({
 })
 
 export const track_metadata_view = writable(null);
+
+export const favourites_list = writable([])

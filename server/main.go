@@ -107,6 +107,7 @@ func main() {
 	// Edit endpoints
 	r.POST("/api/edit/collection")
 	r.POST("/api/edit/track")
+	r.POST("/api/edit/favourite", handle_favourite)
 
 	//Search
 
@@ -117,7 +118,7 @@ func main() {
 	r.POST("/api/user/change_username")
 	r.POST("/api/user/change_password")
 	r.POST("/api/user/change_profile_picture")
-	r.POST("/api/user/favourite")
+	r.GET("/api/user/get_favourites", handle_get_favourites)
 
 	r.GET("/api/user")
 
