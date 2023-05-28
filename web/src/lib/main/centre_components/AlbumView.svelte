@@ -18,7 +18,7 @@
     let title_font = "4.5vw";
 
     function updateView(data) {
-        if (data.name == "radio") {
+        if (data.name == "radio" || data.name == "search") {
             return
         } else {
 

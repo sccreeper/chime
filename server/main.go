@@ -111,7 +111,7 @@ func main() {
 
 	//Search
 
-	r.POST("/api/search")
+	r.POST("/api/search", handle_search)
 
 	// Personal stuff
 

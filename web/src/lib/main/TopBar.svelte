@@ -2,11 +2,21 @@
     import MinorButton from "./general/MinorButton.svelte";
     import { openModal } from 'svelte-modals'
     import UploadModal from "./modals/UploadModal.svelte";
+    import { active_view, search_results } from "../stores";
 
     let searchValue = ""
 
     function executeSearch() {
         
+        fetch("/api/search", {
+            method: "POST",
+            body: JSON.stringify({query: searchValue})
+        }).then(resp => resp.json()).then(data => {
+            search_results.set(data)
+
+            active_view.set({name: "search", id: ""})
+        })
+
     }
 
     function upload_modal() {

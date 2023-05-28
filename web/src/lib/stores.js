@@ -21,3 +21,9 @@ export const active_view = writable({
 export const track_metadata_view = writable(null);
 
 export const favourites_list = writable([])
+
+export const search_results = writable({
+    tracks: [],
+    collections: [],
+    radios: [],
+});

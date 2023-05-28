@@ -1,21 +1,14 @@
 <script>
     import { active_view } from "../stores";
+    import Search from "./Search.svelte";
     import AlbumList from "./centre_components/AlbumList.svelte";
     import AlbumView from "./centre_components/AlbumView.svelte";
     import DetailsView from "./centre_components/DetailsView.svelte";
     import RadioView from "./centre_components/RadioView.svelte";
 
-    let current_view = null;
-
-    active_view.subscribe((val) => {
-
-        if (val.name == "radio") {
-            current_view = RadioView
-        } else if (val.name == "album") {
-            current_view = AlbumView
-        }
-
-    })
+    let album_view = AlbumView
+    let radio_view = RadioView
+    let search_view = Search
 
 </script>
 <div class="flex h-full grow overflow-hidden">
@@ -25,14 +18,22 @@
 
     <div class="grow centre">
 
-        {#if $active_view.name == ""}
+        {#if $active_view.name === ""}
         <div class="flex justify-items-center items-center w-full h-full">
 
             <h3>Not viewing anything. Click on an album or playlist to get started.</h3>
         
         </div>
         {:else}
-        <svelte:component this={current_view}/>
+
+        {#if $active_view.name === "radio"}
+        <svelte:component this={radio_view}/>
+        {:else if $active_view.name === "album"}
+        <svelte:component this={album_view}/>
+        {:else if $active_view.name === "search"}
+        <svelte:component this={search_view}/>
+        {/if}
+
         {/if}
 
 
