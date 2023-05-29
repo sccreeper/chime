@@ -6,6 +6,7 @@
     import { convertDuration } from "../../util";
     import { openModal } from "svelte-modals";
     import CollectionAdd from "../modals/CollectionAdd.svelte";
+    import BlankPage from "../general/BlankPage.svelte";
 
     // Metadata object
 
@@ -65,7 +66,7 @@
 
 {#if $track_metadata_view == null || $track_metadata_view == ""}
 
-    <p>Not listening to or examining any tracks.</p>
+<BlankPage icon="music-note-list" text="Not examining any tracks"/>
 
 {:else}
 

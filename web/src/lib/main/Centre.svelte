@@ -5,10 +5,7 @@
     import AlbumView from "./centre_components/AlbumView.svelte";
     import DetailsView from "./centre_components/DetailsView.svelte";
     import RadioView from "./centre_components/RadioView.svelte";
-
-    let album_view = AlbumView
-    let radio_view = RadioView
-    let search_view = Search
+    import BlankPage from "./general/BlankPage.svelte";
 
 </script>
 <div class="flex h-full grow overflow-hidden">
@@ -21,17 +18,17 @@
         {#if $active_view.name === ""}
         <div class="flex justify-items-center items-center w-full h-full">
 
-            <h3>Not viewing anything. Click on an album or playlist to get started.</h3>
+            <BlankPage icon="eye" text="Not viewing anything."/>
         
         </div>
         {:else}
 
         {#if $active_view.name === "radio"}
-        <svelte:component this={radio_view}/>
+        <RadioView/>
         {:else if $active_view.name === "album"}
-        <svelte:component this={album_view}/>
+        <AlbumView/>
         {:else if $active_view.name === "search"}
-        <svelte:component this={search_view}/>
+        <Search/>
         {/if}
 
         {/if}

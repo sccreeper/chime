@@ -1,5 +1,6 @@
 <script>
     import {search_results} from "../stores";
+    import BlankPage from "./general/BlankPage.svelte";
     import CollectionCard from "./search_components/CollectionCard.svelte";
     import TrackResult from "./search_components/TrackResult.svelte";
 
@@ -103,7 +104,7 @@
 {/if}
 
 {#if $search_results.tracks == null && $search_results.radios == null && search_playlists == null && search_albums == null}
-<h1>No search results.</h1>
+<BlankPage icon="search" text="No results"/>
 {/if}
 
 </div>
