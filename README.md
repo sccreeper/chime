@@ -1,4 +1,6 @@
-# chime
+<img src="./web/src/assets/logo.png" width="256" height="256"/>
+
+---
 
 This repository is the monorepo for chime, a locally hosted music streaming server.
 
