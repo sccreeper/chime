@@ -1,6 +1,6 @@
 <script>
     import Main from "./Main.svelte";
-    import { session_object, view } from "./stores";
+    import { session_object, user_object, view } from "./stores";
 
     
     let username = "";
@@ -30,9 +30,10 @@
 
                 let date = new Date()
                 date.setTime(date.getTime() + (7*24*60*60*1000))
-                document.cookie =  `session=${btoa(JSON.stringify(data)).replaceAll("/", "-").replaceAll("+", "_").replaceAll("=", ".")}; expires=${date.toUTCString()}; path=/; SameSite=none; Secure`
-
-                session_object.set(data)
+                document.cookie =  `session=${btoa(JSON.stringify(data.session)).replaceAll("/", "-").replaceAll("+", "_").replaceAll("=", ".")}; expires=${date.toUTCString()}; path=/; SameSite=none; Secure`
+                
+                user_object.set(data.user)
+                session_object.set(data.session)
                 view.set(Main)
             
             }   

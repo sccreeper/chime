@@ -3,6 +3,7 @@
     import { openModal } from 'svelte-modals'
     import UploadModal from "./modals/UploadModal.svelte";
     import { active_view, search_results } from "../stores";
+    import Settings from "./modals/Settings.svelte";
 
     let searchValue = ""
 
@@ -24,7 +25,7 @@
     }
 
     function settings() {
-        
+        openModal(Settings)
     }
 
     function profile() {

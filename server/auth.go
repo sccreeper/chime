@@ -22,9 +22,18 @@ type session struct {
 
 type login_repsonse struct {
 	Status string `json:"status"`
-	ID     string `json:"session_id" binding:"required"`
-	Time   int64  `json:"time" binding:"required"`
-	UserID string `json:"user_id" binding:"required"`
+
+	Session struct {
+		ID     string `json:"session_id"`
+		Time   int64  `json:"time"`
+		UserID string `json:"user_id"`
+	} `json:"session"`
+
+	User struct {
+		Username string `json:"username"`
+		IsAdmin  bool   `json:"is_admin"`
+		UserID   string `json:"user_id"`
+	} `json:"user"`
 }
 
 var sessions map[string]session
@@ -84,11 +93,12 @@ func handle_auth(ctx *gin.Context) {
 		var user user_model
 		database.Table(table_users).Where("username = ?", username).First(&user)
 
-		// Hash password & compare
+		is_admin := false
+		if user.IsAdmin == 1 {
+			is_admin = true
+		}
 
-		hash, _ := scrypt.Key([]byte(password), user.Salt, 1<<15, 8, 1, 64)
-
-		if base64.StdEncoding.EncodeToString(hash) == user.Password {
+		if verify_password(&user, password) {
 
 			fmt.Println("Hello World")
 
@@ -115,9 +125,24 @@ func handle_auth(ctx *gin.Context) {
 
 			var response login_repsonse = login_repsonse{
 				Status: "correct",
-				ID:     session_id,
-				Time:   sessions[session_id].Time,
-				UserID: strconv.FormatInt(user.ID, 16),
+				Session: struct {
+					ID     string `json:"session_id"`
+					Time   int64  `json:"time"`
+					UserID string `json:"user_id"`
+				}{
+					ID:     session_id,
+					Time:   sessions[session_id].Time,
+					UserID: strconv.FormatInt(user.ID, 16),
+				},
+				User: struct {
+					Username string `json:"username"`
+					IsAdmin  bool   `json:"is_admin"`
+					UserID   string `json:"user_id"`
+				}{
+					Username: username,
+					IsAdmin:  is_admin,
+					UserID:   strconv.FormatInt(user.ID, 16),
+				},
 			}
 
 			response_bytes, err := json.Marshal(response)
@@ -138,4 +163,10 @@ func handle_auth(ctx *gin.Context) {
 
 	}
 
+}
+
+// Verifies password matches with user model for other methods that require password authorization
+func verify_password(user *user_model, password string) bool {
+	hash, _ := scrypt.Key([]byte(password), user.Salt, 1<<15, 8, 1, 64)
+	return base64.StdEncoding.EncodeToString(hash) == user.Password
 }

@@ -1,12 +1,11 @@
+// General stores used across application.
 import { writable } from "svelte/store";
 
 export const view = writable()
 
-export const user_id = writable();
 export const session_object = writable();
+export const user_object = writable({username: "", is_admin: false, user_id: ""});
 
-// export const current_album = writable(0);
-// export const current_radio = writable("");
 export const album_list = writable({
     albums : [],
     playlists: [],
