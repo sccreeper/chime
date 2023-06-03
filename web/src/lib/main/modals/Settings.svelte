@@ -9,6 +9,7 @@
     let old_password = ""
     let new_password0 = ""
     let new_password1 = ""
+    let password_error = {text: "", status: false}
 
     let username_password = ""
     let username_change = get(user_object).username
@@ -45,6 +46,27 @@
 
     function changePassword() {
       
+      if (new_password0 != new_password1) {
+        return
+      } else {
+
+        fetch("/api/admin/change_password", {
+          method: "POST",
+          body: JSON.stringify({
+            old_password: old_password,
+            new_password_0: new_password0,
+            new_password_1: new_password1,
+          })
+        }).then(response => {
+          if (!response.ok) {
+            password_error = {text: "There was an error changing the password", status: true}
+          } else {
+            password_error = {text: "Password changed successfully", status: false}
+          }
+        })
+
+      }
+
     }
 
 </script>
@@ -61,7 +83,7 @@
       <h1>Settings</h1>
 
       <p class="text-sm p-1">Change username</p>
-      <p class="text-xs p-1 {username_good ? `text-green-400` : `text-red-400`}">{username_status}</p>
+      <p class="text-xs {username_good ? `text-green-400` : `text-red-400`}">{username_status}</p>
       <p class="text-xs p-1">Username</p>
       <input type="text" bind:value={username_change}/>
       <p class="text-xs p-1">Password</p>
@@ -70,7 +92,7 @@
       <button on:click={changeUsername}>Change username</button>
 
       <p class="text-sm p-1">Change password</p>
-
+      <p class="text-xs {password_error.status ? `text-red-400` : `text-green-400`}">{password_error.text}</p>
       <p class="text-xs p-1">Old password</p>
       <input type="text" bind:value={old_password}/>
       <p class="text-xs p-1">New password</p>

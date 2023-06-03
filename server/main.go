@@ -116,9 +116,9 @@ func main() {
 	// Personal stuff
 
 	r.POST("/api/admin/change_username", handle_change_username)
-	r.POST("/api/admin/change_password")
+	r.POST("/api/admin/change_password", handle_change_password)
 	r.POST("/api/admin/change_profile_picture")
-	r.POST("/api/user/get_profile_picture/:picture_id")
+	r.GET("/api/user/get_profile_picture/:picture_id")
 	r.GET("/api/user/get_favourites", handle_get_favourites)
 
 	r.GET("/api/user")
