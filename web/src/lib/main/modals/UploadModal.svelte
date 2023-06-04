@@ -129,34 +129,30 @@
 
         <span class="ml-auto"><MinorButton icon="x-lg" callback={closeModal}/></span>
 
-        <p>Upload file</p>
-        <button on:click={uploadFiles} class="mt-2">Add files</button>
+        <h1>Upload file</h1>
+        <MinorButtonText icon="upload" text="Add files" callback={uploadFiles}/>
 
         <span class="w-full"><HorizontalDivider/></span>
 
-        <p>Add radio</p>
+        <h1>Add radio</h1>
 
-        <p class="text-xs p-1">Name</p>
-        <input type="text" bind:value={radio_name}/>
-        <p class="text-xs p-1">URL</p>
-        <input type="text" bind:value={radio_url}/>
+        <input type="text" bind:value={radio_name} placeholder="Name"/>
+        <input type="text" bind:value={radio_url} placeholder="URL"/>
         <p class="text-red-600 text-xs p-1">{error_message}</p>
-        <button on:click={addRadio} class="mt-2">Add</button>
+        <MinorButtonText text="Add" icon="plus-lg" callback={addRadio}/>
 
         <span class="w-full"><HorizontalDivider/></span>
 
-        <p>Add collection</p>
+        <h1>Add collection</h1>
 
-        <p class="text-xs p-1">Name</p>
-        <input type="text" bind:value={collection_name}/>
-        <p class="text-xs p-1">Description</p>
-        <input type="text" bind:value={collection_description}/>
+        <input type="text" bind:value={collection_name} placeholder="Name"/>
+        <input type="text" bind:value={collection_description} placeholder="Description"/>
         <p class="text-xs p-1">Cover (optional)</p>
         <MinorButtonText icon="upload" text="Add image" callback={setCoverFile}/>
-        <p class="text-xs p-1">Is album?</p>
-        <input type="checkbox" bind:checked={collection_is_album}/>
+        <label for="is_album_check" class="text-xs">Is album?</label>
+        <input type="checkbox" id="is_album_check" bind:checked={collection_is_album}/>
 
-        <button on:click={addCollection} class="mt-2">Add</button>
+        <MinorButtonText icon="plus-lg" text="Add" callback={addCollection}/>
 
     </div>
   </div>

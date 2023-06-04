@@ -9,11 +9,16 @@ body {
   font-family: 'Anuphan', sans-serif;
 }
 
-input {
+input[type=text],input[type=password] {
 
-  @apply text-black;
-  @apply p-3;
-  @apply rounded-sm;
+  @apply appearance-none;
+  @apply bg-transparent;
+  @apply border-b-gray-500;
+  @apply border-b;
+  @apply text-gray-400;
+  @apply placeholder:text-gray-400;
+  @apply outline-none;
+  @apply p-1;
 
 }
 
@@ -37,4 +42,15 @@ button {
   @apply bg-yellow-500;
   @apply text-white;
 
+}
+
+.small-heading {
+
+  @apply text-yellow-500;
+  @apply font-semibold;
+
+}
+
+h1 {
+  @apply font-bold;
 }

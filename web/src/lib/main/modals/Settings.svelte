@@ -3,18 +3,19 @@
     import MinorButton from "../general/MinorButton.svelte";
     import { user_object } from "../../stores";
     import { get } from "svelte/store";
+    import Password from "../general/Password.svelte";
+    import MinorButtonText from "../general/MinorButtonText.svelte";
 
     export let isOpen
 
     let old_password = ""
     let new_password0 = ""
     let new_password1 = ""
-    let password_error = {text: "", status: false}
+    let password_error = {text: "", ok: false}
 
     let username_password = ""
     let username_change = get(user_object).username
-    let username_status = ""
-    let username_good = false
+    let username_error = {text: "", ok: false}
 
     function changeUsername() {
       
@@ -28,16 +29,13 @@
       }).then(response => response.json()).then(data => {
         switch (data.status) {
           case "bad_username":
-            username_good = false
-            username_status = "Username can only contain characters A-Z a-z _-"
+            username_error = {text: "Username can only contain characters A-Z a-z _-", ok: false}
             break;
           case "bad_auth":
-            username_good = false
-            username_status = "Incorrect password"
+            username_error = {text: "Incorrect password", ok: false}
             break;
           default:
-            username_good = true
-            username_status = `Username changed to ${username_change}`
+            username_error = {text: `Username changed to ${username_change}`, ok: true}
             break;
         }
       })
@@ -45,9 +43,10 @@
     }
 
     function changePassword() {
-      
-      if (new_password0 != new_password1) {
-        return
+      if (old_password == "" || new_password0 == "" || new_password1 == "") {
+        password_error = {text: "Passwords cannot be empty", ok: false}
+      } else if (new_password0 != new_password1) {
+        password_error = {text: "Passwords must match", ok: false}
       } else {
 
         fetch("/api/admin/change_password", {
@@ -59,9 +58,9 @@
           })
         }).then(response => {
           if (!response.ok) {
-            password_error = {text: "There was an error changing the password", status: true}
+            password_error = {text: "There was an error changing the password", ok: false}
           } else {
-            password_error = {text: "Password changed successfully", status: false}
+            password_error = {text: "Password changed successfully", ok: true}
           }
         })
 
@@ -82,25 +81,20 @@
       {/if}
       <h1>Settings</h1>
 
-      <p class="text-sm p-1">Change username</p>
-      <p class="text-xs {username_good ? `text-green-400` : `text-red-400`}">{username_status}</p>
-      <p class="text-xs p-1">Username</p>
-      <input type="text" bind:value={username_change}/>
-      <p class="text-xs p-1">Password</p>
-      <input type="text" bind:value={username_password}/>
+      <p class="text-sm small-heading">Change username</p>
+      <p class="text-xs {username_error.ok ? `text-green-400` : `text-red-400`}">{username_error.text}</p>
+      <input type="text" bind:value={username_change} placeholder="Username"/>
+      <Password bind:value={username_password} placeholder="Password"/>
 
-      <button on:click={changeUsername}>Change username</button>
+      <MinorButtonText callback={changeUsername} icon="box-arrow-in-right" text="Change username"/>
 
-      <p class="text-sm p-1">Change password</p>
-      <p class="text-xs {password_error.status ? `text-red-400` : `text-green-400`}">{password_error.text}</p>
-      <p class="text-xs p-1">Old password</p>
-      <input type="text" bind:value={old_password}/>
-      <p class="text-xs p-1">New password</p>
-      <input type="text" bind:value={new_password0}/>
-      <p class="text-xs p-1">Repeat new password</p>
-      <input type="text" bind:value={new_password1}/>
+      <p class="text-sm small-heading">Change password</p>
+      <p class="text-xs {password_error.ok ? `text-green-400` : `text-red-400`}">{password_error.text}</p>
+      <Password bind:value={old_password} placeholder="Old password"/>
+      <Password bind:value={new_password0} placeholder="New password"/>
+      <Password bind:value={new_password1} placeholder="Repeat new password"/>
 
-      <button on:click={changePassword}>Change Password</button>
+      <MinorButtonText callback={changePassword} icon="box-arrow-in-right" text="Change password"/>
   
   </div>
 </div>

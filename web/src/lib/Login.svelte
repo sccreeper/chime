@@ -1,5 +1,6 @@
 <script>
     import Main from "./Main.svelte";
+    import Password from "./main/general/Password.svelte";
     import { session_object, user_object, view } from "./stores";
 
     
@@ -49,11 +50,9 @@
     <br>
     <p class="text-xs p-1 {status_colour}">{login_status}</p>
     <br>
-    <p class="text-xs p-1">Username</p>
-    <input type="text" bind:value={username}/>
+    <input type="text" bind:value={username} placeholder="Username"/>
     <br>
-    <p class="text-xs p-1">Password</p>
-    <input type="password" bind:value={password}/>
+    <Password bind:value={password} placeholder="Password"/>
     <br>
     <button on:click={login} class="mt-3">Login</button>
 </div>
