@@ -47,6 +47,7 @@ type track_model struct {
 	Owner    int64
 	Original string //The original file name, used for streaming and downloading
 	Size     int64  //The size of the original file in bytes
+	Position int64  //Position of a track in album.
 }
 
 type radio_model struct {
@@ -64,4 +65,19 @@ type cover_model struct {
 	ID      int64 `gorm:"primaryKey"`
 	AlbumID int64 //Album this cover belongs to, if custom will be 0
 	Owner   int64
+}
+
+// https://yourbasic.org/golang/how-to-sort-in-go/
+type by_position []track_model
+
+func (t by_position) Len() int {
+	return len(t)
+}
+
+func (t by_position) Less(i int, j int) bool {
+	return t[i].Position < t[j].Position
+}
+
+func (t by_position) Swap(i int, j int) {
+	t[i], t[j] = t[j], t[i]
 }

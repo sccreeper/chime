@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -172,6 +173,8 @@ func handle_upload(ctx *gin.Context) {
 				new_track_list += fmt.Sprintf("%s,%s", collection.Tracks, strconv.FormatInt(track_id, 16))
 			}
 
+			track_position, _ := metadata.Track()
+
 			// Create track record
 
 			database.Table(table_tracks).Create(&track_model{
@@ -185,9 +188,25 @@ func handle_upload(ctx *gin.Context) {
 				Size:     f_size,
 				Duration: probe_data.Format.DurationSeconds,
 				Released: int64(metadata.Year()),
+				Position: int64(track_position),
 			})
 
-			// Update album list
+			// Update album list & reorder for album
+
+			var track_list []track_model
+
+			database.Table(table_tracks).Select("*").Where("album_id = ?", collection.ID).Find(&track_list)
+
+			sort.Sort(by_position(track_list))
+
+			var new_track_string string
+
+			new_track_string += strconv.FormatInt(track_list[0].ID, 16)
+			for i := 1; i < len(track_list); i++ {
+
+				new_track_string += "," + strconv.FormatInt(track_list[i].ID, 16)
+
+			}
 
 			database.Table(table_playlists).Model(&collection).Updates(&playlist_model{Tracks: new_track_list})
 
