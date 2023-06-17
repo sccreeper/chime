@@ -3,7 +3,7 @@
 
 import { get, writable } from "svelte/store";
 import { track_metadata_view } from "./stores";
-import { get_url_extension } from "./util";
+import { base64_image, get_url_extension } from "./util";
 import "https://cdn.jsdelivr.net/npm/hls.js";
 
 export var playing = writable(false)
@@ -19,7 +19,7 @@ var previous_tracks = []
 // Playback settings
 
 export var shuffle = writable(false)
-export var loop = writable(false)
+export var repeat = writable(false)
 export var volume = writable(1.0)
 
 let playing_hls = false;
@@ -94,6 +94,16 @@ hls_player.addEventListener("pause", () => {
     }
 })
 
+// Media session events
+
+navigator.mediaSession.setActionHandler("nexttrack", () => {
+    nextTrack()
+})
+
+navigator.mediaSession.setActionHandler("previoustrack", () => {
+    previousTrack()
+})
+
 // Volume events
 
 volume.subscribe(() => {
@@ -103,7 +113,7 @@ volume.subscribe(() => {
 
 export function nextTrack() {
 
-    if (get(shuffle)) {
+    if (get(repeat)) {
         console.log("Looping")
 
         player_audio.currentTime = 0
@@ -189,6 +199,8 @@ audio_source.subscribe((val) => {
 
         if (val.type == "track") {
 
+            // Stop players and load Track
+
             hls.stopLoad()
             hls_player.pause()
 
@@ -198,6 +210,19 @@ audio_source.subscribe((val) => {
             player_audio.play()
             
             previous_tracks.push(val.source)
+
+            // Update metadata for mediaSession
+
+            fetch(`/api/get_track_metadata/${get(track_metadata_view)}`, {method : "GET"}).then(response => response.json()).then(data => {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: data.title,
+                    artist: data.artist,
+                    album: data.album,
+                })  
+            })
+
+
+            // Set other players to false
 
             playing_radio.set(false)
             playing_hls = false

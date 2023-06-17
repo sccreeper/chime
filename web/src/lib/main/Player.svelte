@@ -1,14 +1,8 @@
 <script>
     import { get } from "svelte/store";
-    import { duration, nextTrack, player_audio, playing, playing_radio, position, previousTrack, shuffle, volume } from "../player";
+    import { duration, nextTrack, player_audio, playing, playing_radio, position, previousTrack, repeat, shuffle, volume } from "../player";
     import Toggle from "./player_components/Toggle.svelte";
     import { convertDuration } from "../util";
-
-    function toggleRepeat() {
-        
-        shuffle.set(!get(shuffle))
-
-    }
 
     function mute(params) {
         
@@ -49,7 +43,7 @@
             </button>
             
             <button class="control-button" on:click={nextTrack}><i class="bi bi-skip-forward"></i></button>
-            <Toggle callback={toggleRepeat} icon="repeat"/>
+            <Toggle callback={(active) => repeat.set(active)} icon="repeat"/>
         </div>
 
         <!-- Volume -->
