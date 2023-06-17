@@ -59,14 +59,14 @@
     }
 
     function addToPlaylist() {
-        openModal(CollectionAdd, {track_id: get(track_metadata_view)})
+        openModal(CollectionAdd, {id: get(track_metadata_view), type: "track", exclude: ""})
     }
 
 </script>
 
 {#if $track_metadata_view == null || $track_metadata_view == ""}
 
-<BlankPage icon="music-note-list" text="Not examining any tracks"/>
+<BlankPage icon="music-note-list" text="Not examining\ any tracks"/>
 
 {:else}
 

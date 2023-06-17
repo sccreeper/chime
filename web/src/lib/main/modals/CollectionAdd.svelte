@@ -10,32 +10,52 @@
         let arr = []
 
         get(album_list).albums.forEach(element => {
-            arr.push(element)
+            if (element.id != exclude) {
+                arr.push(element)   
+            }
         });
 
         get(album_list).playlists.forEach(element => {
-            arr.push(element)
+            if (element.id != exclude) {
+                arr.push(element)   
+            }
         });
 
         return arr
 
     }
 
-    function add(id) {
+    function add(collection_id) {
         
-        fetch("/api/collection/add_track", {
+        if (type == "track") {
+            fetch("/api/collection/add_track", {
             method: "POST",
             body: JSON.stringify({
-                track_id: track_id,
-                collection_id: id,
+                track_id: id,
+                collection_id: collection_id,
             })
-        }).then(() => {
-            closeModal()
-        })
+            }).then(() => {
+                closeModal()
+            })   
+        } else {
+
+            fetch("/api/collection/add_collection", {
+            method: "POST",
+            body: JSON.stringify({
+                source: id,
+                destination: collection_id,
+            })
+            }).then(() => {
+                closeModal()
+            })   
+
+        }
 
     }
     
-    export let track_id = ""
+    export let id = ""
+    export let exclude = ""
+    export let type = "track" || "collection"
 
     // provided by Modals
     export let isOpen

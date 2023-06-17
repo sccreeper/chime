@@ -539,6 +539,81 @@ func add_to_collection(ctx *gin.Context) {
 
 }
 
+type collection_to_collection_query struct {
+	Source      string `json:"source"`
+	Destination string `json:"destination"`
+}
+
+// Add an entire playlist/album to another playlist/album
+func handle_add_collection_to_collection(ctx *gin.Context) {
+
+	verified, session := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	var query collection_to_collection_query
+	if err := ctx.ShouldBindJSON(&query); err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid request body"))
+	}
+
+	user_id, err := strconv.ParseInt(session.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	var user user_model
+	var count int64
+
+	database.Table(table_users).Select("*").Where("id = ?", user_id).Count(&count)
+	if count == 0 {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	database.Table(table_users).Select("*").Where("id = ?", user_id).First(&user)
+
+	var source playlist_model
+	var destination playlist_model
+	var source_id int64
+	var destination_id int64
+
+	source_id, err = strconv.ParseInt(query.Source, 16, 64)
+	database.Table(table_playlists).Select("*").Where("id = ?", source_id).Count(&count)
+	if err != nil || count == 0 {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid source ID"))
+		return
+	}
+
+	destination_id, err = strconv.ParseInt(query.Destination, 16, 64)
+	database.Table(table_playlists).Select("*").Where("id = ?", destination_id).Count(&count)
+	if err != nil || count == 0 {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid destination ID"))
+		return
+	}
+
+	database.Table(table_playlists).Select("*").Where("id = ?", source_id).First(&source)
+	database.Table(table_playlists).Select("*").Where("id = ?", destination_id).First(&destination)
+
+	if source.Owner != user_id || destination.Owner != user_id {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: No ownership of collections"))
+		return
+	}
+
+	var tracks string
+
+	if destination.Tracks == "" {
+		tracks = source.Tracks
+	} else {
+		tracks = destination.Tracks + "," + source.Tracks
+	}
+
+	database.Table(table_playlists).Model(&destination).Update("tracks", tracks)
+
+}
+
 type delete_collection_query struct {
 	ID string `json:"collection_id"`
 }

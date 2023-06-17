@@ -8,6 +8,7 @@
     import { get } from "svelte/store";
     import MinorButtonText from "../general/MinorButtonText.svelte";
     import { audio_source, playing, playing_collection, shuffle, track_queue } from "../../player";
+    import CollectionAdd from "../modals/CollectionAdd.svelte";
 
     let album_title = "";
     let album_cover_src = "";
@@ -105,9 +106,13 @@
         }
 
     }
+
+    function addToCollection() {
+        openModal(CollectionAdd, {id: get(active_view).id, type: "collection", exclude: get(active_view).id})
+    }
 </script>
 
-<div class="m-2">
+<div class="m-2 h-full overflow-y-scroll">
     <div class="flex flex-row items-center gap-4">
         <img
             src={album_cover_src == "" ? no_cover_image : album_cover_src}
@@ -120,6 +125,7 @@
             <div class="flex flex-row items-center gap-3">
                 <button on:click={playCollection}>{#if $playing_collection == $active_view.id && $playing}<i class="bi bi-pause-fill"></i> Pause{:else}<i class="bi bi-play-fill"></i> Play{/if}</button> 
                 {#if $active_view.id != "1"}<MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>{/if}
+                {#if is_album}<MinorButtonText callback={addToCollection} text="Add to" icon="plus-lg"/>{/if}
             </div>
         </div>
     </div>
