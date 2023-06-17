@@ -565,20 +565,13 @@ func handle_add_collection_to_collection(ctx *gin.Context) {
 	}
 
 	var user user_model
-	var count int64
-
-	database.Table(table_users).Select("*").Where("id = ?", user_id).Count(&count)
-	if count == 0 {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
-		return
-	}
-
 	database.Table(table_users).Select("*").Where("id = ?", user_id).First(&user)
 
 	var source playlist_model
 	var destination playlist_model
 	var source_id int64
 	var destination_id int64
+	var count int64
 
 	source_id, err = strconv.ParseInt(query.Source, 16, 64)
 	database.Table(table_playlists).Select("*").Where("id = ?", source_id).Count(&count)
