@@ -53,12 +53,15 @@
             let session_obj = JSON.parse(session_json)
             let user_json = atob(Cookies.get("user").replaceAll("-", "/").replaceAll("_", "+").replaceAll(".", "="))
             let user_obj = JSON.parse(user_json)
-            user_object.set(user_obj)
-            session_object.set(session_obj)
-            view.set(Main)
 
+            fetch(`/api/auth/session_exists/${session_obj.session_id}`, {method: "GET"}).then(resp => resp.json()).then(data => {
+                if (data.status == "exists") {
+                    user_object.set(user_obj)
+                    session_object.set(session_obj)
+                    view.set(Main)
+                }
+            })
         }
-
     })
 
 </script>

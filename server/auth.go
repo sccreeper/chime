@@ -165,6 +165,27 @@ func handle_auth(ctx *gin.Context) {
 
 }
 
+type session_exists struct {
+	SessionID string `uri:"session_id"`
+}
+
+func handle_session_exists(ctx *gin.Context) {
+
+	var query session_exists
+
+	if err := ctx.BindUri(&query); err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	if _, ok := sessions[query.SessionID]; ok {
+		ctx.JSON(http.StatusOK, gin.H{"status": "exists"})
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{"status": "doesnt_exist"})
+	}
+
+}
+
 // Verifies password matches with user model for other methods that require password authorization
 func verify_password(user *user_model, password string) bool {
 	hash, _ := scrypt.Key([]byte(password), user.Salt, 1<<15, 8, 1, 64)
