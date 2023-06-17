@@ -5,6 +5,7 @@
     import { get } from "svelte/store";
     import Password from "../general/Password.svelte";
     import MinorButtonText from "../general/MinorButtonText.svelte";
+    import { onMount } from "svelte";
 
     export let isOpen
 
@@ -16,6 +17,10 @@
     let username_password = ""
     let username_change = get(user_object).username
     let username_error = {text: "", ok: false}
+
+    let total_storage = 0
+    let used_by_others = 0
+    let used_by_chime = 0
 
     function changeUsername() {
       
@@ -68,6 +73,24 @@
 
     }
 
+    onMount(() => {
+
+      fetch("/api/admin/storage", 
+      {
+        method: "GET"
+      }
+      ).then(response => response.json()).then(
+        data => {
+
+          total_storage = data.total_volume_space
+          used_by_others = data.used_by_others
+          used_by_chime = data.used_by_chime
+          
+        }
+      )
+
+    })
+
 </script>
 
 {#if isOpen}
@@ -78,6 +101,11 @@
 
       {#if $user_object.is_admin}
       <h1>Users</h1>
+      <h1>Storage</h1>
+      <p>Total storage: {Math.round(total_storage / Math.pow(10, 9))}GB</p>
+      <p>Used by other data: {Math.round(used_by_others / Math.pow(10, 9))}GB</p>
+      <p>Used by Chime: {Math.round(used_by_chime / Math.pow(10, 6))}MB</p>
+
       {/if}
       <h1>Settings</h1>
 

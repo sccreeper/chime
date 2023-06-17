@@ -125,9 +125,9 @@ func main() {
 
 	// Server info & admin
 
-	r.GET("/api/server/users")
-	r.GET("/api/server/storage")
-	r.GET("/api/server/backup")
+	r.GET("/api/admin/users")
+	r.GET("/api/admin/storage", handle_get_storage)
+	r.GET("/api/admin/backup")
 
 	r.POST("/api/admin/new_user")
 	r.POST("/api/admin/remove_user")

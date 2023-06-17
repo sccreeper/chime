@@ -3,11 +3,15 @@ package main
 import (
 	"encoding/base64"
 	"encoding/binary"
+	"encoding/json"
+	"io/fs"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/scrypt"
+	"golang.org/x/sys/unix"
 )
 
 const username_check string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_-"
@@ -194,6 +198,84 @@ func handle_get_backup(ctx *gin.Context) {
 
 }
 
+type storage_resp struct {
+	TotalVolumeSpace int64 `json:"total_volume_space"`
+	UsedByOthers     int64 `json:"used_by_others"`
+	UsedByChime      int64 `json:"used_by_chime"`
+}
+
 func handle_get_storage(ctx *gin.Context) {
+
+	// Verify user & request
+	verified, session := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	user_id, err := strconv.ParseInt(session.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	var user user_model
+	var count int64
+
+	database.Table(table_users).Select("*").Where("id = ?", user_id).Count(&count)
+	if count == 0 {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: User does not exist"))
+		return
+	}
+
+	database.Table(table_users).Select("*").Where("id = ?", user_id).First(&user)
+	if user.IsAdmin != 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: User is not admin"))
+		return
+	}
+
+	// Calculate storage usage
+	var size int64
+
+	err = filepath.Walk("/var/lib/chime/", func(path string, info fs.FileInfo, err error) error {
+
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			size += info.Size()
+		}
+
+		return err
+
+	})
+
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Internal server error"))
+		return
+	}
+
+	// Get system storage usage
+
+	var stat unix.Statfs_t
+	unix.Statfs("/", &stat)
+
+	var sys_total int64 = int64(stat.Blocks) * stat.Bsize
+	var sys_usage int64 = sys_total - (int64(stat.Bavail) * stat.Bsize)
+
+	resp := storage_resp{
+		TotalVolumeSpace: sys_total,
+		UsedByOthers:     sys_usage - size,
+		UsedByChime:      size,
+	}
+
+	resp_bytes, err := json.Marshal(resp)
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Unable to marshal response"))
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEJSON, resp_bytes)
 
 }
