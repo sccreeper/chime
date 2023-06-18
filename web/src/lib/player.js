@@ -4,7 +4,7 @@
 import { get, writable } from "svelte/store";
 import { track_metadata_view } from "./stores";
 import { base64_image, get_url_extension } from "./util";
-import "https://cdn.jsdelivr.net/npm/hls.js";
+import Hls from "hls.js";
 
 export var playing = writable(false)
 export var playing_radio = writable(false)

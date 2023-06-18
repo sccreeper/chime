@@ -12,6 +12,7 @@
     "@sveltejs/vite-plugin-svelte": "^2.0.3",
     "autoprefixer": "^10.4.14",
     "bootstrap-icons": "^1.10.5",
+    "hls.js": "^1.4.6",
     "js-cookie": "^3.0.5",
     "postcss": "^8.4.22",
     "svelte": "^3.55.1",
