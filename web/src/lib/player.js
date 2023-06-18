@@ -11,7 +11,8 @@ export var playing_radio = writable(false)
 export var audio_source = writable({type: "", source: ""})
 export var position = writable(0)
 export var duration = writable(0)
-export var track_queue = writable([])
+export var track_queue = writable([]) //This is set when a track is played from a collection.
+export var viewing_tracks = writable([]) //What tracks are in the collection that is currently being viewed?
 export var track_queue_index = writable(0)
 export var playing_collection = writable("")
 var previous_tracks = []
@@ -147,7 +148,6 @@ export function nextTrack() {
         } else {
 
             console.log("Playing next track in collection")
-            console.log(get(track_queue))
 
             audio_source.set({type: "track", source: get(track_queue)[get(track_queue_index)]})
 
@@ -258,5 +258,11 @@ audio_source.subscribe((val) => {
         }
     }
 
+})
+
+// Track queue change
+
+playing_collection.subscribe((id) => {
+    track_queue.set(get(viewing_tracks))
 })
 

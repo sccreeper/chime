@@ -7,7 +7,7 @@
     import ConfirmModal from "../modals/ConfirmModal.svelte";
     import { get } from "svelte/store";
     import MinorButtonText from "../general/MinorButtonText.svelte";
-    import { audio_source, playing, playing_collection, shuffle, track_queue } from "../../player";
+    import { audio_source, playing, playing_collection, shuffle, track_queue, viewing_tracks } from "../../player";
     import CollectionAdd from "../modals/CollectionAdd.svelte";
 
     let album_title = "";
@@ -23,8 +23,6 @@
             return
         } else {
 
-            track_queue.set([])
-
             fetch(`/api/get_collection/${data.id}`, {
                 method: "GET",
             })
@@ -33,17 +31,14 @@
                     album_title = data.title;
                     tracks = data.tracks;
 
-                    if (!get(playing)) {
-                        let track_ids = []
 
-                        data.tracks.forEach(element => {
-                            track_ids.push(element.id)
-                        });
+                    let track_ids = []
 
-                        track_queue.set(track_ids)
+                    data.tracks.forEach(element => {
+                        track_ids.push(element.id)
+                    });
 
-                        playing_collection.set(data.id)
-                    }
+                    viewing_tracks.set(track_ids)
 
                     album_description = data.description;
                     is_album = (data.is_album == 1) ? true : false
