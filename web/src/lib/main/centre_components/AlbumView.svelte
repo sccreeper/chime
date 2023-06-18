@@ -11,10 +11,11 @@
     import CollectionAdd from "../modals/CollectionAdd.svelte";
 
     let album_title = "";
-    let album_cover_src = "";
+    let album_cover_src = no_cover_image;
     let tracks = [];
     let is_album = false;
     let album_description = "";
+    let actual_album_cover = no_cover_image;
 
     let title_font = "4.5vw";
 
@@ -105,22 +106,26 @@
     function addToCollection() {
         openModal(CollectionAdd, {id: get(active_view).id, type: "collection", exclude: get(active_view).id})
     }
+
+    $: actual_album_cover = album_cover_src == "" ? no_cover_image : album_cover_src
 </script>
 
 <div class="m-2 h-full overflow-y-scroll">
-    <div class="flex flex-row items-center gap-4">
-        <img
-            src={album_cover_src == "" ? no_cover_image : album_cover_src}
-            class="album-cover"
-        />
+    <div class="bg-image" style={`background-image: url(${actual_album_cover});`}>
+        <div class="flex flex-row items-center gap-4 backdrop-blur-lg backdrop-brightness-50 w-full">
+            <img
+                src={actual_album_cover}
+                class="album-cover"
+            />
 
-        <div class="flex flex-col gap-4 items-start">
-            <h1 class="album-title" style="font-size: {title_font};">{album_title}</h1>
-            <p>{album_description}</p>
-            <div class="flex flex-row items-center gap-3">
-                <button on:click={playCollection}>{#if $playing_collection == $active_view.id && $playing}<i class="bi bi-pause-fill"></i> Pause{:else}<i class="bi bi-play-fill"></i> Play{/if}</button> 
-                {#if $active_view.id != "1"}<MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>{/if}
-                {#if is_album}<MinorButtonText callback={addToCollection} text="Add to" icon="plus-lg"/>{/if}
+            <div class="flex flex-col gap-4 items-start">
+                <h1 class="album-title" style="font-size: {title_font};">{album_title}</h1>
+                <p>{album_description}</p>
+                <div class="flex flex-row items-center gap-3">
+                    <button on:click={playCollection}>{#if $playing_collection == $active_view.id && $playing}<i class="bi bi-pause-fill"></i> Pause{:else}<i class="bi bi-play-fill"></i> Play{/if}</button> 
+                    {#if $active_view.id != "1"}<MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>{/if}
+                    {#if is_album}<MinorButtonText callback={addToCollection} text="Add to" icon="plus-lg"/>{/if}
+                </div>
             </div>
         </div>
     </div>
@@ -184,6 +189,13 @@
 
     th {
         @apply font-thin;
+    }
+
+    .bg-image {
+        @apply w-full;
+        @apply bg-no-repeat;
+        @apply bg-cover;    
+        @apply bg-center;
     }
 
 </style>
