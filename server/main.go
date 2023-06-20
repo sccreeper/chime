@@ -126,11 +126,11 @@ func main() {
 
 	// Server info & admin
 
-	r.GET("/api/admin/users")
+	r.GET("/api/admin/users", handle_get_users)
 	r.GET("/api/admin/storage", handle_get_storage)
 	r.GET("/api/admin/backup")
 
-	r.POST("/api/admin/new_user")
+	r.POST("/api/admin/add_user", handle_add_user)
 	r.POST("/api/admin/remove_user")
 	r.POST("/api/admin/make_admin")
 

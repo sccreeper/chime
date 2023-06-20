@@ -96,6 +96,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      @apply z-10;
     }
   
     .contents {

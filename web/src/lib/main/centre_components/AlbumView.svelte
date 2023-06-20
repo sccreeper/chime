@@ -7,7 +7,7 @@
     import ConfirmModal from "../modals/ConfirmModal.svelte";
     import { get } from "svelte/store";
     import MinorButtonText from "../general/MinorButtonText.svelte";
-    import { audio_source, playing, playing_collection, shuffle, track_queue, viewing_tracks } from "../../player";
+    import { audio_source, playing, playing_collection, shuffle, viewing_tracks } from "../../player";
     import CollectionAdd from "../modals/CollectionAdd.svelte";
 
     let album_title = "";
@@ -112,7 +112,7 @@
 
 <div class="m-2 h-full overflow-y-scroll">
     <div class="bg-image" style={`background-image: url(${actual_album_cover});`}>
-        <div class="flex flex-row items-center gap-4 backdrop-blur-lg backdrop-brightness-50 w-full">
+        <div class="album-title-container">
             <img
                 src={actual_album_cover}
                 class="album-cover"
@@ -196,6 +196,11 @@
         @apply bg-no-repeat;
         @apply bg-cover;    
         @apply bg-center;
+        @apply -z-20;
+    }
+
+    .album-title-container {
+        @apply flex flex-row items-center gap-4 backdrop-blur-lg backdrop-brightness-50 w-full -z-50;
     }
 
 </style>

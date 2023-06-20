@@ -6,8 +6,12 @@
     import Password from "../general/Password.svelte";
     import MinorButtonText from "../general/MinorButtonText.svelte";
     import { onMount } from "svelte";
+    import User from "./settings_components/User.svelte";
+    import { verifyString } from "../../util";
 
     export let isOpen
+
+    const allowed_username_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_-"
 
     let old_password = ""
     let new_password0 = ""
@@ -21,6 +25,21 @@
     let total_storage = 0
     let used_by_others = 0
     let used_by_chime = 0
+    
+    let show_new_user_ui = false
+    let new_user_error = ""
+
+    let new_user = {
+      username: "",
+      password: "",
+      is_admin: false
+    }
+
+    let users = [{
+      username: "",
+      is_admin: false,
+      id: "",
+    }]
 
     function changeUsername() {
       
@@ -73,21 +92,60 @@
 
     }
 
+    async function addUser() {
+      
+      // Verify form data
+
+      if (!verifyString(new_user.username, allowed_username_chars)) {
+        new_user_error = "Only allowed characters A-Z a-z 0-9 _-"
+        return
+      }
+
+      const new_user_request = await fetch("/api/admin/add_user", 
+      {
+        method: "POST", 
+        body: JSON.stringify(new_user)
+      })
+
+      if (new_user_request.ok) {
+        
+        fetch("/api/admin/users", {method: "GET"}).then(resp => resp.json()).then(data => {
+          users = data.users
+        })
+
+        show_new_user_ui = false;
+
+      } else {
+
+        new_user_error = "There was an error adding the new user"
+
+      }
+
+    }
+
+    // When mounted fetch all required data, (this only applies if a user is admin)
     onMount(() => {
 
-      fetch("/api/admin/storage", 
-      {
-        method: "GET"
-      }
-      ).then(response => response.json()).then(
-        data => {
-
-          total_storage = data.total_volume_space
-          used_by_others = data.used_by_others
-          used_by_chime = data.used_by_chime
-          
+      if (get(user_object).is_admin) {      
+        fetch("/api/admin/storage", 
+        {
+          method: "GET"
         }
-      )
+        ).then(response => response.json()).then(
+          data => {
+
+            total_storage = data.total_volume_space
+            used_by_others = data.used_by_others
+            used_by_chime = data.used_by_chime
+            
+          }
+        )
+        
+        fetch("/api/admin/users", {method: "GET"}).then(resp => resp.json()).then(data => {
+          users = data.users
+        })
+        
+      }
 
     })
 
@@ -101,6 +159,41 @@
 
       {#if $user_object.is_admin}
       <h1>Users</h1>
+      {#if !show_new_user_ui}
+
+      <MinorButtonText text="Add user" icon="plus-lg" callback={() => {show_new_user_ui = true}}/>
+      
+      {:else}
+
+      <p class="text-xs text-red-600">{new_user_error}</p>
+      <input type="text" placeholder="Username" bind:value={new_user.username}/>
+      <input type="text" placeholder="Password" bind:value={new_user.password}/>
+      <input type="checkbox" id="new_user_admin" bind:checked={new_user.is_admin}/>
+      <label for="new_user_admin">Admin</label>
+      <MinorButtonText text="Add" icon="plus-lg" callback={addUser}/>
+
+      {/if}
+      <table class="w-full text-gray-400">
+        <colgroup>
+          <col span="1" style="width: 45%;">
+          <col span="1" style="width: 40%;">
+          <col span="1" style="width: 5%;">
+          <col span="1" style="width: 5%;">
+          <col span="1" style="width: 5%;">
+        </colgroup>
+
+        <tr class="font-light text-sm small-heading">
+          <td>Username</td>
+          <td>Password</td>
+          <td>Admin</td>
+          <td>Edit</td>
+          <td>Delete</td>
+        </tr>
+      {#each users as u}
+        <User username={u.username} id={u.id} is_admin={u.is_admin}/>
+      {/each}
+      </table>  
+
       <h1>Storage</h1>
       <p>Total storage: {Math.round(total_storage / Math.pow(10, 9))}GB</p>
       <p>Used by other data: {Math.round(used_by_others / Math.pow(10, 9))}GB</p>
@@ -139,6 +232,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      @apply z-10;
     }
   
     .contents {

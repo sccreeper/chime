@@ -3,7 +3,7 @@
 
 import { get, writable } from "svelte/store";
 import { track_metadata_view } from "./stores";
-import { base64_image, get_url_extension } from "./util";
+import { getUrlExtension } from "./util";
 import Hls from "hls.js";
 
 export var playing = writable(false)
@@ -228,7 +228,7 @@ audio_source.subscribe((val) => {
             playing_hls = false
         } else if (val.type == "radio") {
 
-            if (get_url_extension(val.source) == "m3u8" || get_url_extension(val.source) == "m3u" || get_url_extension(val.source) == "pls") {
+            if (getUrlExtension(val.source) == "m3u8" || getUrlExtension(val.source) == "m3u" || getUrlExtension(val.source) == "pls") {
 
                 player_audio.src = ""
                 player_audio.pause()

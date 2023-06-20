@@ -9,6 +9,20 @@ export function convertDuration(time) {
 
 }
 
-export function get_url_extension( url ) {
+export function getUrlExtension( url ) {
     return url.split(/[#?]/)[0].split('.').pop().trim();
+}
+
+export function verifyString(s, check) {
+    
+    for(let char of s) {
+
+        if (!check.includes(char)) {
+            return false
+        }
+
+    }
+
+    return true
+
 }

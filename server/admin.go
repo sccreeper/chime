@@ -181,15 +181,160 @@ func handle_reset_password(ctx *gin.Context) {
 }
 
 // User admin actions
+
+type get_users_resp struct {
+	Users []struct {
+		ID       string `json:"id"`
+		Username string `json:"username"`
+		IsAdmin  bool   `json:"is_admin"`
+	} `json:"users"`
+}
+
 func handle_get_users(ctx *gin.Context) {
 
+	// Verify user & request
+	verified, session := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	user_id, err := strconv.ParseInt(session.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	var user user_model
+	database.Table(table_users).Select("is_admin").Where("id = ?", user_id).First(&user)
+
+	if user.IsAdmin != 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: User is not admin"))
+		return
+	}
+
+	var user_list []user_model
+	database.Table(table_users).Select("*").Find(&user_list)
+
+	resp := get_users_resp{
+		Users: []struct {
+			ID       string `json:"id"`
+			Username string `json:"username"`
+			IsAdmin  bool   `json:"is_admin"`
+		}{},
+	}
+
+	for _, v := range user_list {
+		var admin bool
+		if v.IsAdmin == 1 {
+			admin = true
+		}
+
+		resp.Users = append(resp.Users, struct {
+			ID       string `json:"id"`
+			Username string `json:"username"`
+			IsAdmin  bool   `json:"is_admin"`
+		}{
+			ID:       strconv.FormatInt(v.ID, 16),
+			Username: v.Username,
+			IsAdmin:  admin,
+		})
+	}
+
+	resp_bytes, err := json.Marshal(resp)
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Unable to marshal response"))
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEJSON, resp_bytes)
+
+}
+
+type add_user_query struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	IsAdmin  bool   `json:"is_admin"`
 }
 
 func handle_add_user(ctx *gin.Context) {
 
+	// Verify user & request
+	verified, session := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	admin_id, err := strconv.ParseInt(session.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	var admin user_model
+	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)
+
+	if admin.IsAdmin != 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: User is not admin"))
+		return
+	}
+
+	// Verify request body
+	var query add_user_query
+	if err := ctx.ShouldBindJSON(&query); err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad request"))
+		return
+	}
+
+	// Hash password & create salt, user, etc.
+	salt := random.Uint64()
+	salt_bytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(salt_bytes, salt)
+	user_id := generate_id(table_users)
+
+	hash, err := scrypt.Key([]byte(query.Password), salt_bytes, 1<<15, 8, 1, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("500: Error hashing password"))
+		return
+	}
+
+	var is_admin int64
+
+	if query.IsAdmin {
+		is_admin = 1
+	} else {
+		is_admin = 0
+	}
+
+	// Create database records
+
+	database.Table(table_users).Create(&user_model{
+		ID:           user_id,
+		Username:     query.Username,
+		Password:     base64.StdEncoding.EncodeToString(hash),
+		Salt:         salt_bytes,
+		IsAdmin:      is_admin,
+		SettingsJSON: "",
+		Favourites:   "",
+	})
+
+	database.Table(table_playlists).Create(&playlist_model{
+		ID:          generate_id(table_playlists),
+		Name:        "Unsorted",
+		IsAlbum:     1,
+		Cover:       0,
+		Tracks:      "",
+		Dates:       "",
+		Owner:       user_id,
+		Description: "Default album for tracks that don't have any metadata.",
+	})
+
+	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
+
 }
 
-func handle_remove_user(ctx *gin.Context) {
+func handle_delete_user(ctx *gin.Context) {
 
 }
 
@@ -220,13 +365,6 @@ func handle_get_storage(ctx *gin.Context) {
 	}
 
 	var user user_model
-	var count int64
-
-	database.Table(table_users).Select("*").Where("id = ?", user_id).Count(&count)
-	if count == 0 {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: User does not exist"))
-		return
-	}
 
 	database.Table(table_users).Select("*").Where("id = ?", user_id).First(&user)
 	if user.IsAdmin != 1 {
