@@ -26,3 +26,5 @@ export const search_results = writable({
     collections: [],
     radios: [],
 });
+
+export const edit_user_error = writable("");

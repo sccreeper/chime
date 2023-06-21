@@ -39,7 +39,7 @@ func main() {
 			running_in_docker = true
 		}
 
-		admin_pass := generate_password(10)
+		admin_pass, _ := random_string(pass_chars, 10)
 
 		log.Println("No database or default configuration. Creating default database and configuration.")
 		first_time_setup(admin_pass, running_in_docker)
@@ -116,7 +116,7 @@ func main() {
 
 	// Personal stuff
 
-	r.POST("/api/admin/change_username", handle_change_username)
+	r.POST("/api/admin/change_username", handle_change_username) //These two are also used for admin user changes.
 	r.POST("/api/admin/change_password", handle_change_password)
 	r.POST("/api/admin/change_profile_picture")
 	r.GET("/api/user/get_profile_picture/:picture_id")
@@ -131,8 +131,9 @@ func main() {
 	r.GET("/api/admin/backup")
 
 	r.POST("/api/admin/add_user", handle_add_user)
-	r.POST("/api/admin/remove_user")
-	r.POST("/api/admin/make_admin")
+	r.POST("/api/admin/reset_password", handle_reset_password)
+	r.POST("/api/admin/delete_user", handle_delete_user)
+	r.POST("/api/admin/toggle_admin", handle_toggle_admin)
 
 	// Auth
 

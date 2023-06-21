@@ -133,16 +133,3 @@ func first_time_setup(admin_pass string, in_docker bool) {
 	log.Println("Setup process successful!")
 
 }
-
-// Generates random password
-func generate_password(length int) string {
-
-	var pass string
-
-	for i := 0; i < length; i++ {
-		pass += string(pass_chars[random.Intn(len(pass_chars))])
-	}
-
-	return pass
-
-}

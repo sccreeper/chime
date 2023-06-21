@@ -1,10 +1,11 @@
 <script>
-    export var icon = ""
-    export var callback = function (e) {}
+    export let icon = ""
+    export let callback = function (e) {}
+    export let hint = ""
 
 </script>
 
-<i on:click={callback} class="bi bi-{icon}"></i>
+<i on:click={callback} class="bi bi-{icon}" title={hint}></i>
 
 <style>
 i {

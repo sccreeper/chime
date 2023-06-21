@@ -1,4 +1,6 @@
-// Utility functions
+// Utility functions & constants
+
+export const allowed_username_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_-"
 
 export function convertDuration(time) {
     

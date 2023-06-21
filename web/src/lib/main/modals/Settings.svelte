@@ -1,17 +1,15 @@
 <script>
     import { closeModal } from "svelte-modals";
     import MinorButton from "../general/MinorButton.svelte";
-    import { user_object } from "../../stores";
+    import { edit_user_error, user_object } from "../../stores";
     import { get } from "svelte/store";
     import Password from "../general/Password.svelte";
     import MinorButtonText from "../general/MinorButtonText.svelte";
     import { onMount } from "svelte";
     import User from "./settings_components/User.svelte";
-    import { verifyString } from "../../util";
+    import { allowed_username_chars, verifyString } from "../../util";
 
     export let isOpen
-
-    const allowed_username_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_-"
 
     let old_password = ""
     let new_password0 = ""
@@ -57,6 +55,9 @@
             break;
           case "bad_auth":
             username_error = {text: "Incorrect password", ok: false}
+            break;
+          case "username_exists":
+            username_error = {text: "Username already exists", ok: false}
             break;
           default:
             username_error = {text: `Username changed to ${username_change}`, ok: true}
@@ -147,6 +148,8 @@
         
       }
 
+      edit_user_error.set("")
+
     })
 
 </script>
@@ -173,20 +176,19 @@
       <MinorButtonText text="Add" icon="plus-lg" callback={addUser}/>
 
       {/if}
+      <p class="text-xs text-red-600">{$edit_user_error}</p>
       <table class="w-full text-gray-400">
         <colgroup>
           <col span="1" style="width: 45%;">
-          <col span="1" style="width: 40%;">
-          <col span="1" style="width: 5%;">
-          <col span="1" style="width: 5%;">
-          <col span="1" style="width: 5%;">
+          <col span="1" style="width: 45%;">
+          <col span="1" style="width: 10%;">
+          <col span="1" style="width: 10%;">
         </colgroup>
 
         <tr class="font-light text-sm small-heading">
           <td>Username</td>
           <td>Password</td>
           <td>Admin</td>
-          <td>Edit</td>
           <td>Delete</td>
         </tr>
       {#each users as u}

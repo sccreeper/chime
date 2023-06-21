@@ -4,8 +4,10 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 
@@ -15,6 +17,7 @@ import (
 )
 
 const username_check string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_-"
+const new_password_length = 8
 
 type change_username_query struct {
 	UserID   string `json:"user_id"`
@@ -41,7 +44,7 @@ func handle_change_username(ctx *gin.Context) {
 	var query change_username_query
 
 	if err := ctx.ShouldBindJSON(&query); err != nil {
-		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: Invalid request body"))
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid request body"))
 		return
 	}
 
@@ -51,6 +54,13 @@ func handle_change_username(ctx *gin.Context) {
 	if err != nil {
 		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
+	}
+
+	// Check if username already exists
+	var count int64
+	database.Table(table_users).Where("username = ?", query.Username).Count(&count)
+	if count != 0 {
+		ctx.JSON(http.StatusOK, gin.H{"status": "username_exists"})
 	}
 
 	if user_id_change == user_id {
@@ -85,13 +95,13 @@ func handle_change_username(ctx *gin.Context) {
 			return
 		}
 
-		// Check if user is admin and has perm to change other user IDs.
+		// Check if user is admin and has perm to change other usernames.
 
 		var user user_model
 		database.Table(table_users).Select("*").Where("id = ?", user_id).Find(&user)
 
 		if user.IsAdmin != 1 {
-			ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("403: Insufficient permissions"))
+			ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: Insufficient permissions"))
 			return
 		}
 
@@ -175,8 +185,72 @@ func handle_change_password(ctx *gin.Context) {
 
 }
 
-// Admin reset password
+type reset_password_query struct {
+	UserID string `json:"user_id"`
+}
+
+// Resets password to randomized string.
 func handle_reset_password(ctx *gin.Context) {
+
+	// Verify user & request
+	verified, session := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	user_id, err := strconv.ParseInt(session.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	var query reset_password_query
+	if err := ctx.ShouldBindJSON(&query); err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid request body"))
+		return
+	}
+
+	// Check if user is admin and has perm to reset other user passwords.
+
+	var user user_model
+	database.Table(table_users).Select("*").Where("id = ?", user_id).Find(&user)
+
+	if user.IsAdmin != 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: Insufficient permissions"))
+		return
+	}
+
+	// Generate password & salt
+
+	password, _ := random_string(pass_chars, 10)
+	var salt uint64 = random.Uint64()
+	salt_bytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(salt_bytes, salt)
+
+	hash, err := scrypt.Key([]byte(password), salt_bytes, 1<<15, 8, 1, 64)
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Error hashing password"))
+		return
+	}
+
+	user_change_id, err := strconv.ParseInt(query.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	var user_change user_model
+	database.Table(table_users).Select("*").Where("id = ?", user_change_id).First(&user_change)
+
+	database.Table(table_users).Model(&user_change).Updates(&user_model{
+		Password: base64.StdEncoding.EncodeToString(hash),
+		Salt:     salt_bytes,
+	})
+
+	// Finally return the new password
+
+	ctx.JSON(http.StatusOK, gin.H{"password": password})
 
 }
 
@@ -251,7 +325,7 @@ func handle_get_users(ctx *gin.Context) {
 
 }
 
-type add_user_query struct {
+type user_query struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	IsAdmin  bool   `json:"is_admin"`
@@ -281,7 +355,7 @@ func handle_add_user(ctx *gin.Context) {
 	}
 
 	// Verify request body
-	var query add_user_query
+	var query user_query
 	if err := ctx.ShouldBindJSON(&query); err != nil {
 		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad request"))
 		return
@@ -334,7 +408,158 @@ func handle_add_user(ctx *gin.Context) {
 
 }
 
+type delete_user_query struct {
+	UserID string `json:"user_id"`
+}
+
+// Deletes a user and all their assets (tracks, playlists, covers etc.)
 func handle_delete_user(ctx *gin.Context) {
+
+	// Verify user & request
+	verified, session := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	admin_id, err := strconv.ParseInt(session.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	var admin user_model
+	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)
+
+	if admin.IsAdmin != 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: User is not admin"))
+		return
+	}
+
+	var query delete_user_query
+	if err := ctx.ShouldBindJSON(&query); err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid query"))
+		return
+	}
+
+	delete_user_id, err := strconv.ParseInt(query.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid query"))
+		return
+	}
+
+	// Check if user exists
+	var count int64
+	database.Table(table_users).Where("id = ?", delete_user_id).Count(&count)
+	if count == 0 {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user"))
+		return
+	}
+
+	// Get user model from database
+	var user user_model
+	database.Table(table_users).Select("*").Where("id = ?", delete_user_id).First(&user)
+
+	// Find all records and delete them and their associated files.
+
+	var tracks []track_model
+	var covers []cover_model
+	var collections []playlist_model
+	var radios []radio_model
+
+	database.Table(table_tracks).Select("*").Where("owner = ?", delete_user_id).Find(&tracks)
+	database.Table(table_covers).Select("*").Where("owner = ?", delete_user_id).Find(&covers)
+	database.Table(table_playlists).Select("*").Where("owner = ?", delete_user_id).Find(&collections)
+	database.Table(table_radio).Select("*").Where("owner = ?", delete_user_id).Find(&radios)
+
+	for _, v := range tracks {
+		os.Remove(fmt.Sprintf("/var/lib/chime/tracks/%s", strconv.FormatInt(v.ID, 16)))
+		database.Table(table_tracks).Unscoped().Delete(&v)
+	}
+
+	for _, v := range covers {
+		os.Remove(fmt.Sprintf("/var/lib/chime/covers/%s", strconv.FormatInt(v.ID, 16)))
+		database.Table(table_covers).Unscoped().Delete(&v)
+	}
+
+	for _, v := range collections {
+		database.Table(table_playlists).Unscoped().Delete(&v)
+	}
+
+	for _, v := range radios {
+		database.Table(table_radio).Unscoped().Delete(&v)
+	}
+
+	// Finally delete user.
+	database.Table(table_users).Unscoped().Delete(&user)
+
+	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
+
+}
+
+type toggle_admin_query struct {
+	UserID string `json:"user_id"`
+}
+
+func handle_toggle_admin(ctx *gin.Context) {
+
+	// Verify user & request
+	verified, session := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	admin_id, err := strconv.ParseInt(session.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	var admin user_model
+	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)
+
+	if admin.IsAdmin != 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: User is not admin"))
+		return
+	}
+
+	var query toggle_admin_query
+	if err := ctx.ShouldBindJSON(&query); err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad request"))
+		return
+	}
+
+	user_id, err := strconv.ParseInt(query.UserID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad user ID"))
+		return
+	}
+
+	// See if user actually exists
+	var count int64
+	database.Table(table_users).Where("id = ?", user_id).Count(&count)
+	if count == 0 {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
+		return
+	}
+
+	// Check if user id is equal to admin id as admins cannot stop themselves from being admins.
+	if user_id == admin_id {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Admins toggle admin on themselves"))
+		return
+	}
+
+	var user user_model
+	database.Table(table_users).Select("*").Where("id = ?", user_id).First(&user)
+
+	if user.IsAdmin == 1 {
+		database.Table(table_users).Model(&user).UpdateColumn("is_admin", 0)
+	} else {
+		database.Table(table_users).Model(&user).UpdateColumn("is_admin", 1)
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
 
 }
 
