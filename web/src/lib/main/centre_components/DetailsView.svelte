@@ -66,7 +66,7 @@
 
 {#if $track_metadata_view == null || $track_metadata_view == ""}
 
-<BlankPage icon="music-note-list" text="Not examining\ any tracks"/>
+<BlankPage icon="music-note-list" text="Not examining any tracks"/>
 
 {:else}
 
