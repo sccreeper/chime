@@ -11,6 +11,7 @@ export const album_list = writable({
     playlists: [],
     radios: []
 });
+export const collection_tracks = writable([]);
 
 export const active_view = writable({
     name: "",

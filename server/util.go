@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 )
 
@@ -33,5 +34,30 @@ func random_string(chars string, length int) (string, error) {
 	}
 
 	return rs, nil
+
+}
+
+func record_exists[K int64 | string](table string, id K) bool {
+	var record_id int64
+	var err error
+
+	switch any(id).(type) {
+	case string:
+		record_id, err = strconv.ParseInt(string(id), 16, 64)
+		if err != nil {
+			return false
+		}
+	case int64:
+		record_id = any(id).(int64)
+	}
+
+	var count int64
+	database.Table(table).Where("id = ?", record_id).Count(&count)
+
+	if count == 0 {
+		return false
+	} else {
+		return true
+	}
 
 }

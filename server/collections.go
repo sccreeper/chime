@@ -241,6 +241,7 @@ type track_metadata_query struct {
 type track_metadata_response struct {
 	Title        string `json:"title"`
 	AlbumName    string `json:"album_name"`
+	AlbumID      string `json:"album_id"`
 	CoverID      string `json:"cover_id"`
 	Artist       string `json:"artist"`
 	OriginalFile string `json:"original_file"`
@@ -283,6 +284,7 @@ func handle_get_track_metadata(ctx *gin.Context) {
 		Duration:     int(track.Duration),
 		Released:     int(track.Released),
 		Size:         int(track.Size),
+		AlbumID:      strconv.FormatInt(track.AlbumID, 16),
 	}
 
 	var track_album playlist_model

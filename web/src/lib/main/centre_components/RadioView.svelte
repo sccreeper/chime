@@ -4,12 +4,17 @@
     import no_cover from "../../../assets/no_cover.png";
     import { onMount } from "svelte";
     import { audio_source, playing } from "../../player";
+    import MinorButtonText from "../general/MinorButtonText.svelte";
+    import { openModal } from "svelte-modals";
+    import EditRadio from "../modals/editing/EditRadio.svelte";
 
     let cover_id = ""
     let name = ""
     let description = ""
     let url = ""
     let id = ""
+
+    let processing_request = false
 
     function load_details() {
         
@@ -33,7 +38,7 @@
 
     function handle_click() {
         // This radio is the radio being played.
-        if (get(playing) && get(active_view).name == "radio" && get(active_view).id == id && get(audio_source).source == url) {
+        if ($playing && $active_view.name == "radio" && $active_view.id == id && $audio_source.source == url) {
             playing.set(false)
         
         // This radio isn't being played, we can just set it normally.
@@ -42,6 +47,30 @@
         }
     }
 
+    function edit() {
+
+        openModal(EditRadio, {radio_title: name, radio_url: url, data_callback: (data) => {
+
+            name = data.title
+
+            // Stop playing if the URL is changed.
+            if (url != data.url) {
+             
+                $playing = false
+                $audio_source = {type: "radio", source: data.url}
+
+                url = data.url
+
+                $playing = true
+
+            }
+
+        }})
+
+    }
+
+
+    // Subscribe to active view changes to load metadata
     active_view.subscribe(load_details)
 
 </script>
@@ -57,13 +86,17 @@
             </div>
         </div>
         
-        <button on:click={handle_click} class="mt-4">
-            {#if $active_view.name == "radio" && $active_view.id == id && $playing && $audio_source.source == url}
-            <i class="bi bi-pause-fill"></i> Pause
-            {:else}
-            <i class="bi bi-play-fill"></i> Play
-            {/if}
-        </button>
+        <div class=" flex flex-row items-center gap-3 mt-4">
+            <button on:click={handle_click}>
+                {#if $active_view.name == "radio" && $active_view.id == id && $playing && $audio_source.source == url}
+                <i class="bi bi-pause-fill"></i> Pause
+                {:else}
+                <i class="bi bi-play-fill"></i> Play
+                {/if}
+            </button>
+
+            <MinorButtonText icon="pencil-fill" text="Edit" bind:disabled={processing_request} callback={edit}/>
+        </div>
     
     </div>
 

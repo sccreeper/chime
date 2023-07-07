@@ -1,12 +1,14 @@
 <script>
     import { get } from "svelte/store";
     import HorizontalDivider from "../general/HorizontalDivider.svelte";
-    import { track_metadata_view } from "../../stores";
+    import { active_view, collection_tracks, track_metadata_view } from "../../stores";
     import MinorButton from "../general/MinorButton.svelte";
     import { convertDuration } from "../../util";
     import { openModal } from "svelte-modals";
     import CollectionAdd from "../modals/CollectionAdd.svelte";
     import BlankPage from "../general/BlankPage.svelte";
+    import { is_client } from "svelte/internal";
+    import EditTrack from "../modals/editing/EditTrack.svelte";
 
     // Metadata object
 
@@ -21,6 +23,8 @@
         duration: 0,
         released: 0,
         size: 0,
+        album_id: "",
+        previous_album_id: ""
 
     } 
 
@@ -32,6 +36,7 @@
             method : "GET"
         }).then(response => response.json()).then(data => {
             metadata = data
+            metadata.previous_album_id = metadata.album_id
         })
 
     }
@@ -60,6 +65,46 @@
 
     function addToPlaylist() {
         openModal(CollectionAdd, {id: get(track_metadata_view), type: "track", exclude: ""})
+    }
+
+    function edit() {
+        openModal(EditTrack, {
+            track_title: metadata.title, 
+            track_artist: metadata.artist, 
+            track_released: metadata.released.toString(), 
+            track_album_id: metadata.album_id,
+            data_callback: (data) => {
+                // Update data in UI
+                metadata.title = data.title
+                metadata.artist = data.artist
+                metadata.artist = data.released
+                metadata.album_id = data.album_id
+                metadata.album_name = data.album_name
+
+                // Update data in album view
+                if (metadata.previous_album_id == metadata.album_id 
+                && get(active_view).id == metadata.album_id 
+                && get(active_view).name == "album") {
+                    
+                    let new_tracks = []
+
+                    $collection_tracks.forEach((e) => {
+                        let t = e
+
+                        if (t.id == $track_metadata_view) {
+                            t.name = data.title
+                        }
+
+                        new_tracks.push(t)
+                    })
+
+                    $collection_tracks = new_tracks
+
+
+                }
+
+            }
+        })
     }
 
 </script>
@@ -92,8 +137,9 @@
         <HorizontalDivider/>
 
         <div class="w-full flex-col items-center">
-            <MinorButton icon="download" callback={download}/>
-            <MinorButton icon="plus-lg" callback={addToPlaylist}/>
+            <MinorButton icon="download" callback={download} hint="Download original file"/>
+            <MinorButton icon="plus-lg" callback={addToPlaylist} hint="Add to collection"/>
+            <MinorButton icon="pencil-fill" callback={edit} hint="Edit"/>
         </div>
 
     </div>

@@ -9,7 +9,7 @@ body {
   font-family: 'Anuphan', sans-serif;
 }
 
-input[type=text],input[type=password] {
+input[type=text],input[type=password],select {
 
   @apply appearance-none;
   @apply bg-transparent;

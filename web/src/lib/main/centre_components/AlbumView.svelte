@@ -1,5 +1,5 @@
 <script>
-    import { active_view } from "../../stores";
+    import { active_view, collection_tracks } from "../../stores";
     import Track from "./Track.svelte";
     import no_cover_image from "../../../assets/no_cover.png";
     import HorizontalDivider from "../general/HorizontalDivider.svelte";
@@ -9,12 +9,13 @@
     import MinorButtonText from "../general/MinorButtonText.svelte";
     import { audio_source, playing, playing_collection, shuffle, viewing_tracks } from "../../player";
     import CollectionAdd from "../modals/CollectionAdd.svelte";
+    import EditCollection from "../modals/editing/EditCollection.svelte";
 
-    let album_title = "";
-    let album_cover_src = no_cover_image;
-    let tracks = [];
+    let collection_title = "";
+    let collection_cover_src = no_cover_image;
+
     let is_album = false;
-    let album_description = "";
+    let collection_description = "";
     let actual_album_cover = no_cover_image;
 
     let title_font = "4.5vw";
@@ -29,8 +30,8 @@
             })
                 .then((response) => response.json())
                 .then((data) => {
-                    album_title = data.title;
-                    tracks = data.tracks;
+                    collection_title = data.title;
+                    collection_tracks.set(data.tracks);
 
 
                     let track_ids = []
@@ -41,20 +42,20 @@
 
                     viewing_tracks.set(track_ids)
 
-                    album_description = data.description;
+                    collection_description = data.description;
                     is_album = (data.is_album == 1) ? true : false
 
                     if (data.cover == "0" || data.cover == "00") {
-                        album_cover_src = ""
+                        collection_cover_src = ""
                     } else {
-                        album_cover_src = `/api/collection/get_cover/${data.cover}`
+                        collection_cover_src = `/api/collection/get_cover/${data.cover}`
                     }
 
-                    if (album_title.length > 35) {
+                    if (collection_title.length > 35) {
                         title_font = "2vw"
-                    } else if (album_title.length > 25) {
+                    } else if (collection_title.length > 25) {
                         title_font = "3vw"
-                    } else if (album_title.length > 15) {
+                    } else if (collection_title.length > 15) {
                         title_font = "3.5vw"
                     } else {
                         title_font = "4vw"
@@ -89,14 +90,14 @@
 
         if (get(playing) && get(playing_collection) == get(active_view).id) {
             playing.set(false)
-        } else if (tracks.length == 0) {
+        } else if ($collection_tracks.length == 0) {
             return
         } else if (get(shuffle)) {
-            audio_source.set({type: "track", source: tracks[Math.floor(Math.random()*tracks.length)].id})
+            audio_source.set({type: "track", source: $collection_tracks[Math.floor(Math.random()*$collection_tracks.length)].id})
 
             playing_collection.set(get(active_view).id)
         } else {
-            audio_source.set({type: "track", source: tracks[0].id})
+            audio_source.set({type: "track", source: $collection_tracks[0].id})
 
             playing_collection.set(get(active_view).id)
         }
@@ -107,7 +108,24 @@
         openModal(CollectionAdd, {id: get(active_view).id, type: "collection", exclude: get(active_view).id})
     }
 
-    $: actual_album_cover = album_cover_src == "" ? no_cover_image : album_cover_src
+    function editCollection() {
+        openModal(EditCollection, {
+            collection_id: get(active_view).id, 
+            collection_description: collection_description, 
+            collection_is_album: is_album, 
+            collection_title: collection_title,
+            data_callback: editCallback
+        })
+    }
+
+    function editCallback(data) {
+        
+        collection_description = data.collection_description
+        collection_title = data.collection_title
+
+    }
+
+    $: actual_album_cover = collection_cover_src == "" ? no_cover_image : collection_cover_src
 </script>
 
 <div class="m-2 h-full overflow-y-scroll">
@@ -119,11 +137,14 @@
             />
 
             <div class="flex flex-col gap-4 items-start">
-                <h1 class="album-title" style="font-size: {title_font};">{album_title}</h1>
-                <p>{album_description}</p>
+                <h1 class="album-title" style="font-size: {title_font};">{collection_title}</h1>
+                <p>{collection_description}</p>
                 <div class="flex flex-row items-center gap-3">
                     <button on:click={playCollection}>{#if $playing_collection == $active_view.id && $playing}<i class="bi bi-pause-fill"></i> Pause{:else}<i class="bi bi-play-fill"></i> Play{/if}</button> 
-                    {#if $active_view.id != "1"}<MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>{/if}
+                    {#if $active_view.id != "1"}
+                        <MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>
+                        <MinorButtonText callback={editCollection} text="Edit" icon="pencil-fill"/>
+                    {/if}
                     {#if is_album}<MinorButtonText callback={addToCollection} text="Add to" icon="plus-lg"/>{/if}
                 </div>
             </div>
@@ -133,7 +154,7 @@
     <div class="m-2"><HorizontalDivider/></div>
 
     <div>
-        {#if tracks.length == 0}
+        {#if $collection_tracks.length == 0}
             <p>
                 No tracks in {is_album ? "album" : "playlist"}. Add from the
                 lefthand sidebar or upload files.
@@ -156,7 +177,7 @@
                     <th>Duration</th>
                 </tr>
 
-            {#each tracks as track, i}
+            {#each $collection_tracks as track, i}
                 <Track
                     index={(i+1).toString()}
                     id={track.id}

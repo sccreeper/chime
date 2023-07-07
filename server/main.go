@@ -106,8 +106,10 @@ func main() {
 	r.POST("/api/library/get_track_ids", get_track_ids)
 
 	// Edit endpoints
-	r.POST("/api/edit/collection")
-	r.POST("/api/edit/track")
+	r.POST("/api/edit/collection", handle_edit_collection)
+	r.POST("/api/edit/reorder_collection", handle_reorder_collection)
+	r.POST("/api/edit/track", handle_edit_track)
+	r.POST("/api/edit/radio", handle_edit_radio)
 	r.POST("/api/edit/favourite", handle_favourite)
 
 	//Search

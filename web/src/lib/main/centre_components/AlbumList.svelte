@@ -28,7 +28,7 @@
 {#if $album_list.albums.length == 0}
 <p class="text-gray-300">No Albums</p>
 {:else}
-{#each get(album_list).albums as album}
+{#each $album_list.albums as album}
 
 <Album album_id={album.id} name={album.name}/>
 
@@ -43,7 +43,7 @@
 
 <ul>
 
-{#each get(album_list).playlists as playlist}
+{#each $album_list.playlists as playlist}
 
 <Album album_id={playlist.id} name={playlist.name}/>
 
@@ -59,7 +59,7 @@
 {:else}
 <ul>
 
-{#each get(album_list).radios as radio}
+{#each $album_list.radios as radio}
 
 <Radio radio_id={radio.id} name={radio.name}/>
 
