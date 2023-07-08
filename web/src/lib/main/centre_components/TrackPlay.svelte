@@ -5,7 +5,7 @@
 
 
     export let track_id = ""
-    export let index = ""
+    export let index = 0
 
     let mouse_over = false
 

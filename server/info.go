@@ -165,7 +165,7 @@ func handle_reorder_collection(ctx *gin.Context) {
 	}
 
 	var collection playlist_model
-	database.Table(table_playlists).Select("*").Where("id = ?", collection_id)
+	database.Table(table_playlists).Select("*").Where("id = ?", collection_id).First(&collection)
 
 	if collection.Owner != user_id {
 		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: User does not own collection"))

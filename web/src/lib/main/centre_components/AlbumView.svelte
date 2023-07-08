@@ -179,7 +179,7 @@
 
             {#each $collection_tracks as track, i}
                 <Track
-                    index={(i+1).toString()}
+                    index={i+1}
                     id={track.id}
                     title={track.name}
                     artist={track.artist}
