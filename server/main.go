@@ -137,6 +137,9 @@ func main() {
 	r.POST("/api/admin/delete_user", handle_delete_user)
 	r.POST("/api/admin/toggle_admin", handle_toggle_admin)
 
+	// Embedded
+	r.GET("/api/embedded/:session_id/res/:resource_type/:resource_id", handle_embedded_resource)
+
 	// Auth
 
 	r.POST("/api/auth", handle_auth)

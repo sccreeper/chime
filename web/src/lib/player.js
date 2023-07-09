@@ -2,7 +2,7 @@
 // Source code for managing the player state.
 
 import { get, writable } from "svelte/store";
-import { track_metadata_view } from "./stores";
+import { session_object, track_metadata_view } from "./stores";
 import { getUrlExtension } from "./util";
 import Hls from "hls.js";
 
@@ -218,6 +218,11 @@ audio_source.subscribe((val) => {
                     title: data.title,
                     artist: data.artist,
                     album: data.album,
+                    artwork: [
+                        {
+                            src: `${window.location.origin}/api/embedded/${get(session_object).session_id}/res/cover/${data.cover_id}`
+                        }
+                    ]
                 })  
             })
 
