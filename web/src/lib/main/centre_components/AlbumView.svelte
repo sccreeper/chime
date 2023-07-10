@@ -17,6 +17,7 @@
     let is_album = false;
     let collection_description = "";
     let actual_album_cover = no_cover_image;
+    let is_protected = false;
 
     let title_font = "4.5vw";
 
@@ -43,7 +44,8 @@
                     viewing_tracks.set(track_ids)
 
                     collection_description = data.description;
-                    is_album = (data.is_album == 1) ? true : false
+                    is_album = data.is_album
+                    is_protected = data.protected
 
                     if (data.cover == "0" || data.cover == "00") {
                         collection_cover_src = ""
@@ -141,7 +143,7 @@
                 <p>{collection_description}</p>
                 <div class="flex flex-row items-center gap-3">
                     <button on:click={playCollection}>{#if $playing_collection == $active_view.id && $playing}<i class="bi bi-pause-fill"></i> Pause{:else}<i class="bi bi-play-fill"></i> Play{/if}</button> 
-                    {#if $active_view.id != "1"}
+                    {#if !is_protected}
                         <MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>
                         <MinorButtonText callback={editCollection} text="Edit" icon="pencil-fill"/>
                     {/if}

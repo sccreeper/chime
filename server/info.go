@@ -228,9 +228,14 @@ func handle_edit_collection(ctx *gin.Context) {
 		return
 	}
 
+	if collection.Protected == 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: Record is protected"))
+		return
+	}
+
 	// Finally apply changes
 
-	var is_album int64
+	var is_album int8
 	if query.IsAlbum {
 		is_album = 1
 	} else {

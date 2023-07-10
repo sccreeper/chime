@@ -37,6 +37,7 @@ type collection_response struct {
 	Tracks      []track_response `json:"tracks"`
 	Dates       []string         `json:"dates"`
 	Description string           `json:"description"`
+	Protected   bool             `json:"protected"`
 }
 
 type track_response struct {
@@ -146,6 +147,12 @@ func handle_get_collection(ctx *gin.Context) {
 		response_struct.IsAlbum = true
 	} else {
 		response_struct.IsAlbum = false
+	}
+
+	if collection.Protected == 1 {
+		response_struct.Protected = true
+	} else {
+		response_struct.Protected = false
 	}
 
 	response_struct.Dates = strings.Split(collection.Dates, ",")
@@ -429,7 +436,7 @@ func handle_add_collection(ctx *gin.Context) {
 
 	id := generate_id(table_playlists)
 
-	var is_album int64
+	var is_album int8
 
 	if playlist.IsAlbum {
 		is_album = 1
@@ -653,6 +660,11 @@ func handle_delete_collection(ctx *gin.Context) {
 	}
 
 	database.Table(table_playlists).Select("*").Where("owner = ? AND id = ?", user_id, collection_id).First(&collection)
+
+	if collection.Protected == 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: Record is protected"))
+		return
+	}
 
 	if collection.IsAlbum == 1 {
 

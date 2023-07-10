@@ -29,10 +29,11 @@ type playlist_model struct {
 	Name        string //Name of this collection
 	Description string
 	Cover       int64
-	IsAlbum     int64  //If the collection is an album or not
+	IsAlbum     int8   //If the collection is an album or not
 	Tracks      string //Comma seperated list of hexadecimal track IDs.
 	Dates       string //Comma seperated list of dates added (as unix time hex)
 	Owner       int64
+	Protected   int8
 }
 
 type track_model struct {

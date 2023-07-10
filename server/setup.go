@@ -73,20 +73,8 @@ func first_time_setup(admin_pass string, in_docker bool) {
 
 	// Add initial values to DB.
 
-	var id_found bool
-	var admin_id int64
-	var count int64
-
-	for !id_found {
-
-		admin_id = random.Int63n(math.MaxInt64)
-		db.Table(table_users).Where("id = ?", admin_id).Count(&count)
-
-		if count == 0 {
-			id_found = true
-		}
-
-	}
+	var admin_id int64 = random.Int63n(math.MaxInt64)
+	var unsorted_id int64 = random.Int63n(math.MaxInt64)
 
 	db.Table(table_users).Create(&user_model{
 		ID:           admin_id,
@@ -99,7 +87,7 @@ func first_time_setup(admin_pass string, in_docker bool) {
 	})
 
 	db.Table(table_playlists).Create(&playlist_model{
-		ID:          1,
+		ID:          unsorted_id,
 		Name:        "Unsorted",
 		IsAlbum:     1,
 		Cover:       0,
@@ -107,6 +95,7 @@ func first_time_setup(admin_pass string, in_docker bool) {
 		Dates:       "",
 		Owner:       admin_id,
 		Description: "Default album for tracks that don't have any metadata.",
+		Protected:   1,
 	})
 
 	// Create default config.toml
