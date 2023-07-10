@@ -65,20 +65,8 @@ type download_track_query struct {
 	ID string `uri:"track_id" binding:"required"`
 }
 
-// TODO: Download individual track
-func handle_download_track(ctx *gin.Context) {
-
-}
-
-// TOOD: Download album or playlist
-func handle_download_playlist(ctx *gin.Context) {
-
-}
-
-// TODO: Download individual track
+// Download track route, this is also used for caching/downloading for online listening.
 func handle_download_track_original(ctx *gin.Context) {
-
-	// TODO: Remove this boilerplate everywhere.
 
 	// Verify user
 	verified, request_body := verify_user(ctx.Request)

@@ -145,8 +145,14 @@ func main() {
 	r.POST("/api/auth", handle_auth)
 	r.GET("/api/auth/session_exists/:session_id", handle_session_exists)
 
-	//TODO: Evaluate how Chromecast works
-	// Chromecast methods
+	// Chromecast proxy methods
+
+	r.POST("/api/cast/toggle") //Enables/disables the cast proxy (disabled by default).
+	r.GET("/api/cast/enabled")
+	r.POST("/api/cast/control/:state") //Play/pause/stop/forward/backwards
+	r.POST("/api/cast/set_volume")
+	r.GET("/api/cast/get_devices")
+	r.POST("/api/cast/play_media")
 
 	r.Run("0.0.0.0:80")
 

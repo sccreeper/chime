@@ -509,7 +509,7 @@ func add_to_collection(ctx *gin.Context) {
 	var query add_to_collection_query
 
 	if err := ctx.ShouldBindJSON(&query); err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Form formatted incorrectly")) //TODO: Move these to constants. Also only print long message if debug. TLDR; Shorten this boilerplate in some way.
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Form formatted incorrectly"))
 		return
 	}
 
