@@ -4,7 +4,13 @@
     import TopBar from "./main/TopBar.svelte";
 
     import { Modals, closeModal } from 'svelte-modals'
+    import { createNotification, notifications } from "./notifications";
+    import { onMount } from "svelte";
+    import Notification from "./main/notifications/Notification.svelte";
 
+    onMount(() => {
+      createNotification(Notification, {icon: "check-lg", text: "Logged in", expiry: 3000})
+    })
     
 </script>
 
@@ -16,6 +22,12 @@
       on:click={closeModal}
     />
 </Modals>
+
+<div class="fixed right-3 bottom-0 w-56 h-72 flex justify-end flex-col">
+  {#each $notifications as n}
+      <svelte:component this={n.component} {...n.props}/>    
+  {/each}
+</div>
   
 
 <div class="flex flex-col h-full">

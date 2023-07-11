@@ -3,6 +3,9 @@
     import HorizontalDivider from '../general/HorizontalDivider.svelte'
     import MinorButton from '../general/MinorButton.svelte';
     import MinorButtonText from '../general/MinorButtonText.svelte';
+    import { createNotification, notificationID, removeNotification } from '../../notifications';
+    import UploadNotification from '../notifications/UploadNotification.svelte';
+    import Notification from '../notifications/Notification.svelte';
     
     let radio_name = ""
     let radio_url = ""
@@ -24,8 +27,13 @@
         file_form.addEventListener("change", async () => {
 
             let files = file_form.files;
+            let notification_id;
+            let failed = false;
             
             for (let i = 0; i < files.length; i++) {
+                notification_id = notificationID()
+                createNotification(UploadNotification, {id: notification_id, progress: i+1, count: files.length, finished: false})
+
                 const element = files[i];
                 
                 let data = new FormData();
@@ -33,11 +41,20 @@
 
                 var resp = await fetch("/api/upload", {method: "POST", body: data})
                 if (resp.ok) {
-                    console.log("Uploaded track successfully!")
+                  removeNotification(notification_id)
+                  console.log("Uploaded track successfully!")
                 } else {
-                    console.log("There was an error uploading the track!")
+                  removeNotification(notification_id)
+                  createNotification(Notification, {text: `Error with: ${element.name}`, icon: "x-lg", expires: 5000})
+                  break
                 }
 
+            }
+
+            if (!failed) {
+              removeNotification(notification_id)
+              notification_id = notificationID()
+              createNotification(UploadNotification, {id: notification_id, progress: files.length, count: files.length, finished: true})
             }
 
         })
