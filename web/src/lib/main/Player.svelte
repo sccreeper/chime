@@ -33,7 +33,7 @@
         <!-- Controls -->
 
         <div class="grid grid-rows-1 grid-cols-5 gap-3 items-center justify-items-center">
-            <Toggle callback={(active) => shuffle.set(active)} icon="shuffle"/>
+            <Toggle bind:active={$shuffle} icon="shuffle"/>
             <button class="control-button" on:click={previousTrack}><i class="bi bi-skip-backward"></i></button>
             
             <button 
@@ -43,7 +43,7 @@
             </button>
             
             <button class="control-button" on:click={nextTrack}><i class="bi bi-skip-forward"></i></button>
-            <Toggle callback={(active) => repeat.set(active)} icon="repeat"/>
+            <Toggle bind:active={$repeat} icon="repeat"/>
         </div>
 
         <!-- Volume -->
