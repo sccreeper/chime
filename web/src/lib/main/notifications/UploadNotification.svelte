@@ -1,5 +1,4 @@
 <script>
-    import { onMount } from "svelte";
     import { removeNotification } from "../../notifications";
 
 
@@ -7,21 +6,16 @@
     export let count = 0
     export let finished = false;
 
-    let element;
-
     // Required attribute
     export let id = 0;
     
-    if (finished) {
+    $: () => {
+        if (finished) {
         console.log("lol 2")
         setTimeout(() => {
             removeNotification(id)
         }, 5000)
     }
-    
-    $: () => {
-        console.log(progress)
-        element.style.background = `linear-gradient(to right, rgb(235, 179, 8), rgb(235, 179, 8) ${Math.floor((progress / count) * 100)}%, rgb(202, 138, 4) ${Math.floor((progress / count) * 100)}%, rgb(202, 138, 4));`
     }
 
 </script>
@@ -40,5 +34,19 @@
     
     </div>
 
-    <div bind:this={element} class="w-full h-1 bg-yellow-600"></div>
+    <div style="--progress: {`${Math.floor((progress / count) * 100)}%`}" class="progress-bar"></div>
 </div>
+
+<style>
+    .progress-bar {
+        @apply w-full bg-yellow-600 h-2;
+    }
+
+    .progress-bar:after {
+        content: "";
+        @apply top-0 left-0 bottom-0 right-0;
+        @apply block;
+        width: var(--progress);
+        @apply h-2 bg-yellow-400;
+    }
+</style>
