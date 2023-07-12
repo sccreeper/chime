@@ -2,8 +2,10 @@
     import { closeModal } from "svelte-modals";
     import MinorButton from "../../general/MinorButton.svelte";
     import MinorButtonText from "../../general/MinorButtonText.svelte";
-    import { active_view, album_list, track_metadata_view } from "../../../stores";
+    import { album_list, track_metadata_view } from "../../../stores";
     import { get } from "svelte/store";
+    import { createNotification, notificationID } from "../../../notifications";
+    import Notification from "../../notifications/Notification.svelte";
 
     export let track_title = ""
     export let track_artist = ""
@@ -46,6 +48,7 @@
           })
 
           closeModal()
+          createNotification(Notification, {id: notificationID(), text: "Changed track details", icon:"check-lg", expiry: 5000})
 
         } else {
           error_text = "There was an error."

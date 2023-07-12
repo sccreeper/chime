@@ -3,6 +3,8 @@
     import MinorButton from "../../general/MinorButton.svelte";
     import MinorButtonText from "../../general/MinorButtonText.svelte";
     import { active_view } from "../../../stores";
+    import { createNotification, notificationID } from "../../../notifications";
+    import Notification from "../../notifications/Notification.svelte";
 
     export let radio_title = ""
     export let radio_url = ""
@@ -33,6 +35,7 @@
             })
 
             closeModal()
+            createNotification(Notification, {id: notificationID(), text: "Changed radio details", icon:"check-lg", expiry: 5000})
         }
       })
 

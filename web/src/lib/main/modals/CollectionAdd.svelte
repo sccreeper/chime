@@ -4,6 +4,8 @@
     import MinorButton from '../general/MinorButton.svelte';
     import { get } from 'svelte/store';
     import { album_list } from '../../stores';
+    import { createNotification, notificationID } from '../../notifications';
+    import Notification from '../notifications/Notification.svelte';
 
     function extractCollections() {
         
@@ -47,6 +49,7 @@
             })
             }).then(() => {
                 closeModal()
+                createNotification(Notification, {id: notificationID(), text: "Added to playlist", icon:"check-lg", expiry: 5000})
             })   
 
         }

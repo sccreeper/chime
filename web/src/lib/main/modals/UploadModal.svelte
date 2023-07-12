@@ -26,6 +26,8 @@
 
         file_form.addEventListener("change", async () => {
 
+            closeModal()
+
             let files = file_form.files;
             let notification_id;
             let failed = false;
@@ -75,7 +77,8 @@
             })
         }).then(() => {
 
-            closeModal()
+          closeModal()
+          createNotification(Notification, {id: notificationID(), text: "Added radio", icon:"check-lg", expiry: 5000})
 
         })
 
@@ -113,7 +116,8 @@
             body: data
         }).then(() => {
 
-            closeModal()
+          closeModal()
+          createNotification(Notification, {id: notificationID(), text: `Added ${collection_is_album ? "album" : "collection"}`, icon:"check-lg", expiry: 5000})
 
         })
 

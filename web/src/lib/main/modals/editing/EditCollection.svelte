@@ -3,6 +3,8 @@
   import MinorButton from "../../general/MinorButton.svelte";
   import MinorButtonText from "../../general/MinorButtonText.svelte";
   import { album_list } from "../../../stores";
+  import { createNotification, notificationID } from "../../../notifications";
+  import Notification from "../../notifications/Notification.svelte";
 
   function apply() {
     processing_request = true;
@@ -39,6 +41,7 @@
 
         // Finally close the modal
         closeModal();
+        createNotification(Notification, {id: notificationID(), text: "Changed collection details", icon:"check-lg", expiry: 5000})
       }
     });
   }
