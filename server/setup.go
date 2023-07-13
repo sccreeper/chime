@@ -118,6 +118,7 @@ func first_time_setup(admin_pass string, in_docker bool) {
 
 	os.Mkdir("/var/lib/chime/tracks", os.ModeDir)
 	os.Mkdir("/var/lib/chime/covers", os.ModeDir)
+	os.Mkdir("/var/lib/chime/backups", os.ModeDir)
 
 	log.Println("Setup process successful!")
 

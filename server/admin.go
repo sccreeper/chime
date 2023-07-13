@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/scrypt"
@@ -563,10 +564,7 @@ func handle_toggle_admin(ctx *gin.Context) {
 
 }
 
-// Other admin actions
-func handle_get_backup(ctx *gin.Context) {
-
-}
+//Other admin actions
 
 type storage_resp struct {
 	TotalVolumeSpace int64 `json:"total_volume_space"`
@@ -641,4 +639,117 @@ func handle_get_storage(ctx *gin.Context) {
 
 	ctx.Data(http.StatusOK, gin.MIMEJSON, resp_bytes)
 
+}
+
+// Backup
+
+type backup struct {
+	Progress float64 `json:"progress"`
+	ID       int64   `json:"-"`
+	Finished bool    `json:"finished"`
+	Path     string  `json:"path"`
+}
+
+var backups map[int64]backup
+var backup_lock = sync.RWMutex{}
+
+func handle_start_backup(ctx *gin.Context) {
+	// Verify user & request
+	verified, session := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	admin_id, _ := strconv.ParseInt(session.UserID, 16, 64)
+
+	var admin user_model
+	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)
+
+	if admin.IsAdmin != 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: User is not admin"))
+		return
+	}
+
+	// Generate backup id
+	var id int64
+	for {
+		id = random.Int63()
+		if _, exists := backups[id]; exists {
+			continue
+		} else {
+			break
+		}
+	}
+
+	backup_path := fmt.Sprintf("/var/lib/chime/backups/%s", strconv.FormatInt(id, 16))
+
+	file, err := os.Create(backup_path)
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Couldn't create backup file"))
+	}
+	file.Close()
+
+	// Create backup struct
+
+	backups[id] = backup{
+		Progress: 0,
+		ID:       id,
+		Finished: false,
+		Path:     backup_path,
+	}
+
+	go run_backup(backup_path, id)
+
+	ctx.JSON(http.StatusOK, gin.H{"id": strconv.FormatInt(id, 16)})
+
+}
+
+type backup_status_query struct {
+	ID string `uri:"id"`
+}
+
+func handle_get_backup_status(ctx *gin.Context) {
+
+	// Verify user & request
+	verified, session := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	admin_id, _ := strconv.ParseInt(session.UserID, 16, 64)
+
+	var admin user_model
+	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)
+
+	if admin.IsAdmin != 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: User is not admin"))
+		return
+	}
+
+	var query backup_status_query
+	if err := ctx.ShouldBindUri(&query); err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad request"))
+		return
+	}
+
+	backup_id, err := strconv.ParseInt(query.ID, 16, 64)
+	if err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad ID"))
+		return
+	}
+
+	backup_lock.RLock()
+	defer backup_lock.RUnlock()
+	ctx.JSON(http.StatusOK, backups[backup_id])
+
+}
+
+func run_backup(out string, id int64) {
+
+}
+
+func init() {
+	backups = make(map[int64]backup, 0)
 }

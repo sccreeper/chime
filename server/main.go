@@ -130,7 +130,8 @@ func main() {
 
 	r.GET("/api/admin/users", handle_get_users)
 	r.GET("/api/admin/storage", handle_get_storage)
-	r.GET("/api/admin/backup")
+	r.GET("/api/admin/start_backup", handle_start_backup)
+	r.GET("/api/admin/backup_status/:id", handle_get_backup_status)
 
 	r.POST("/api/admin/add_user", handle_add_user)
 	r.POST("/api/admin/reset_password", handle_reset_password)
