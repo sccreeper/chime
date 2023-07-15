@@ -57,7 +57,10 @@ func main() {
 
 	r := gin.Default()
 
-	r.Use(gzipgin.Gzip(gzipgin.DefaultCompression, gzip.WithExcludedPathsRegexs([]string{`(^\/api\/stream\/).`, `(^\/api\/download\/).`})))
+	r.Use(gzipgin.Gzip(gzipgin.DefaultCompression, gzip.WithExcludedPathsRegexs([]string{
+		`(^\/api\/stream\/).`,
+		`(^\/api\/download\/).`,
+		`(\/api/\admin\/download_backup\/).`})))
 
 	//Base method for does server exist or not
 	r.GET("/api/ping", func(ctx *gin.Context) {
@@ -132,6 +135,8 @@ func main() {
 	r.GET("/api/admin/storage", handle_get_storage)
 	r.GET("/api/admin/start_backup", handle_start_backup)
 	r.GET("/api/admin/backup_status/:id", handle_get_backup_status)
+	r.GET("/api/admin/download_backup/:id", handle_download_backup)
+	r.GET("/api/admin/clear_backups", handle_clear_backups)
 
 	r.POST("/api/admin/add_user", handle_add_user)
 	r.POST("/api/admin/reset_password", handle_reset_password)

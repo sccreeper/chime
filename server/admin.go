@@ -1,11 +1,17 @@
 package main
 
 import (
+	"archive/tar"
+	"compress/gzip"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -644,10 +650,12 @@ func handle_get_storage(ctx *gin.Context) {
 // Backup
 
 type backup struct {
-	Progress float64 `json:"progress"`
-	ID       int64   `json:"-"`
-	Finished bool    `json:"finished"`
-	Path     string  `json:"path"`
+	Progress int64  `json:"progress"`
+	ID       int64  `json:"-"`
+	Finished bool   `json:"finished"`
+	Path     string `json:"path"`
+	Failed   bool   `json:"failed"`
+	Hash     string `json:"hash"`
 }
 
 var backups map[int64]backup
@@ -682,13 +690,7 @@ func handle_start_backup(ctx *gin.Context) {
 		}
 	}
 
-	backup_path := fmt.Sprintf("/var/lib/chime/backups/%s", strconv.FormatInt(id, 16))
-
-	file, err := os.Create(backup_path)
-	if err != nil {
-		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Couldn't create backup file"))
-	}
-	file.Close()
+	backup_path := fmt.Sprintf("/var/lib/chime/backups/chime-%s", strconv.FormatInt(id, 16))
 
 	// Create backup struct
 
@@ -697,6 +699,7 @@ func handle_start_backup(ctx *gin.Context) {
 		ID:       id,
 		Finished: false,
 		Path:     backup_path,
+		Failed:   false,
 	}
 
 	go run_backup(backup_path, id)
@@ -746,7 +749,202 @@ func handle_get_backup_status(ctx *gin.Context) {
 
 }
 
+func handle_download_backup(ctx *gin.Context) {
+
+	// Verify user & request
+	verified, session := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	admin_id, _ := strconv.ParseInt(session.UserID, 16, 64)
+
+	var admin user_model
+	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)
+
+	if admin.IsAdmin != 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: User is not admin"))
+		return
+	}
+
+	// Download query
+	var query backup_status_query
+	if err := ctx.ShouldBindUri(&query); err != nil {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad request"))
+		return
+	}
+
+	// Return file
+
+	ctx.File(fmt.Sprintf("/var/lib/chime/backups/chime-%s", query.ID))
+
+}
+
 func run_backup(out string, id int64) {
+
+	file, err := os.OpenFile(out, os.O_CREATE|os.O_RDWR, os.FileMode(600))
+	if err != nil {
+		b := read_backup_value(id)
+		b.Failed = true
+		write_backup_value(b, id)
+		return
+	}
+
+	var progress int64
+	var count int64
+	filepath.Walk("/var/lib/chime", func(path string, info fs.FileInfo, err error) error {
+		count++
+		return nil
+	})
+
+	gw := gzip.NewWriter(file)
+	tw := tar.NewWriter(gw)
+
+	err = filepath.Walk("/var/lib/chime/", func(path string, info fs.FileInfo, err error) error {
+
+		if err != nil {
+			fail_backup(id)
+		}
+
+		progress++
+
+		// Tar Header
+		header, err := tar.FileInfoHeader(info, path)
+		if err != nil {
+			fail_backup(id)
+			return err
+		}
+		header.Name = filepath.ToSlash(path)
+
+		// Write header to file
+		if err := tw.WriteHeader(header); err != nil {
+			fail_backup(id)
+			return err
+		}
+
+		if !info.IsDir() {
+			data, err := os.Open(path)
+			if err != nil {
+				fail_backup(id)
+				return err
+			}
+
+			if _, err := io.Copy(tw, data); err != nil {
+				fail_backup(id)
+				return err
+			}
+		}
+
+		b := read_backup_value(id)
+		b.Progress = int64(math.Floor((float64(progress) / float64(count)) * 100.0))
+		write_backup_value(b, id)
+
+		return nil
+
+	})
+
+	if err != nil {
+		fail_backup(id)
+		return
+	} else if !read_backup_value(id).Failed {
+		// Produce gzip and tar
+
+		if err := tw.Close(); err != nil {
+			fail_backup(id)
+			return
+		}
+
+		if err := gw.Close(); err != nil {
+			fail_backup(id)
+			return
+		}
+
+		if err := file.Close(); err != nil {
+			fail_backup(id)
+			return
+		}
+
+		// Calculate hash
+
+		file, err := os.Open(out)
+		if err != nil {
+			fail_backup(id)
+			return
+		}
+
+		h := sha256.New()
+
+		if _, err := io.Copy(h, file); err != nil {
+			fail_backup(id)
+			return
+		}
+
+		b := read_backup_value(id)
+		b.Finished = true
+		b.Progress = 100
+		b.Hash = hex.EncodeToString(h.Sum(nil))
+		write_backup_value(b, id)
+
+	}
+
+}
+
+func fail_backup(id int64) {
+
+	b := read_backup_value(id)
+	b.Failed = true
+	write_backup_value(b, id)
+
+}
+
+func write_backup_value(b backup, id int64) {
+	backup_lock.Lock()
+	defer backup_lock.Unlock()
+	backups[id] = b
+}
+
+func read_backup_value(id int64) backup {
+
+	backup_lock.RLock()
+	defer backup_lock.RUnlock()
+	return backups[id]
+
+}
+
+func handle_clear_backups(ctx *gin.Context) {
+
+	// Verify user & request
+	verified, session := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	admin_id, _ := strconv.ParseInt(session.UserID, 16, 64)
+
+	var admin user_model
+	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)
+
+	if admin.IsAdmin != 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: User is not admin"))
+		return
+	}
+
+	backups, err := os.ReadDir("/var/lib/chime/backups")
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Internal server error"))
+		return
+	}
+
+	for _, v := range backups {
+		if err := os.Remove(fmt.Sprintf("/var/lib/chime/backups/%s", v.Name())); err != nil {
+			ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Internal server error"))
+			return
+		}
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
 
 }
 

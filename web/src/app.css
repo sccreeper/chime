@@ -46,7 +46,7 @@ button {
 
 .small-heading {
 
-  @apply text-yellow-500;
+  @apply text-white;
   @apply font-semibold;
 
 }

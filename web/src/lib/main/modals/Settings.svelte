@@ -11,19 +11,23 @@
 
     export let isOpen
 
+    // Password modificatin
     let old_password = ""
     let new_password0 = ""
     let new_password1 = ""
     let password_error = {text: "", ok: false}
 
+    // Userame modification
     let username_password = ""
     let username_change = get(user_object).username
     let username_error = {text: "", ok: false}
 
+    // Storage
     let total_storage = 0
     let used_by_others = 0
     let used_by_chime = 0
-    
+
+    // New users
     let show_new_user_ui = false
     let new_user_error = ""
 
@@ -38,6 +42,10 @@
       is_admin: false,
       id: "",
     }]
+
+    // Backup
+    let backup_status = ""
+    let backup_processing = false
 
     function changeUsername() {
       
@@ -124,6 +132,82 @@
 
     }
 
+    async function backup() {
+      backup_processing = true
+
+      let backup_id;
+      let backup_interval;
+
+      backup_status = "Starting backup..."
+      
+      let resp = await fetch("/api/admin/start_backup", {
+        method: "GET",
+      })
+      let data = await resp.json()
+
+      backup_id = data.id
+
+      // Timeout to query status
+
+      backup_interval = async () => {
+
+        let resp = await fetch(`/api/admin/backup_status/${backup_id}`, {
+          method: "GET"
+        })
+        let data = await resp.json()
+
+        if (data.finished) {
+
+          backup_processing = false
+
+          backup_status = "Backup finished"
+
+          let date = new Date()
+
+          let link = document.createElement("a")
+          link.download = `chime-${data.hash.substring(0, 16)}-${date.toDateString().replaceAll(" ", "")}.tar.gz`
+          link.href = `/api/admin/download_backup/${backup_id}`
+          link.click()
+          document.removeChild(link)
+          
+        } else if (data.failed) {
+
+          backup_status = "Backup failed"
+          backup_processing = false
+
+        } else {
+
+          backup_status = `Backup progress: ${data.progress}%`
+          setTimeout(backup_interval, 1000)
+
+        }
+
+      }
+
+      setTimeout(backup_interval, 1000)
+
+      
+    }
+
+    function clearBackups() {
+      
+      backup_status = "Removing backups..."
+      backup_processing = true
+
+      fetch("/api/admin/clear_backups", {
+        method: "GET"
+      }).then(resp => {
+        if (resp.ok) {
+          backup_status = "Backups removed sucessfully"
+          backup_processing = false
+        } else {
+          backup_status = "There was an error removing the backups"
+          backup_processing = false
+        }
+      })
+
+    }
+
     // When mounted fetch all required data, (this only applies if a user is admin)
     onMount(() => {
 
@@ -161,7 +245,7 @@
       <span class="ml-auto"><MinorButton icon="x-lg" callback={closeModal}/></span>
 
       {#if $user_object.is_admin}
-      <h1>Users</h1>
+      <h1><i class="bi bi-people-fill"></i> Users</h1>
       {#if !show_new_user_ui}
 
       <MinorButtonText text="Add user" icon="plus-lg" callback={() => {show_new_user_ui = true}}/>
@@ -196,13 +280,19 @@
       {/each}
       </table>  
 
-      <h1>Storage</h1>
+      <h1><i class="bi bi-device-hdd-fill"></i> Storage</h1>
       <p>Total storage: {Math.round(total_storage / Math.pow(10, 9))}GB</p>
       <p>Used by other data: {Math.round(used_by_others / Math.pow(10, 9))}GB</p>
       <p>Used by Chime: {Math.round(used_by_chime / Math.pow(10, 6))}MB</p>
 
+      <h1><i class="bi bi-database-fill-down"></i> Backup</h1>
+      <MinorButtonText text="Download backup" icon="download" callback={backup} bind:disabled={backup_processing}/>
+      <MinorButtonText text="Clear backups" icon="trash-fill" callback={clearBackups} bind:disabled={backup_processing}/>
+      <p>{backup_status}</p>
+
+
       {/if}
-      <h1>Settings</h1>
+      <h1><i class="bi bi-gear-fill"></i> Settings</h1>
 
       <p class="text-sm small-heading">Change username</p>
       <p class="text-xs {username_error.ok ? `text-green-400` : `text-red-400`}">{username_error.text}</p>
@@ -224,6 +314,10 @@
 {/if}
 
 <style>
+
+h1 {
+  @apply text-yellow-500;
+}
 
 .modal {
       position: fixed;
