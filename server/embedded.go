@@ -71,7 +71,7 @@ func handle_embedded_resource(ctx *gin.Context) {
 		track_id, _ := strconv.ParseInt(query.ID, 16, 64)
 
 		var track track_model
-		database.Table(table_covers).Select("owner", "original").Where("id = ?", track_id).First(&track)
+		database.Table(table_tracks).Select("owner", "original").Where("id = ?", track_id).First(&track)
 
 		if track.Owner != user_id {
 			ctx.AbortWithStatus(http.StatusForbidden)

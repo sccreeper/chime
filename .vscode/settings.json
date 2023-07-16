@@ -1,2 +1,3 @@
 {
+    "python.defaultInterpreterPath": "./castproxy/.venv/bin/python3.11"
 }

@@ -155,9 +155,10 @@ func main() {
 
 	r.POST("/api/cast/toggle") //Enables/disables the cast proxy (disabled by default).
 	r.GET("/api/cast/enabled")
-	r.POST("/api/cast/control/:state") //Play/pause/stop/forward/backwards
+	r.POST("/api/cast/control") //Play/pause/stop/forward/backwards
 	r.POST("/api/cast/set_volume")
 	r.GET("/api/cast/get_devices")
+	r.GET("/api/cast/get_status/:id")
 	r.POST("/api/cast/play_media")
 
 	r.Run("0.0.0.0:80")

@@ -9,7 +9,8 @@ import (
 )
 
 type config struct {
-	Port uint `toml:"port"`
+	Port             uint `toml:"port" json:"port"`
+	CastProxyEnabled bool `toml:"cast_proxy" json:"cast_proxy"`
 }
 
 var random *rand.Rand

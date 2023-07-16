@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "castproxy"
+version = "0.1.0"
+description = "Chromecast proxy for Chime"
+authors = ["Oscar Peace <oscar@oscarcp.net>"]
+license = "GNU GPL V3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Flask = "^2.3.2"
+PyChromecast = "^13.0.7"
+gunicorn = "^20.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

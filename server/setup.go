@@ -16,7 +16,8 @@ import (
 var pass_chars string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890@!"
 
 var default_config_toml config = config{
-	Port: 80,
+	Port:             80,
+	CastProxyEnabled: false,
 }
 
 // Creates default db and configuration
