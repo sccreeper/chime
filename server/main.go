@@ -94,10 +94,10 @@ func main() {
 
 	//Get track & playlist info
 	r.GET("/api/get_collection/:collection_id", handle_get_collection)
-	r.GET("/api/get_track_metadata/:track_id", handle_get_track_metadata)
-	r.GET("/api/get_collections", handle_get_collections)
-	r.GET("/api/get_radio/:radio_id", handle_get_radio)
-	r.GET("/api/collection/get_cover/:cover_id", handle_get_cover)
+	r.GET("/api/get_track_metadata/:track_id", handle_get_track_metadata) //TODO: move to /track/get_metadata
+	r.GET("/api/get_collections", handle_get_collections)                 //TODO: Move to /user/get_libary/
+	r.GET("/api/get_radio/:radio_id", handle_get_radio)                   //TODO: move to /radio/get_metadata
+	r.GET("/api/collection/get_cover/:cover_id", handle_get_cover)        //TODO: move to /cover/:id
 
 	// Modify playlists & albums (collections)
 
