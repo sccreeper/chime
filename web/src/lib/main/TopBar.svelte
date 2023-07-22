@@ -35,8 +35,12 @@
         openModal(Settings)
     }
 
-    function profile() {
+    function open_cast_menu() {
         
+        fetch("/api/cast/get_devices").then(resp => resp.json()).then(
+            data => console.log(data)
+        )
+
     }
 
 </script>
@@ -54,7 +58,7 @@
     <div class="grid grid-cols-3 grid-rows-1 gap-4 items-center justify-items-center text-xl">
         <MinorButton icon="plus-lg" callback={upload_modal}/>
         <MinorButton icon="gear-fill" callback={settings}/>
-        <MinorButton icon="person-circle" callback={profile}/>
+        <MinorButton icon="cast" callback={open_cast_menu}/>
     </div>
     
 

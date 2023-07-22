@@ -157,7 +157,7 @@ func main() {
 	r.GET("/api/cast/enabled")
 	r.POST("/api/cast/control") //Play/pause/stop/forward/backwards
 	r.POST("/api/cast/set_volume")
-	r.GET("/api/cast/get_devices")
+	r.GET("/api/cast/get_devices", handle_cast_get_devices)
 	r.GET("/api/cast/get_status/:id")
 	r.POST("/api/cast/play_media")
 
