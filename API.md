@@ -13,7 +13,13 @@ Contains all information about all API endpoints.
   - [/api/download\_original/:track\_id](#apidownload_originaltrack_id)
 - [Collections](#collections)
   - [/api/get\_collection/:collection\_id](#apiget_collectioncollection_id)
+  - [/api/collection/add](#apicollectionadd)
+  - [/api/collection/add\_collection](#apicollectionadd_collection)
+  - [/api/collection/add\_track](#apicollectionadd_track)
+- [User library](#user-library)
   - [/api/get\_collections](#apiget_collections)
+  - [/api/get\_radio/:radio\_id](#apiget_radioradio_id)
+  - [/api/library/get\_track\_ids](#apilibraryget_track_ids)
 - [Tracks](#tracks)
   - [/api/get\_track\_metadata/:track\_id](#apiget_track_metadatatrack_id)
 
@@ -32,7 +38,9 @@ Contains all information about all API endpoints.
 - Info: Is server alive?
 - Returns: 
 ```json
-{"message":"pong"}
+{
+  "message":"pong"
+}
 ```
 
 ## Uploading/Downloading/Adding
@@ -41,7 +49,7 @@ Contains all information about all API endpoints.
 - Method: **POST**
 - Info: Upload a single track.
 - Accepts: Multipart Form with field `file` for uploaded file. File can be MP3, FLAC, OGG or WAV.
-- Returns: `200`
+- Response: `200`
 
 ### /api/add_radio
 - Method: **POST**
@@ -53,15 +61,15 @@ Contains all information about all API endpoints.
     "url":"https://example.com/radio/stream.m3u8" //Or any other internet radio stream
 }
 ```
-- Returns: `200`
+- Reponse: `200`
 ### /api/download_original/:track_id
 - Method: **GET**
 - Info: Download the original file for a track.
 - Accepts: 
   - `:track_id` - URL paramater, hexadecimal representation of Track ID (`int64`).
-- Returns: The track file.
+- Response: The track file.
 
-**For adding collections (playlists/albums) see ()[]**
+**For adding collections (playlists/albums) see [/api/collection/add](#apicollectionadd).**
 
 ## Collections
 
@@ -94,6 +102,49 @@ Contains all information about all API endpoints.
 
 }
 ```
+
+### /api/collection/add
+
+- Method: **POST**
+- Info: Creates a new collection
+- Accepts:
+```json
+{
+  "name":"Test",
+  "description":"Tes 2",
+  "is_album":false, //If this collection should be added as a collection or not.
+  "custom_cover":false //True if the a custom cover image is submitted.
+}
+```
+- Reponse: `200`
+
+### /api/collection/add_collection
+
+- Method: **POST**
+- Info: Adds the contents of a collection to another collection.
+- Accepts:
+```json
+{
+  "destination":"2f84042a45355793", //The collection to source content from.
+  "source":"49c29989e151aba2", //Collection the content is going to be added to.
+}
+```
+- Reponse: `200`
+
+### /api/collection/add_track
+
+- Method: **POST**
+- Info: Adds a track to a collection.
+- Accepts:
+```json
+{
+  "track_id":"217bdba6b6e2b26b", //ID of track
+  "collection_id":"210f33cbdfcc55c7" //ID of collection track is being added to
+}
+```
+- Response: `200`
+
+## User library
 
 ### /api/get_collections
 
@@ -128,6 +179,30 @@ Contains all information about all API endpoints.
     // ...
   ]
 }
+```
+
+### /api/get_radio/:radio_id
+
+- Method: **GET**
+- Info: Get the metadata about a radio.
+- Accepts: Hexadecimal ID of a radio.
+- Reponse:
+
+```json
+{
+  "name":"Radio 2",
+  "url":"http://a.files.bbci.co.uk/media/live/manifesto/audio/simulcast/hls/uk/sbr_high/ak/bbc_radio_two.m3u8",
+  "description":"BBC Radio 2",
+  "cover_id":"0"
+}
+```
+
+### /api/library/get_track_ids
+- Method: **POST**
+- Info: Gets the IDs of all tracks in a users library.
+- Accepts: 
+```json
+
 ```
 
 ## Tracks
