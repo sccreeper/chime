@@ -5,6 +5,7 @@ import { get, writable } from "svelte/store";
 import { session_object, track_metadata_view } from "./stores";
 import { getUrlExtension } from "./util";
 import Hls from "hls.js";
+import { Cast, current_cast_device, using_cast } from "./cast";
 
 export var playing = writable(false)
 export var playing_radio = writable(false)
@@ -197,7 +198,15 @@ audio_source.subscribe((val) => {
 
     if (val != null) {
 
-        if (val.type == "track") {
+        if (get(using_cast)) {
+            
+            if (val.type == "track") {
+                Cast.play_media(get(current_cast_device).uuid, `${location.origin}/api/embedded/${get(session_object).session_id}/res/track/${val.source}`, "audio/flac")   
+            } else {
+                Cast.play_media(get(current_cast_device).uuid, val.source, "audio/mp3")
+            }
+
+        } else if (val.type == "track") {
 
             // Stop players and load Track
 

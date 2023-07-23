@@ -35,8 +35,6 @@ def get_devices():
                 uuid=str(s.uuid)
             )
         )
-
-    print(len(cast_list), flush=True)
     
     return json.dumps([asdict(x) for x in cast_list], indent=4)
 
