@@ -5,7 +5,7 @@ import { get, writable } from "svelte/store";
 import { session_object, track_metadata_view } from "./stores";
 import { getUrlExtension } from "./util";
 import Hls from "hls.js";
-import { Cast, current_cast_device, using_cast } from "./cast";
+import { Cast, CastStates, current_cast_device, using_cast } from "./cast";
 
 export var playing = writable(false)
 export var playing_radio = writable(false)
@@ -54,7 +54,9 @@ playing.subscribe((val) => {
 
     if (val) {
 
-        if (playing_hls) {
+        if (get(using_cast)) {
+            Cast.control(get(current_cast_device).uuid, CastStates.Play)
+        } else if (playing_hls) {
             hls_player.play()
         } else {
             player_audio.play()
@@ -62,7 +64,9 @@ playing.subscribe((val) => {
         
     } else {
 
-        if (playing_hls) {
+        if (get(using_cast)) {
+            Cast.control(get(current_cast_device).uuid, CastStates.Pause)
+        } else if (playing_hls) {
             hls_player.pause()
         } else {
             player_audio.pause()
@@ -111,6 +115,16 @@ navigator.mediaSession.setActionHandler("previoustrack", () => {
 volume.subscribe(() => {
     player_audio.volume = get(volume)
     hls_player.volume = get(volume)
+
+    // Cast volume
+
+    if (get(using_cast) && get(current_cast_device).uuid != "") {
+        
+        Cast.set_volume(get(current_cast_device).uuid, val)
+
+    }
+
+
 })
 
 export function nextTrack() {

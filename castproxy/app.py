@@ -3,6 +3,7 @@ import pychromecast
 from dataclasses import dataclass, asdict
 import json
 from uuid import UUID
+from pychromecast.controllers.media import MediaStatus
 
 app = Flask(__name__)
 
@@ -129,6 +130,7 @@ def control():
 class DeviceStatus:
     volume: float
     current_time: float
+    duration: float
 
 @app.route("/get_status/<uuid>")
 def status(uuid=None):
@@ -145,12 +147,15 @@ def status(uuid=None):
 
     pychromecast.discovery.stop_discovery(browser)
 
-    controller = cast_sessions[uuid].media_controller
+    controller  = cast_sessions[uuid].media_controller
     controller.block_until_active()
 
+    media_status: MediaStatus = controller.status
+
     return json.dumps(asdict(DeviceStatus(
-        volume=controller.status.volume_level,
-        current_time=controller.status.current_time
+        volume=media_status.volume_level,
+        current_time=media_status.current_time,
+        duration=media_status.duration
     )))
 
 if __name__ == "__main__":
