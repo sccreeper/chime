@@ -51,9 +51,9 @@ export const Cast = {
                 }
 
             }
+        } else {
+            console.error("Invalid UUID")
         }
-
-        console.error("Invalid UUID")
         
     },
 
@@ -73,9 +73,9 @@ export const Cast = {
             })
 
             using_cast.set(false)
+        } else {
+            console.error("Invalid UUID")
         }
-
-        console.error("Invalid UUID")
 
     },
 
@@ -96,9 +96,9 @@ export const Cast = {
             playing.set(true)
             setTimeout(cast_update, 1000)
 
+        } else { 
+            console.error("Invalid UUID")
         }
-
-        console.error("Invalid UUID")
 
     },
 
@@ -127,9 +127,9 @@ export const Cast = {
                     volume: volume
                 })
             })   
+        } else {
+            console.error("Invalid UUID")
         }
-
-        console.error("Invalid UUID")
 
     },
 
@@ -145,9 +145,9 @@ export const Cast = {
                 })
             })
 
+        } else {
+            console.error("Invalid UUID")
         }
-
-        console.error("Invalid UUID")
 
     }
 
