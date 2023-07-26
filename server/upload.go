@@ -163,15 +163,8 @@ func handle_upload(ctx *gin.Context) {
 		} else {
 
 			var collection playlist_model
-			var new_track_list string
 
 			database.Table(table_playlists).Where("name = ? AND is_album = 1", album_title).First(&collection)
-
-			if len(strings.Split(collection.Tracks, ",")) == 0 {
-				new_track_list += strconv.FormatInt(track_id, 16)
-			} else {
-				new_track_list += fmt.Sprintf("%s,%s", collection.Tracks, strconv.FormatInt(track_id, 16))
-			}
 
 			track_position, _ := metadata.Track()
 
@@ -196,19 +189,15 @@ func handle_upload(ctx *gin.Context) {
 			var track_list []track_model
 
 			database.Table(table_tracks).Select("*").Where("album_id = ?", collection.ID).Find(&track_list)
-
 			sort.Sort(by_position(track_list))
 
-			var new_track_string string
-
-			new_track_string += strconv.FormatInt(track_list[0].ID, 16)
-			for i := 1; i < len(track_list); i++ {
-
-				new_track_string += "," + strconv.FormatInt(track_list[i].ID, 16)
-
+			// Convert to hex
+			var track_hex_ids []string = make([]string, 0)
+			for i := 0; i < len(track_list); i++ {
+				track_hex_ids = append(track_hex_ids, strconv.FormatInt(track_list[i].ID, 16))
 			}
 
-			database.Table(table_playlists).Model(&collection).Updates(&playlist_model{Tracks: new_track_list})
+			database.Table(table_playlists).Model(&collection).Updates(&playlist_model{Tracks: strings.Join(track_hex_ids, ",")})
 
 		}
 

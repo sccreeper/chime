@@ -182,7 +182,7 @@ func handle_reorder_collection(ctx *gin.Context) {
 
 	}
 
-	database.Table(table_tracks).Model(&collection).Update("tracks", strings.Join(query.Tracks, ","))
+	database.Table(table_playlists).Model(&collection).Updates(&playlist_model{Tracks: strings.Join(query.Tracks, ",")})
 
 	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
 
