@@ -3,8 +3,7 @@ import 'dart:io' as io;
 
 import 'package:app/api/endpoints.dart';
 import 'package:app/api/models/session.dart';
-import 'package:app/backend/login.dart';
-import 'package:app/backend/shared.dart';
+import 'package:app/shared.dart';
 import 'package:app/mainscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -54,6 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
             onChanged: (value) => {loginServerAddress = value},
             decoration: const InputDecoration(hintText: "Server Address")),
         ElevatedButton(
+          style: Theme.of(context).textButtonTheme.style,
           onPressed: () => {_login()},
           child: const Text("Login"),
         ),

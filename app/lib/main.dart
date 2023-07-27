@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io' as io;
 import 'package:app/api/endpoints.dart';
-import 'package:app/backend/login.dart';
-import 'package:app/backend/shared.dart';
+import 'package:app/shared.dart';
+import 'package:app/shared.dart';
 import 'package:app/mainscreen.dart';
+import 'package:app/views/libraryview.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:app/login.dart';
@@ -11,6 +13,7 @@ import 'package:app/api/models/session.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   hierarchicalLoggingEnabled = true;
@@ -24,9 +27,8 @@ void main() {
 
   session = UserSession.empty();
 
-  runApp(const MaterialApp(
-    home: MainApp(),
-  ));
+  runApp(ChangeNotifierProvider(create: (_) => LibraryViewChangeNotifier(), child: const MaterialApp(home: MainApp()),));
+  
 }
 
 class MainApp extends StatefulWidget {
@@ -39,24 +41,64 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
 
   late io.Directory appDocuments;
-  late UserSession userSession;
 
+  Widget _currentView = Scaffold(backgroundColor: Colors.grey[700],);
 
-  
   @override
   void initState() {
     // Check config and switch view.
     _checkConfig();
     super.initState();
   }
-  
+
   @override
   Widget build(BuildContext context) {
 
-    return const MaterialApp(
-      home: Scaffold(
-        backgroundColor: Colors.black,
+    final ThemeData baseTheme = ThemeData.light();
+
+    return MaterialApp(
+      theme: baseTheme.copyWith( 
+        primaryTextTheme: GoogleFonts.anuphanTextTheme(),
+        scaffoldBackgroundColor: Colors.grey[700],
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.grey[800],
+          titleTextStyle: GoogleFonts.anuphan(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)
+        ),
+        textTheme: baseTheme.textTheme.copyWith(
+          bodySmall: GoogleFonts.anuphan(color: Colors.white, fontSize: 14),
+          bodyMedium: GoogleFonts.anuphan(color: Colors.white, fontSize: 16),
+          bodyLarge: GoogleFonts.anuphan(color: Colors.white, fontSize: 18),
+          headlineSmall: GoogleFonts.anuphan(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          titleMedium: GoogleFonts.anuphan(color: Colors.white)
+        ),
+        primaryColor: Colors.yellow[800],
+        colorScheme: ColorScheme.fromSwatch(
+          accentColor: Colors.amber[600],
+          primaryColorDark: Colors.yellow[800],
+        ),
+
+        inputDecorationTheme: InputDecorationTheme(
+          labelStyle: GoogleFonts.anuphan(color: Colors.white70),
+          hintStyle: GoogleFonts.anuphan(color: Colors.white70),
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.white54),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.orange),
+          )
+        ),
+
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            foregroundColor: MaterialStateColor.resolveWith((states) => Colors.white),
+            overlayColor: MaterialStateColor.resolveWith((states) => Colors.deepOrange),
+            backgroundColor: MaterialStateColor.resolveWith((states) => Colors.orange),
+            textStyle: MaterialStateTextStyle.resolveWith((states) => GoogleFonts.anuphan(color: Colors.white))
+          )
+        )
+
       ),
+      home: _currentView
     );
   }
 
@@ -84,7 +126,7 @@ class _MainAppState extends State<MainApp> {
 
       } on FormatException {
         log.warning("Error in config file formatting, changing to login screen");
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+        _currentView = LoginScreen();
         return;
       }
       
@@ -100,11 +142,18 @@ class _MainAppState extends State<MainApp> {
 
       if (respJson["status"] == "exists") {
         log.fine("Session exists, continuing to main screen");
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
+        
+        setState(() {
+          _currentView = MainScreen();
+        });
 
       } else {
         log.fine("Session does not exist, continuing to login screen");
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+        
+        setState(() {
+          _currentView = LoginScreen();          
+        });
+
       }
 
 
@@ -121,7 +170,9 @@ class _MainAppState extends State<MainApp> {
 
       // Push login screen
 
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+      setState(() {
+        _currentView = LoginScreen();
+      });
 
     }
 
