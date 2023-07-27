@@ -9,7 +9,8 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY . ./
+COPY ./server ./server
+COPY ./web ./web
 
 RUN go build -o /chime ./server/.
 
