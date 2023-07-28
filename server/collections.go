@@ -41,14 +41,14 @@ type collection_response struct {
 }
 
 type track_response struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	AlbumName string `json:"album_name"`
-	Released  int    `json:"released"`
-	Artist    string `json:"artist"`
-	AlbumID   string `json:"album_id"`
-	Duration  int    `json:"duration"`
-	CoverID   string `json:"cover_id"`
+	ID        string  `json:"id"`
+	Name      string  `json:"name"`
+	AlbumName string  `json:"album_name"`
+	Released  int     `json:"released"`
+	Artist    string  `json:"artist"`
+	AlbumID   string  `json:"album_id"`
+	Duration  float64 `json:"duration"`
+	CoverID   string  `json:"cover_id"`
 }
 
 func handle_get_collections(ctx *gin.Context) {
@@ -181,7 +181,7 @@ func handle_get_collection(ctx *gin.Context) {
 			AlbumName: track_collection.Name,
 			Artist:    track.Artist,
 			AlbumID:   strconv.FormatInt(track.AlbumID, 16),
-			Duration:  int(track.Duration),
+			Duration:  track.Duration,
 			CoverID:   strconv.FormatInt(track.AlbumID, 16),
 		})
 
@@ -246,16 +246,16 @@ type track_metadata_query struct {
 }
 
 type track_metadata_response struct {
-	Title        string `json:"title"`
-	AlbumName    string `json:"album_name"`
-	AlbumID      string `json:"album_id"`
-	CoverID      string `json:"cover_id"`
-	Artist       string `json:"artist"`
-	OriginalFile string `json:"original_file"`
-	Format       string `json:"format"`
-	Duration     int    `json:"duration"`
-	Released     int    `json:"released"`
-	Size         int    `json:"size"`
+	Title        string  `json:"title"`
+	AlbumName    string  `json:"album_name"`
+	AlbumID      string  `json:"album_id"`
+	CoverID      string  `json:"cover_id"`
+	Artist       string  `json:"artist"`
+	OriginalFile string  `json:"original_file"`
+	Format       string  `json:"format"`
+	Duration     float64 `json:"duration"`
+	Released     int     `json:"released"`
+	Size         int     `json:"size"`
 }
 
 func handle_get_track_metadata(ctx *gin.Context) {
@@ -288,7 +288,7 @@ func handle_get_track_metadata(ctx *gin.Context) {
 		CoverID:      strconv.FormatInt(track.Cover, 16),
 		Artist:       track.Artist,
 		OriginalFile: track.Original,
-		Duration:     int(track.Duration),
+		Duration:     track.Duration,
 		Released:     int(track.Released),
 		Size:         int(track.Size),
 		AlbumID:      strconv.FormatInt(track.AlbumID, 16),
