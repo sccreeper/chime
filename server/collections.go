@@ -172,7 +172,7 @@ func handle_get_collection(ctx *gin.Context) {
 		}
 
 		database.Table("tracks").Select("*").Where("id = ?", id).First(&track)
-		database.Table("playlists").Select("name").Where("id = ?", track.AlbumID).First(&track_collection)
+		database.Table("playlists").Select("name, cover").Where("id = ?", track.AlbumID).First(&track_collection)
 
 		response_struct.Tracks = append(response_struct.Tracks, track_response{
 			ID:        strconv.FormatInt(id, 16),
@@ -182,7 +182,7 @@ func handle_get_collection(ctx *gin.Context) {
 			Artist:    track.Artist,
 			AlbumID:   strconv.FormatInt(track.AlbumID, 16),
 			Duration:  track.Duration,
-			CoverID:   strconv.FormatInt(track.AlbumID, 16),
+			CoverID:   strconv.FormatInt(track_collection.Cover, 16),
 		})
 
 	}
