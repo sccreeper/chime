@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 import 'package:app/api/endpoints.dart';
-import 'package:app/shared.dart';
+import 'package:app/player.dart';
 import 'package:app/shared.dart';
 import 'package:app/mainscreen.dart';
 import 'package:app/views/libraryview.dart';
@@ -11,11 +11,12 @@ import 'package:http/http.dart' as http;
 import 'package:app/login.dart';
 import 'package:app/api/models/session.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   hierarchicalLoggingEnabled = true;
 
   log.level = Level.ALL;
@@ -25,7 +26,11 @@ void main() {
 
   });
 
+  WidgetsFlutterBinding.ensureInitialized();
+
   session = UserSession.empty();
+  audioPlayer = AudioPlayer();
+  Player.init();
 
   runApp(ChangeNotifierProvider(create: (_) => LibraryViewChangeNotifier(), child: const MaterialApp(home: MainApp()),));
   

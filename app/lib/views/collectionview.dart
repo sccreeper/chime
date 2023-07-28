@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:app/api/api.dart';
 import 'package:app/api/models/collections.dart';
+import 'package:app/player.dart';
 import 'package:app/shared.dart';
 import 'package:app/widgets/borderedchip.dart';
 import 'package:app/widgets/loadingspinner.dart';
@@ -153,27 +154,8 @@ class TrackScaffold extends StatelessWidget {
       subtitle: Text("${track.artist} ● ${Util.convertDuration(track.duration)}"),
       dense: true,
       contentPadding: EdgeInsets.all(0.0),
+      onTap: () => Player.playTrack(track),
     );
-
-
-    // return Column(
-    //   crossAxisAlignment: CrossAxisAlignment.start,
-    //   children: [
-    //     SingleChildScrollView(
-    //       scrollDirection: Axis.horizontal,
-    //       child: Text(track.name, maxLines: 1, style: GoogleFonts.anuphan(color: Colors.white, fontWeight: FontWeight.w500))
-    //     ),
-    //     Row(
-    //       children: [            
-    //         Text(track.artist, style: Theme.of(context).textTheme.bodySmall,),
-    //         const SizedBox(width: 2.5,),
-    //         Text("●", style: Theme.of(context).textTheme.bodySmall,),
-    //         const SizedBox(width: 2.5,),
-    //         Text(Util.convertDuration(track.duration), style: Theme.of(context).textTheme.bodySmall)
-    //       ],
-    //     )
-    //   ],
-    // );
     
   }
 
