@@ -42,7 +42,6 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Text(_viewNames[_selectedIndex]),
       ),
-      backgroundColor: Colors.grey[700],
       body: Center (child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
         items: const [

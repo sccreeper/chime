@@ -100,7 +100,7 @@ class Track {
   final int released;
   final String artist;
   final String albumId;
-  final int duration;
+  final double duration;
   final String coverId;
 
   Track({

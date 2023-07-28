@@ -59,7 +59,7 @@ class _MainAppState extends State<MainApp> {
     return MaterialApp(
       theme: baseTheme.copyWith( 
         primaryTextTheme: GoogleFonts.anuphanTextTheme(),
-        scaffoldBackgroundColor: Colors.grey[700],
+        scaffoldBackgroundColor: Color.fromARGB(255, 43, 43, 43),
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.grey[800],
           titleTextStyle: GoogleFonts.anuphan(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)
@@ -95,7 +95,9 @@ class _MainAppState extends State<MainApp> {
             backgroundColor: MaterialStateColor.resolveWith((states) => Colors.orange),
             textStyle: MaterialStateTextStyle.resolveWith((states) => GoogleFonts.anuphan(color: Colors.white))
           )
-        )
+        ),
+
+        dividerColor: Colors.white70,
 
       ),
       home: _currentView

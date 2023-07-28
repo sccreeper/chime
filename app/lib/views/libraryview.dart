@@ -122,14 +122,14 @@ class _LibraryItemState extends State<LibaryItem> {
   @override
   Widget build(BuildContext context) {
 
-    log.fine(Theme.of(context).textTheme.bodySmall!.fontSize);
-
     return InkWell(
       child: Text(widget.name, style: Theme.of(context).textTheme.bodyMedium,),
       onTap: () {
         log.fine("Opening ${widget.type.name} ${widget.id}");
-        
-        Provider.of<LibraryViewChangeNotifier>(context, listen: false).changeActiveWidget(CollectionView(id: widget.id));
+
+        if (widget.type == LibaryItemType.album || widget.type == LibaryItemType.playlist) {
+          Provider.of<LibraryViewChangeNotifier>(context, listen: false).changeActiveWidget(CollectionView(id: widget.id)); 
+        }
 
       },
     );
