@@ -1,6 +1,5 @@
-import 'package:app/api/api.dart';
-import 'package:app/api/models/collections.dart';
 import 'package:app/shared.dart';
+import 'package:app/views/dockedplayer.dart';
 import 'package:app/views/libraryview.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -43,6 +42,8 @@ class _MainScreenState extends State<MainScreen> {
         title: Text(_viewNames[_selectedIndex]),
       ),
       body: Center (child: _widgetOptions.elementAt(_selectedIndex)),
+      floatingActionButton: DockedPlayer(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(

@@ -5,7 +5,7 @@ import 'package:app/views/collectionview.dart';
 import 'package:app/widgets/iconlabel.dart';
 import 'package:app/widgets/loadingspinner.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get_it/get_it.dart';
 
 class LibrayView extends StatefulWidget {
 
@@ -19,12 +19,19 @@ class LibrayView extends StatefulWidget {
 
 class _LibaryViewState extends State<LibrayView> {
 
-  Widget _childWidget = LoadingSpinner();
+  final _service = GetIt.I<LibraryViewChangeNotifier>();
 
   @override
   void initState() {
+    _service.addListener(updateView);
     _fetchLibaryData();
     super.initState();
+  }
+
+  void updateView() {
+    if (mounted) {
+      setState(() {}); 
+    }
   }
 
   void _fetchLibaryData() async {
@@ -61,7 +68,7 @@ class _LibaryViewState extends State<LibrayView> {
       
     }
 
-    Provider.of<LibraryViewChangeNotifier>(context, listen: false).changeActiveWidget(ListView(
+    GetIt.I<LibraryViewChangeNotifier>().changeActiveWidget(ListView(
       children: content,
     ));
 
@@ -74,10 +81,10 @@ class _LibaryViewState extends State<LibrayView> {
     return WillPopScope(
       onWillPop: () async {
 
-        if (context.read<LibraryViewChangeNotifier>().activeWidget is ListView) {
+        if (GetIt.I<LibraryViewChangeNotifier>().activeWidget is ListView) {
           return false;
         } else {
-          Provider.of<LibraryViewChangeNotifier>(context, listen: false).changeActiveWidget(LoadingSpinner());
+          GetIt.I<LibraryViewChangeNotifier>().changeActiveWidget(LoadingSpinner());
           _fetchLibaryData();
           return false;
         }
@@ -85,7 +92,7 @@ class _LibaryViewState extends State<LibrayView> {
       }, 
       child: Container(
         padding: EdgeInsets.all(16.0),
-        child: context.watch<LibraryViewChangeNotifier>().activeWidget,
+        child: GetIt.I<LibraryViewChangeNotifier>().activeWidget,
       )
     );
   }
@@ -128,7 +135,9 @@ class _LibraryItemState extends State<LibaryItem> {
         log.fine("Opening ${widget.type.name} ${widget.id}");
 
         if (widget.type == LibaryItemType.album || widget.type == LibaryItemType.playlist) {
-          Provider.of<LibraryViewChangeNotifier>(context, listen: false).changeActiveWidget(CollectionView(id: widget.id)); 
+          
+          GetIt.I<LibraryViewChangeNotifier>().changeActiveWidget(CollectionView(id: widget.id));
+
         }
 
       },

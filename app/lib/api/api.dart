@@ -31,4 +31,22 @@ class ChimeAPI {
   
   }
 
+  static Future<TrackMetadata> getTrackMetadata(String id) async {
+
+    final req = await http.get(Uri.parse("${session.serverOrigin}${apiTrackMetadata}/${id}"), headers: {"Cookie": "session=${session.sessionBase64}"});
+    return TrackMetadata.fromJSON(jsonDecode(req.body));
+
+  }
+
+  static Future<List<String>> getTracks(int limit) async {
+
+    final req = await http.post(
+      Uri.parse("${session.serverOrigin}/${apiAllTracks}"),
+      headers: {"Cookie":"session=${session.sessionBase64}"},
+      body: jsonEncode(<String,int>{"limit":limit})
+    );
+    return jsonDecode(req.body) as List<String>;
+
+  }
+
 }

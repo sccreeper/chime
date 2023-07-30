@@ -5,16 +5,15 @@ import 'package:app/player.dart';
 import 'package:app/shared.dart';
 import 'package:app/mainscreen.dart';
 import 'package:app/views/libraryview.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:app/login.dart';
 import 'package:app/api/models/session.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
 
 void main() async {
   hierarchicalLoggingEnabled = true;
@@ -29,10 +28,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   session = UserSession.empty();
-  audioPlayer = AudioPlayer();
   Player.init();
 
-  runApp(ChangeNotifierProvider(create: (_) => LibraryViewChangeNotifier(), child: const MaterialApp(home: MainApp()),));
+  GetIt.I.registerSingleton<LibraryViewChangeNotifier>(LibraryViewChangeNotifier());
+  GetIt.I.registerSingleton<PlayerStatusNotifier>(PlayerStatusNotifier());
+
+  runApp(const MaterialApp(home: MainApp()));
   
 }
 
@@ -103,6 +104,12 @@ class _MainAppState extends State<MainApp> {
         ),
 
         dividerColor: Colors.white70,
+
+        progressIndicatorTheme: ProgressIndicatorThemeData(
+          color: Colors.amber,
+          linearTrackColor: Colors.amber[50],
+          linearMinHeight: 2.0
+        )
 
       ),
       home: _currentView

@@ -8,7 +8,6 @@ import 'package:app/shared.dart';
 import 'package:app/widgets/borderedchip.dart';
 import 'package:app/widgets/loadingspinner.dart';
 import 'package:flutter/material.dart';
-import 'package:app/api/endpoints.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -63,6 +62,8 @@ class _CollectionViewState extends State<CollectionView> {
   
   @override
   Widget build(BuildContext context) {
+
+    currentCollection = widget.id;
     
     return Container(
       child: _childWidget,
@@ -81,6 +82,20 @@ class CollectionScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    
+    // The cast on this line *is* required.
+    List<int> contentsIndexes = Iterable<int>.generate(collection.tracks.length).toList();
+    List<Widget> contents = contentsIndexes.map((i) => TrackScaffold(track: collection.tracks[i], index: i, collectionId: currentCollection) as Widget).toList();
+
+    log.fine(contentsIndexes.length);
+
+    Player.viewingTracks = collection.tracks;
+
+    contents.add(
+      const SizedBox(
+        height: 48.0,
+      )
+    );
     
     return Container(
 
@@ -125,7 +140,7 @@ class CollectionScaffold extends StatelessWidget {
           Expanded(
             child: Scrollbar(
               child: ListView(
-                children: collection.tracks.map((e) => TrackScaffold(track: e)).toList(),
+                children: contents,
               )
             ),
           )
@@ -140,8 +155,10 @@ class CollectionScaffold extends StatelessWidget {
 class TrackScaffold extends StatelessWidget {
 
   final Track track;
+  final int index;
+  final String collectionId;
 
-  const TrackScaffold({super.key, required this.track});
+  const TrackScaffold({super.key, required this.track, required this.index, required this.collectionId});
 
   @override
   Widget build(BuildContext context) {
@@ -154,10 +171,13 @@ class TrackScaffold extends StatelessWidget {
       subtitle: Text("${track.artist} ● ${Util.convertDuration(track.duration)}"),
       dense: true,
       contentPadding: EdgeInsets.all(0.0),
-      onTap: () => Player.playTrack(track),
+      onTap: () {
+          
+        Player.playCollection(collectionId, track.id, index, track);
+
+      },
     );
     
   }
-
 
 }

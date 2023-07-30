@@ -102,6 +102,7 @@ class Track {
   final String albumId;
   final double duration;
   final String coverId;
+  final int position;
 
   Track({
     required this.id,
@@ -112,6 +113,7 @@ class Track {
     required this.albumId,
     required this.duration,
     required this.coverId,
+    required this.position,
   });
 
   factory Track.fromJSON(Map<String, dynamic> json) => Track(
@@ -122,10 +124,11 @@ class Track {
     artist: json["artist"], 
     albumId: json["album_id"], 
     duration: json["duration"], 
-    coverId: json["cover_id"]
+    coverId: json["cover_id"],
+    position: json["position"]
   );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
     "id":id,
     "name":name,
     "album_name":name,
@@ -133,7 +136,78 @@ class Track {
     "artist":artist,
     "album_id":albumId,
     "duration":duration,
-    "cover_id":coverId
+    "cover_id":coverId,
+    "position":position
+  };
+
+  factory Track.fromMetadata(String id, TrackMetadata metadata) => Track(
+    id: id, 
+    name: metadata.title, 
+    albumName: metadata.albumName, 
+    released: metadata.released, 
+    artist: metadata.artist, 
+    albumId: metadata.albumId, 
+    duration: metadata.duration, 
+    coverId: metadata.coverId,
+    position: metadata.position
+  );
+
+}
+
+class TrackMetadata {
+
+  final String title; //Title of the track
+  final String albumName; //The name of the album this track belongs to
+  final String albumId; //The ID of the album this track belongs to
+  final String coverId; //The ID of the cover for the album this track belongs to
+  final String artist; //The artist of this track
+  final String originalFile; //The original file name for this track
+  final String format; //The format of the track e.g. FLAC, MP3, WAV etc.
+  final double duration; //The duration of the track in seconds
+  final int released; //The year the track was released
+  final int size; //The size of the track in bytes
+  final int position;
+
+  TrackMetadata({
+    required this.title,
+    required this.albumName,
+    required this.albumId,
+    required this.coverId,
+    required this.artist,
+    required this.originalFile,
+    required this.format,
+    required this.duration,
+    required this.released,
+    required this.size,
+    required this.position,
+  });
+
+  factory TrackMetadata.fromJSON(Map<String, dynamic> json) => TrackMetadata(
+    title: json["title"], 
+    albumName: json["album_name"], 
+    albumId: json["album_id"], 
+    coverId: json["cover_id"], 
+    artist: json["artist"], 
+    originalFile: json["original_file"], 
+    format: json["format"], 
+    duration: json["duration"], 
+    released: json["released"], 
+    size: json["size"],
+    position: json["position"]
+  );
+
+  Map<String, dynamic> toJson() => {
+    "title":title,
+    "album_name":albumName,
+    "album_id":albumId,
+    "cover_id":coverId,
+    "artist":artist,
+    "original_file":originalFile,
+    "format":format,
+    "duration":duration,
+    "released":released,
+    "size":size,
+    "position":position
   };
 
 }
