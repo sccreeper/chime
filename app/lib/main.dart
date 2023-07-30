@@ -97,9 +97,16 @@ class _MainAppState extends State<MainApp> {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
             foregroundColor: MaterialStateColor.resolveWith((states) => Colors.white),
-            overlayColor: MaterialStateColor.resolveWith((states) => Colors.deepOrange),
-            backgroundColor: MaterialStateColor.resolveWith((states) => Colors.orange),
+            overlayColor: MaterialStateColor.resolveWith((states) => const Color(0xFFF57F17)),
+            backgroundColor: MaterialStateColor.resolveWith((states) => const Color(0xFFF9A825)),
             textStyle: MaterialStateTextStyle.resolveWith((states) => GoogleFonts.anuphan(color: Colors.white))
+          )
+        ),
+
+        textButtonTheme: TextButtonThemeData(
+          style: ButtonStyle(
+            foregroundColor: MaterialStateColor.resolveWith((states) => const Color(0xFFF9A825)),
+            overlayColor: MaterialStateColor.resolveWith((states) => const Color(0xFFF57F17))
           )
         ),
 

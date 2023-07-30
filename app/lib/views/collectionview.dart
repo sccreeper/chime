@@ -1,7 +1,9 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:app/api/api.dart';
+import 'package:app/api/endpoints.dart';
 import 'package:app/api/models/collections.dart';
 import 'package:app/player.dart';
 import 'package:app/shared.dart';
@@ -174,6 +176,90 @@ class TrackScaffold extends StatelessWidget {
       onTap: () {
           
         Player.playCollection(collectionId, track.id, index, track);
+
+      },
+
+      onLongPress: () {
+
+        ChimeAPI.getTrackMetadata(track.id).then((TrackMetadata trackMetadata) {
+          
+          showDialog(
+            context: context,
+            builder: (BuildContext context) => AlertDialog(
+              backgroundColor: Colors.grey[700],
+              title: const Text("Track metadata"),
+              contentTextStyle: GoogleFonts.anuphan(),
+              titleTextStyle: GoogleFonts.anuphan(),
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: (track.coverId == "0" ? 
+                      Image.asset("assets/no_cover.png", width: 100, height: 100,) : 
+                      Image.network(
+                        "${session.serverOrigin}${apiGetCover}/${track.coverId}", 
+                        headers: {"Cookie":"session=${session.sessionBase64}"}, 
+                        width: 100,
+                        height: 100,
+                        )
+                    ),
+                  ),
+                  Divider(),
+                  Text(track.name),
+                  Divider(),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        const TextSpan(text: "Released: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(text: trackMetadata.released.toString())
+                      ]
+                    ),
+                  ),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        const TextSpan(text: "Duration: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(text: Util.convertDuration(trackMetadata.duration))
+                      ]
+                    ),
+                  ),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        const TextSpan(text: "Format: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(text: trackMetadata.format)
+                      ]
+                    ),
+                  ),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        const TextSpan(text: "Original file: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(text: trackMetadata.originalFile)
+                      ]
+                    ),
+                  ),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        const TextSpan(text: "File size: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(text: "${(trackMetadata.size / pow(10, 6)).toStringAsFixed(2)} mb")
+                      ]
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, "OK"), 
+                  child: const Text("OK")
+                )
+              ],
+            )
+          );
+
+        });
 
       },
     );
