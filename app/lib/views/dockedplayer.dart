@@ -61,15 +61,18 @@ class _DockedPlayerState extends State<DockedPlayer> {
                         headers: {"Cookie":"session=${session.sessionBase64}"},
                         )
                     ),
-                    SizedBox(width: 10,),
+                    SizedBox(width: 5,),
                     Expanded(
-                      flex: 8,
+                      flex: 5,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             GetIt.I<PlayerStatusNotifier>().currentTrack,
                             style: GoogleFonts.anuphan(fontSize: 16),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            softWrap: false,
                           ),
                           Text(
                             GetIt.I<PlayerStatusNotifier>().currentArtist,
@@ -79,19 +82,37 @@ class _DockedPlayerState extends State<DockedPlayer> {
                       ),
                     ),
                     Expanded(
-                      flex: 1,
-                      child: IconButton(
-                        icon: GetIt.I<PlayerStatusNotifier>().playing ? const Icon(Icons.pause_rounded) : const Icon(Icons.play_arrow_rounded), 
-                        iconSize: 24, 
-                        color: Colors.yellow[800], 
-                        onPressed: () {
-                          if (GetIt.I<PlayerStatusNotifier>().playing) {
-                            audioPlayer.pause();
-                          } else {
-                            audioPlayer.play();
-                          }
-                        },
-                      ),
+                      flex: 4,
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: GetIt.I<PlayerStatusNotifier>().playing ? const Icon(Icons.pause_rounded) : const Icon(Icons.play_arrow_rounded), 
+                            iconSize: 24, 
+                            color: Colors.white70, 
+                            onPressed: () {
+                              if (GetIt.I<PlayerStatusNotifier>().playing) {
+                                audioPlayer.pause();
+                              } else {
+                                audioPlayer.play();
+                              }
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.shuffle_rounded),
+                            color: GetIt.I<PlayerStatusNotifier>().shuffle ? Colors.yellow[800] : Colors.white70,
+                            onPressed: () {
+                              GetIt.I<PlayerStatusNotifier>().shuffle = !GetIt.I<PlayerStatusNotifier>().shuffle;
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.repeat_rounded),
+                            color: GetIt.I<PlayerStatusNotifier>().loop ? Colors.yellow[800] : Colors.white70,
+                            onPressed: () {
+                              GetIt.I<PlayerStatusNotifier>().loop = !GetIt.I<PlayerStatusNotifier>().loop;
+                            },
+                          )
+                        ],
+                      )
                     )
                   ],
                 ),

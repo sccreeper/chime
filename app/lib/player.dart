@@ -20,8 +20,6 @@ class Player {
   static int trackIndex = 0;
   static String currentCollectionId = "";
 
-  static bool shuffle = false;
-  static bool loop = false;
   static bool playingRandom = false;
 
   static void init() {
@@ -30,13 +28,14 @@ class Player {
 
       if (playerState.processingState == ProcessingState.completed) {
         
-        if (shuffle && !playingRandom) {
+        if (GetIt.I<PlayerStatusNotifier>().shuffle && !playingRandom) {
 
           playTrack(trackQueue[Random().nextInt(trackQueue.length)]);
 
-        } else if (loop) {
+        } else if (GetIt.I<PlayerStatusNotifier>().loop) {
 
-          playTrack(currentTrack!);
+          audioPlayer.seek(Duration.zero);
+          audioPlayer.play();
 
         } else if(!(trackIndex+1 >= trackQueue.length)) {
 
@@ -122,12 +121,16 @@ class PlayerStatusNotifier extends ChangeNotifier {
   double _completion = 0.0;
   String _coverId = "0";
   bool _playing = false;
+  bool _shuffle = false;
+  bool _loop = false;
 
   String get currentTrack => _currentTrackName;
   String get currentArtist => _currentArtist;
   double get completion => _completion;
   String get coverID => _coverId;
   bool get playing => _playing;
+  bool get shuffle => _shuffle;
+  bool get loop => _loop;
 
   void updateTrackDetails(Track track) {
 
@@ -151,6 +154,16 @@ class PlayerStatusNotifier extends ChangeNotifier {
     _playing = playing;
     notifyListeners();
 
+  }
+
+  set shuffle(bool val) {
+    _shuffle = val;
+    notifyListeners();
+  }
+
+  set loop(bool val) {
+    _loop = val;
+    notifyListeners();
   }
 
 }
