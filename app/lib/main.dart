@@ -5,6 +5,7 @@ import 'package:app/player.dart';
 import 'package:app/shared.dart';
 import 'package:app/mainscreen.dart';
 import 'package:app/views/libraryview.dart';
+import 'package:app/views/radioview.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -32,6 +33,7 @@ void main() async {
 
   GetIt.I.registerSingleton<LibraryViewChangeNotifier>(LibraryViewChangeNotifier());
   GetIt.I.registerSingleton<PlayerStatusNotifier>(PlayerStatusNotifier());
+  GetIt.I.registerSingleton<RadioViewLoadedNotifier>(RadioViewLoadedNotifier());
 
   runApp(const MaterialApp(home: MainApp()));
   
@@ -105,6 +107,7 @@ class _MainAppState extends State<MainApp> {
 
         textButtonTheme: TextButtonThemeData(
           style: ButtonStyle(
+            textStyle: MaterialStateTextStyle.resolveWith((states) => GoogleFonts.anuphan(color: const Color(0xFFF9A825))),
             foregroundColor: MaterialStateColor.resolveWith((states) => const Color(0xFFF9A825)),
             overlayColor: MaterialStateColor.resolveWith((states) => const Color(0xFFF57F17))
           )

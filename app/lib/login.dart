@@ -53,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
             onChanged: (value) => {loginServerAddress = value},
             decoration: const InputDecoration(hintText: "Server Address")),
         ElevatedButton(
-          style: Theme.of(context).textButtonTheme.style,
+          style: Theme.of(context).elevatedButtonTheme.style,
           onPressed: () => {_login()},
           child: const Text("Login"),
         ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:app/api/models/collections.dart';
+import 'package:app/api/models/radio.dart';
 import 'package:app/shared.dart';
 import 'package:app/api/endpoints.dart';
 import 'package:app/shared.dart';
@@ -46,6 +47,13 @@ class ChimeAPI {
       body: jsonEncode(<String,int>{"limit":limit})
     );
     return jsonDecode(req.body) as List<String>;
+
+  }
+
+  static Future<RadioModel> getRadio(String id) async {
+
+    final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetRadio/$id"), headers: {"Cookie":"session=${session.sessionBase64}"});
+    return RadioModel.fromJson(jsonDecode(req.body));
 
   }
 

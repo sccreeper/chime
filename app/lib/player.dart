@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:app/api/api.dart';
 import 'package:app/api/endpoints.dart';
 import 'package:app/api/models/collections.dart';
+import 'package:app/api/models/radio.dart';
 import 'package:app/shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
@@ -42,7 +43,7 @@ class Player {
           trackIndex += 1;
 
           playTrackId(trackQueue[trackIndex].id);
-          GetIt.I<PlayerStatusNotifier>().updateTrackDetails(trackQueue[trackIndex]);
+          GetIt.I<PlayerStatusNotifier>().updateDetails(trackQueue[trackIndex]);
 
         } else if(playingRandom) {
 
@@ -50,7 +51,7 @@ class Player {
           String trackId = allTracks[Random().nextInt(allTracks.length)];
           TrackMetadata track = await ChimeAPI.getTrackMetadata(trackId);
 
-          GetIt.I<PlayerStatusNotifier>().updateTrackDetails(Track.fromMetadata(trackId, track));
+          GetIt.I<PlayerStatusNotifier>().updateDetails(Track.fromMetadata(trackId, track));
 
           playTrackId(trackId);
 
@@ -85,7 +86,7 @@ class Player {
   static void playTrack(Track track) async {
 
     playTrackId(track.id);
-    GetIt.I<PlayerStatusNotifier>().updateTrackDetails(track);
+    GetIt.I<PlayerStatusNotifier>().updateDetails(track);
 
   }
 
@@ -97,6 +98,8 @@ class Player {
         headers: {"Cookie":"session=${session.sessionBase64}"},
       )
     );
+
+    GetIt.I<PlayerStatusNotifier>().playingRadio = false;
 
     audioPlayer.play();
   
@@ -112,6 +115,19 @@ class Player {
 
   }
 
+  static void playRadio(RadioModel radio) async {
+
+    await audioPlayer.setAudioSource(
+      AudioSource.uri(Uri.parse(radio.url))
+    );
+
+    GetIt.I<PlayerStatusNotifier>().playingRadio = true;
+    GetIt.I<PlayerStatusNotifier>().updateDetails(radio);
+    
+    audioPlayer.play();
+
+  }
+
 }
 
 class PlayerStatusNotifier extends ChangeNotifier {
@@ -123,6 +139,7 @@ class PlayerStatusNotifier extends ChangeNotifier {
   bool _playing = false;
   bool _shuffle = false;
   bool _loop = false;
+  bool _playingRadio = false;
 
   String get currentTrack => _currentTrackName;
   String get currentArtist => _currentArtist;
@@ -131,14 +148,25 @@ class PlayerStatusNotifier extends ChangeNotifier {
   bool get playing => _playing;
   bool get shuffle => _shuffle;
   bool get loop => _loop;
+  bool get playingRadio => _playingRadio;
 
-  void updateTrackDetails(Track track) {
+  void updateDetails<T>(T item) {
 
-    _currentTrackName = track.name;
-    _currentArtist = track.artist;
-    _coverId = track.coverId;
+    if (item is Track) {
+      _currentTrackName = item.name;
+      _currentArtist = item.artist;
+      _coverId = item.coverId; 
 
-    notifyListeners();
+      notifyListeners();
+    } else if (item is RadioModel) {
+      _currentTrackName = item.name;
+      _currentArtist = "Playing internet radio";
+      _coverId = item.coverId;
+
+      notifyListeners();
+    } else {
+      throw ArgumentError('Unsupported $T type');
+    }
 
   }
 
@@ -163,6 +191,11 @@ class PlayerStatusNotifier extends ChangeNotifier {
 
   set loop(bool val) {
     _loop = val;
+    notifyListeners();
+  }
+
+  set playingRadio(bool val) {
+    _playingRadio = val;
     notifyListeners();
   }
 

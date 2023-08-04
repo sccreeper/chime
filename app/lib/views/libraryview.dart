@@ -2,6 +2,7 @@ import 'package:app/api/api.dart';
 import 'package:app/api/models/collections.dart';
 import 'package:app/shared.dart';
 import 'package:app/views/collectionview.dart';
+import 'package:app/views/radioview.dart';
 import 'package:app/widgets/iconlabel.dart';
 import 'package:app/widgets/loadingspinner.dart';
 import 'package:flutter/material.dart';
@@ -138,6 +139,10 @@ class _LibraryItemState extends State<LibaryItem> {
           
           GetIt.I<LibraryViewChangeNotifier>().changeActiveWidget(CollectionView(id: widget.id));
 
+        } else {
+
+          GetIt.I<LibraryViewChangeNotifier>().changeActiveWidget(RadioView(id: widget.id));
+          
         }
 
       },
