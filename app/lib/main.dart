@@ -119,6 +119,15 @@ class _MainAppState extends State<MainApp> {
           color: Colors.amber,
           linearTrackColor: Colors.amber[50],
           linearMinHeight: 2.0
+        ),
+
+        sliderTheme: SliderThemeData(
+          trackHeight: 2,
+          activeTrackColor: Colors.amber,
+          inactiveTrackColor: Colors.amber[50],
+          thumbColor: Colors.yellow[800],
+          overlayColor: Colors.grey.withOpacity(0.25),
+          
         )
 
       ),

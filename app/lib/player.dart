@@ -16,6 +16,7 @@ AudioPlayer audioPlayer = AudioPlayer();
 class Player {
 
   static List<Track> trackQueue = [];
+  static List<Track> previousTrackQueue = [];
   static List<Track> viewingTracks = [];
   static Track? currentTrack;
   static int trackIndex = 0;
@@ -28,41 +29,7 @@ class Player {
     audioPlayer.playerStateStream.listen((playerState) async {
 
       if (playerState.processingState == ProcessingState.completed) {
-        
-        if (GetIt.I<PlayerStatusNotifier>().shuffle && !playingRandom) {
-
-          playTrack(trackQueue[Random().nextInt(trackQueue.length)]);
-
-        } else if (GetIt.I<PlayerStatusNotifier>().loop) {
-
-          audioPlayer.seek(Duration.zero);
-          audioPlayer.play();
-
-        } else if(!(trackIndex+1 >= trackQueue.length)) {
-
-          trackIndex += 1;
-
-          playTrackId(trackQueue[trackIndex].id);
-          GetIt.I<PlayerStatusNotifier>().updateDetails(trackQueue[trackIndex]);
-
-        } else if(playingRandom) {
-
-          List<String> allTracks = await ChimeAPI.getTracks(0);
-          String trackId = allTracks[Random().nextInt(allTracks.length)];
-          TrackMetadata track = await ChimeAPI.getTrackMetadata(trackId);
-
-          GetIt.I<PlayerStatusNotifier>().updateDetails(Track.fromMetadata(trackId, track));
-
-          playTrackId(trackId);
-
-        } else {
-          currentCollectionId = "";
-          trackQueue.clear();
-          trackIndex = 0;
-          playingRandom = true;
-
-        }
-
+        nextTrack();
       }
 
     });
@@ -70,9 +37,9 @@ class Player {
     audioPlayer.positionStream.listen((duration) {
 
       if (audioPlayer.duration != null) {
-        GetIt.I<PlayerStatusNotifier>().setCompletion( duration.inMilliseconds / audioPlayer.duration!.inMilliseconds);
+        GetIt.I<PlayerStatusNotifier>().setCurrentTime(duration.inSeconds.toDouble());
       } else {
-        GetIt.I<PlayerStatusNotifier>().setCompletion(0.0);
+        GetIt.I<PlayerStatusNotifier>().setCurrentTime(0.0);
       }
 
     });
@@ -100,6 +67,8 @@ class Player {
     );
 
     GetIt.I<PlayerStatusNotifier>().playingRadio = false;
+    GetIt.I<PlayerStatusNotifier>().active = true;
+    GetIt.I<PlayerStatusNotifier>().duration = audioPlayer.duration!.inSeconds.toDouble();
 
     audioPlayer.play();
   
@@ -110,6 +79,8 @@ class Player {
     trackQueue = viewingTracks;
     trackIndex = startingIndex;
     currentCollectionId = "";
+    
+    currentTrack = trackDetails;
 
     playTrack(trackDetails);
 
@@ -128,27 +99,106 @@ class Player {
 
   }
 
+  static void seek(double time) {
+    audioPlayer.seek(Duration(seconds: time.toInt()));
+  }
+
+  static void nextTrack() async {
+    if (GetIt.I<PlayerStatusNotifier>().shuffle && !playingRandom) {
+        
+        previousTrackQueue.add(currentTrack!);
+
+        Track randomTrack = trackQueue[Random().nextInt(trackQueue.length)];
+        currentTrack = randomTrack;
+        playTrack(randomTrack);
+
+      } else if (GetIt.I<PlayerStatusNotifier>().loop) {
+
+        audioPlayer.seek(Duration.zero);
+        audioPlayer.play();
+
+      } else if(trackIndex+1 <= trackQueue.length) {
+
+        trackIndex += 1;
+
+        previousTrackQueue.add(currentTrack!);
+
+        playTrackId(trackQueue[trackIndex].id);
+        GetIt.I<PlayerStatusNotifier>().updateDetails(trackQueue[trackIndex]);
+        currentTrack = trackQueue[trackIndex];
+
+      } else if(playingRandom) {
+
+        previousTrackQueue.add(currentTrack!);
+
+        List<String> allTracks = await ChimeAPI.getTracks(0);
+        String trackId = allTracks[Random().nextInt(allTracks.length)];
+        TrackMetadata track = await ChimeAPI.getTrackMetadata(trackId);
+
+        currentTrack = Track.fromMetadata(trackId, track);
+        GetIt.I<PlayerStatusNotifier>().updateDetails(Track.fromMetadata(trackId, track));
+
+        playTrackId(trackId);
+
+      } else {
+        currentCollectionId = "";
+        trackQueue.clear();
+        trackIndex = 0;
+        playingRandom = true;
+      }
+  }
+
+  static void previousTrack() async {
+
+    if (previousTrackQueue.isEmpty) {
+      
+      audioPlayer.seek(Duration.zero);
+      audioPlayer.play();
+
+    } else {
+    
+      GetIt.I<PlayerStatusNotifier>().updateDetails(previousTrackQueue.last);
+      playTrack(previousTrackQueue.last);
+      previousTrackQueue.removeLast();
+
+    }
+
+  }
+
 }
 
 class PlayerStatusNotifier extends ChangeNotifier {
 
   String _currentTrackName = "No track playing";
   String _currentArtist = "No artist";
+  bool _active = false;
   double _completion = 0.0;
   String _coverId = "0";
   bool _playing = false;
   bool _shuffle = false;
   bool _loop = false;
   bool _playingRadio = false;
+  double _duration = 0.0;
+  double _currentTime = 0.0;
 
   String get currentTrack => _currentTrackName;
   String get currentArtist => _currentArtist;
-  double get completion => _completion;
+  double get completion {
+    if (_duration == 0) {
+      return 0.0;
+    } else {
+      return _currentTime / _duration;
+    }
+  }
   String get coverID => _coverId;
   bool get playing => _playing;
   bool get shuffle => _shuffle;
   bool get loop => _loop;
   bool get playingRadio => _playingRadio;
+  double get duration => _duration;
+  double get currentTime => _currentTime;
+  bool get active => _active;
+
 
   void updateDetails<T>(T item) {
 
@@ -170,8 +220,8 @@ class PlayerStatusNotifier extends ChangeNotifier {
 
   }
 
-  void setCompletion(double completion) {
-    _completion = completion;
+  void setCurrentTime(double currentTime) {
+    _currentTime = currentTime;
 
     notifyListeners();
 
@@ -197,6 +247,21 @@ class PlayerStatusNotifier extends ChangeNotifier {
   set playingRadio(bool val) {
     _playingRadio = val;
     notifyListeners();
+  }
+
+  set duration(double val) {
+    _duration = val;
+    notifyListeners();
+  }
+
+  set active(bool val) {
+    _active = val;
+    notifyListeners();
+  }
+
+  set currentTime(double val) {
+    _currentTime = val;
+    Player.seek(val);
   }
 
 }
