@@ -1,3 +1,3 @@
-# app
+# Chime App
 
-A new Flutter project.
+This directory contains the code for the mobile app for Chime.
