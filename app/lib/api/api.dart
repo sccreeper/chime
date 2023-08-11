@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:app/api/models/collections.dart';
 import 'package:app/api/models/radio.dart';
+import 'package:app/api/models/search.dart';
 import 'package:app/shared.dart';
 import 'package:app/api/endpoints.dart';
 import 'package:app/shared.dart';
@@ -42,7 +43,7 @@ class ChimeAPI {
   static Future<List<String>> getTracks(int limit) async {
 
     final req = await http.post(
-      Uri.parse("${session.serverOrigin}/${apiAllTracks}"),
+      Uri.parse("${session.serverOrigin}${apiAllTracks}"),
       headers: {"Cookie":"session=${session.sessionBase64}"},
       body: jsonEncode(<String,int>{"limit":limit})
     );
@@ -54,6 +55,17 @@ class ChimeAPI {
 
     final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetRadio/$id"), headers: {"Cookie":"session=${session.sessionBase64}"});
     return RadioModel.fromJson(jsonDecode(req.body));
+
+  }
+
+  static Future<SearchResults> search(String query) async {
+
+    final req = await http.post(
+      Uri.parse("${session.serverOrigin}${apiSearch}"),
+      headers: {"Cookie":"session=${session.sessionBase64}"},
+      body: jsonEncode(<String,String>{"query":query})
+    );
+    return SearchResults.fronJson(jsonDecode(req.body));
 
   }
 

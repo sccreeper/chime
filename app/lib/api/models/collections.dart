@@ -84,7 +84,7 @@ class Collection {
     "title":title,
     "cover":coverId,
     "is_album":isAlbum,
-    "tracks":tracks.map((e) => e.toJson()),
+    "tracks":tracks.map((e) => e.toJson()).toList(),
     "dates":dates,
     "description":description,
     "protected":protected,

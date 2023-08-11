@@ -34,6 +34,7 @@ void main() async {
   GetIt.I.registerSingleton<LibraryViewChangeNotifier>(LibraryViewChangeNotifier());
   GetIt.I.registerSingleton<PlayerStatusNotifier>(PlayerStatusNotifier());
   GetIt.I.registerSingleton<RadioViewLoadedNotifier>(RadioViewLoadedNotifier());
+  GetIt.I.registerSingleton<ScreenChangeNotifier>(ScreenChangeNotifier());
 
   runApp(const MaterialApp(home: MainApp()));
   

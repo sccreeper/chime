@@ -37,6 +37,11 @@ class _LibaryViewState extends State<LibrayView> {
 
   void _fetchLibaryData() async {
 
+    // To prevent switching back if collection view is already present.
+    if (GetIt.I<LibraryViewChangeNotifier>().activeWidget.runtimeType == CollectionView) {
+      return;
+    }
+
     final Library lib = await ChimeAPI.getLibary();
     
     List<Widget> content = [];
@@ -50,7 +55,7 @@ class _LibaryViewState extends State<LibrayView> {
       );
     }
 
-    content.add(const IconLabel(icon: Icons.playlist_play, label: "Playlists"));
+    content.add(const IconLabel(icon: Icons.playlist_play_rounded, label: "Playlists"));
     content.add(const Divider());
 
     for (var playlist in lib.playlists) {      
@@ -59,7 +64,7 @@ class _LibaryViewState extends State<LibrayView> {
       );
     }
 
-    content.add(const IconLabel(icon: Icons.radio, label: "Radios"));
+    content.add(const IconLabel(icon: Icons.radio_rounded, label: "Radios"));
     content.add(const Divider());
 
     for (var radio in lib.radios) {      

@@ -1,7 +1,9 @@
 import 'package:app/shared.dart';
 import 'package:app/views/dockedplayer.dart';
 import 'package:app/views/libraryview.dart';
+import 'package:app/views/searchview.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class MainScreen extends StatefulWidget {
@@ -15,21 +17,28 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
 
-  int _selectedIndex = 0;
   final List<String> _viewNames = ["Library", "Search", "Settings"];
 
   static const List<Widget> _widgetOptions = <Widget>[
 
      LibrayView(),
-     Text("Index 1: Search"),
+     SearchView(),
      Text("Index 2: Settings")
 
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
+      GetIt.I<ScreenChangeNotifier>().currentIndex = index;
+  }
+
+  @override
+  void initState() {
+    
+    GetIt.I<ScreenChangeNotifier>().addListener(() {
+      setState(() {});
     });
+
+    super.initState();
   }
 
   @override
@@ -39,9 +48,9 @@ class _MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_viewNames[_selectedIndex]),
+        title: Text(_viewNames[GetIt.I<ScreenChangeNotifier>().currentIndex]),
       ),
-      body: Center (child: _widgetOptions.elementAt(_selectedIndex)),
+      body: Center (child: _widgetOptions.elementAt(GetIt.I<ScreenChangeNotifier>().currentIndex)),
       floatingActionButton: DockedPlayer(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       bottomNavigationBar: BottomNavigationBar(
@@ -59,7 +68,7 @@ class _MainScreenState extends State<MainScreen> {
             label: "Settings"
           )
         ],
-        currentIndex: _selectedIndex,
+        currentIndex: GetIt.I<ScreenChangeNotifier>().currentIndex,
         backgroundColor: Colors.grey[800],
         unselectedItemColor: Colors.white70,
         selectedItemColor: Colors.yellow[800],
@@ -68,6 +77,21 @@ class _MainScreenState extends State<MainScreen> {
         onTap: _onItemTapped,
       ),
     );
+
+  }
+
+}
+
+class ScreenChangeNotifier extends ChangeNotifier {
+
+  int _currentIndex = 0;
+
+  int get currentIndex => _currentIndex;
+
+  set currentIndex(int val) {
+
+    _currentIndex = val;
+    notifyListeners();
 
   }
 

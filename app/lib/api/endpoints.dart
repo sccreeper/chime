@@ -11,3 +11,5 @@ const apiGetRadio = "/api/get_radio";
 const apiStream = "/api/stream";
 
 const apiEmbedded = "/api/embedded/";
+
+const apiSearch = "/api/search";

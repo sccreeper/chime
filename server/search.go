@@ -72,6 +72,30 @@ func handle_search(ctx *gin.Context) {
 
 	resp := search_response{}
 
+	//Return an empty list if empty and not nil/null
+
+	resp.Tracks = make([]struct {
+		ID       string  `json:"id"`
+		AlbumID  string  `json:"album_id"`
+		Artist   string  `json:"artist"`
+		Title    string  `json:"title"`
+		Duration float64 `json:"duration"`
+		Cover    string  `json:"cover"`
+	}, 0)
+
+	resp.Radios = make([]struct {
+		ID    string `json:"id"`
+		Name  string `json:"name"`
+		Cover string `json:"cover"`
+	}, 0)
+
+	resp.Collections = make([]struct {
+		ID      string `json:"id"`
+		Title   string `json:"title"`
+		Cover   string `json:"cover"`
+		IsAlbum bool   `json:"is_album"`
+	}, 0)
+
 	for _, v := range tracks {
 		resp.Tracks = append(resp.Tracks, struct {
 			ID       string  `json:"id"`
