@@ -10,6 +10,8 @@
     import { audio_source, playing, playing_collection, shuffle, viewing_tracks } from "../../player";
     import CollectionAdd from "../modals/CollectionAdd.svelte";
     import EditCollection from "../modals/editing/EditCollection.svelte";
+    import { xlink_attr } from "svelte/internal";
+    import { convertDurationLong } from "../../util";
 
     let collection_title = "";
     let collection_cover_src = no_cover_image;
@@ -20,6 +22,8 @@
     let is_protected = false;
 
     let title_font = "4.5vw";
+
+    let collection_duration = "";
 
     function updateView(data) {
         if (data.name == "radio" || data.name == "search") {
@@ -128,6 +132,16 @@
     }
 
     $: actual_album_cover = collection_cover_src == "" ? no_cover_image : collection_cover_src
+
+    $: {
+        
+        let duration = 0;
+        $collection_tracks.map((e) => {duration += e.duration; console.log(duration)});
+
+        collection_duration = convertDurationLong(duration);
+
+    }
+
 </script>
 
 <div class="m-2 h-full overflow-y-scroll">
@@ -141,6 +155,7 @@
             <div class="flex flex-col gap-4 items-start">
                 <h1 class="album-title" style="font-size: {title_font};">{collection_title}</h1>
                 <p>{collection_description}</p>
+                <p class="text-xs">{collection_duration}</p>
                 <div class="flex flex-row items-center gap-3">
                     <button on:click={playCollection}>{#if $playing_collection == $active_view.id && $playing}<i class="bi bi-pause-fill"></i> Pause{:else}<i class="bi bi-play-fill"></i> Play{/if}</button> 
                     {#if !is_protected}
