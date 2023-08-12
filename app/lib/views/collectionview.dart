@@ -186,7 +186,7 @@ class TrackScaffold extends StatelessWidget {
           showDialog(
             context: context,
             builder: (BuildContext context) => AlertDialog(
-              backgroundColor: Colors.grey[700],
+              backgroundColor: Colors.grey[800],
               title: const Text("Track metadata"),
               contentTextStyle: GoogleFonts.anuphan(),
               titleTextStyle: GoogleFonts.anuphan(),

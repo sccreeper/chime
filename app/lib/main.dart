@@ -31,10 +31,12 @@ void main() async {
   session = UserSession.empty();
   Player.init();
 
+  // Register change notifiers.
   GetIt.I.registerSingleton<LibraryViewChangeNotifier>(LibraryViewChangeNotifier());
   GetIt.I.registerSingleton<PlayerStatusNotifier>(PlayerStatusNotifier());
   GetIt.I.registerSingleton<RadioViewLoadedNotifier>(RadioViewLoadedNotifier());
   GetIt.I.registerSingleton<ScreenChangeNotifier>(ScreenChangeNotifier());
+  GetIt.I.registerSingleton<ActiveMainViewNotifier>(ActiveMainViewNotifier());
 
   runApp(const MaterialApp(home: MainApp()));
   
@@ -51,13 +53,25 @@ class _MainAppState extends State<MainApp> {
 
   late io.Directory appDocuments;
 
-  Widget _currentView = Scaffold(backgroundColor: Colors.grey[700],);
+  // Widget _currentView = Scaffold(backgroundColor: Colors.grey[700],);
 
   @override
   void initState() {
     // Check config and switch view.
+    
+    GetIt.I<ActiveMainViewNotifier>().addListener(updateView);
+
     _checkConfig();
     super.initState();
+  }
+
+  void updateView() {
+
+    if (mounted) {
+      log.fine("Updating view");
+
+      setState(() {});
+    }
   }
 
   @override
@@ -132,7 +146,7 @@ class _MainAppState extends State<MainApp> {
         )
 
       ),
-      home: _currentView
+      home: GetIt.I<ActiveMainViewNotifier>().widget
     );
   }
 
@@ -160,7 +174,7 @@ class _MainAppState extends State<MainApp> {
 
       } on FormatException {
         log.warning("Error in config file formatting, changing to login screen");
-        _currentView = LoginScreen();
+        GetIt.I<ActiveMainViewNotifier>().widget = LoginScreen();
         return;
       }
       
@@ -177,16 +191,12 @@ class _MainAppState extends State<MainApp> {
       if (respJson["status"] == "exists") {
         log.fine("Session exists, continuing to main screen");
         
-        setState(() {
-          _currentView = MainScreen();
-        });
+        GetIt.I<ActiveMainViewNotifier>().widget = const MainScreen();
 
       } else {
         log.fine("Session does not exist, continuing to login screen");
         
-        setState(() {
-          _currentView = LoginScreen();          
-        });
+        GetIt.I<ActiveMainViewNotifier>().widget = const LoginScreen();
 
       }
 
@@ -204,13 +214,21 @@ class _MainAppState extends State<MainApp> {
 
       // Push login screen
 
-      setState(() {
-        _currentView = LoginScreen();
-      });
+      GetIt.I<ActiveMainViewNotifier>().widget = const LoginScreen();
 
     }
 
-    
-
   }
+}
+
+class ActiveMainViewNotifier extends ChangeNotifier {
+
+  Widget _widget = Scaffold(backgroundColor: Colors.grey[700],);
+  Widget get widget => _widget;
+
+  set widget(Widget val) {
+    _widget = val;
+    notifyListeners();
+  }
+
 }

@@ -2,6 +2,7 @@ import 'package:app/shared.dart';
 import 'package:app/views/dockedplayer.dart';
 import 'package:app/views/libraryview.dart';
 import 'package:app/views/searchview.dart';
+import 'package:app/views/settingsview.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,7 +24,7 @@ class _MainScreenState extends State<MainScreen> {
 
      LibrayView(),
      SearchView(),
-     Text("Index 2: Settings")
+     SettingsView(),
 
   ];
 
