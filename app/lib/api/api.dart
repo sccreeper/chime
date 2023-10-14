@@ -22,7 +22,7 @@ class ChimeAPI {
   static Future<Collection> getCollection(String id) async {
     
     final req = await http.get(Uri.parse("${session.serverOrigin}${apiGetCollection}/${id}"), headers: {"Cookie": "session=${session.sessionBase64}"});
-    return Collection.fromJSON(jsonDecode(req.body));
+    return Collection.fromJSON(jsonDecode(req.body), id);
 
   }
 

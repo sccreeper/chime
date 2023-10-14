@@ -13,3 +13,5 @@ const apiStream = "/api/stream";
 const apiEmbedded = "/api/embedded/";
 
 const apiSearch = "/api/search";
+
+const apiDownload = "/api/download_original";

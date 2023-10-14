@@ -64,8 +64,12 @@ func main() {
 
 	//Base method for does server exist or not
 	r.GET("/api/ping", func(ctx *gin.Context) {
+
+		id, _ := os.ReadFile("/var/lib/chime/server_id.txt")
+
 		ctx.JSON(http.StatusOK, gin.H{
-			"message": "pong",
+			"message":   "pong",
+			"server_id": id,
 		})
 	})
 

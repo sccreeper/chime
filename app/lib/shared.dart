@@ -1,8 +1,13 @@
+import "dart:io";
+
+import "package:app/api/downloads.dart";
 import "package:app/api/models/session.dart";
 import "package:logging/logging.dart";
+import "package:sqflite/sqflite.dart";
 
 var log = Logger("Chime");
 late UserSession session;
+late DownloadDatabaseManager dbMgr;
 
 String currentCollection = "";
 
@@ -28,7 +33,22 @@ class Util {
       return "${hours.toString()} hr ${minutes.toString()} min";
     }
 
-    
+  }
+
+  static int directorySize(String path) {
+
+    int size = 0;
+    var dir = Directory(path);
+
+    dir.listSync(recursive: true, followLinks: false).forEach((item) {
+
+      if (item is File) {
+       size += item.lengthSync(); 
+      }
+
+    });
+
+    return size;
 
   }
 

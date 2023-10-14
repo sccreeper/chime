@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
+import 'package:app/api/downloads.dart';
 import 'package:app/api/endpoints.dart';
 import 'package:app/player.dart';
 import 'package:app/shared.dart';
@@ -29,6 +30,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   session = UserSession.empty();
+  dbMgr = DownloadDatabaseManager();
   Player.init();
 
   // Register change notifiers.
@@ -37,6 +39,7 @@ void main() async {
   GetIt.I.registerSingleton<RadioViewLoadedNotifier>(RadioViewLoadedNotifier());
   GetIt.I.registerSingleton<ScreenChangeNotifier>(ScreenChangeNotifier());
   GetIt.I.registerSingleton<ActiveMainViewNotifier>(ActiveMainViewNotifier());
+  GetIt.I.registerSingleton<DownloadNotifier>(DownloadNotifier());
 
   runApp(const MaterialApp(home: MainApp()));
   

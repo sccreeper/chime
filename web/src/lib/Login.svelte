@@ -11,6 +11,8 @@
     let login_status = "";
     let status_colour = "text-white";
 
+    let server_id = "";
+
     function login() {
         
         var data = new FormData()
@@ -62,6 +64,10 @@
                 }
             })
         }
+
+        fetch("/api/ping").then(resp => resp.text()).then(data => {
+            server_id = JSON.parse(data).server_id;
+        });
     })
 
 </script>
@@ -76,7 +82,10 @@
     <Password bind:value={password} placeholder="Password"/>
     <br>
     <button on:click={login} class="mt-3">Login</button>
+    <br>
 </div>
+
+<p class="text-center text-xs text-gray-400 bottom-0 absolute p-2">{server_id}</p>
 
 
 <style>

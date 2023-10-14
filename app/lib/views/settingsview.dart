@@ -1,10 +1,9 @@
+import 'dart:math';
+
 import 'package:app/api/models/session.dart';
-import 'package:app/login.dart';
-import 'package:app/main.dart';
 import 'package:app/shared.dart';
 import 'package:app/widgets/iconlabel.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io' as io;
 
@@ -21,6 +20,28 @@ class SettingsView extends StatefulWidget {
 }
 
 class _SettingsViewState extends State<SettingsView> {
+
+  String _documentsDirectory = "";
+  String _downloadSize = "";
+
+  @override
+  void initState() {
+    
+    () async {
+
+      _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
+
+      int size = Util.directorySize(_documentsDirectory);
+      _downloadSize = "${(size / pow(10, 6)).toStringAsFixed(2)} mb";
+
+      setState(() {});
+
+    }();
+
+  
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +110,26 @@ class _SettingsViewState extends State<SettingsView> {
             child: const Text("Logout")
           ),
           const Divider(),
+          const IconLabel(icon: Icons.download_rounded, label: "Downloads"),
+          const Divider(),
+          RichText(
+            text: TextSpan(
+              children: [
+                const TextSpan(text: "Downloads stored in: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: _documentsDirectory)
+              ]
+            )
+          ),
+          RichText(
+            text: TextSpan(
+              children: [
+                const TextSpan(text: "Total download size: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: _downloadSize)
+              ]
+            )
+          ),
+          TextButton(onPressed: () => {}, child: const Text("Clear downloads"))
+
         ],
       )
     );

@@ -1,0 +1,2 @@
+Placeholder file for words list located at:
+https://www.mit.edu/~ecprice/wordlist.10000

@@ -52,6 +52,7 @@ enum LibaryItemType {album, playlist, radio}
 
 class Collection {
 
+  final String id;
   final String title;
   final String coverId;
   final bool isAlbum;
@@ -61,6 +62,7 @@ class Collection {
   final bool protected;
 
   Collection({
+    required this.id,
     required this.title,
     required this.coverId,
     required this.isAlbum,
@@ -70,7 +72,8 @@ class Collection {
     required this.protected
   });
 
-  factory Collection.fromJSON(Map<String, dynamic> json) => Collection(
+  factory Collection.fromJSON(Map<String, dynamic> json, String id) => Collection(
+    id: id,
     title: json["title"], 
     coverId: json["cover"], 
     isAlbum: json["is_album"], 
@@ -81,6 +84,7 @@ class Collection {
   );
 
   Map<String, dynamic> toJson() => {
+    "id":id,
     "title":title,
     "cover":coverId,
     "is_album":isAlbum,
@@ -89,6 +93,33 @@ class Collection {
     "description":description,
     "protected":protected,
   };
+
+  // Casting hell
+  Map<String, Object> toDatabaseMap() {
+    
+    Map<String, Object> map;
+    map = toJson() as Map<String, Object>;
+    List<String> trackIds = [];
+
+    (map["tracks"] as List<Track>).forEach((element) => trackIds.add(element.id));
+    map["tracks"] = trackIds.join(",");
+
+    map["is_album"] = (map["is_album"] as bool) ? 1 : 0;
+
+    return map;
+
+  }
+
+  factory Collection.fromDatabaseMap(Map<String, Object> dbMap, List<Track> trackList, String id) => Collection(
+    id: id,
+    title: dbMap["title"] as String, 
+    coverId: dbMap["cover"] as String, 
+    isAlbum: (dbMap["is_album"] as int) == 1, 
+    tracks: trackList, 
+    dates: dbMap["dates"] as List<String>, 
+    description: dbMap["description"] as String, 
+    protected: (dbMap["protected"] as int) == 1
+  );
 
 }
 
