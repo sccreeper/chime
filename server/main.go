@@ -69,7 +69,7 @@ func main() {
 
 		ctx.JSON(http.StatusOK, gin.H{
 			"message":   "pong",
-			"server_id": id,
+			"server_id": string(id),
 		})
 	})
 
