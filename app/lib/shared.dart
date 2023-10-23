@@ -3,7 +3,6 @@ import "dart:io";
 import "package:app/api/downloads.dart";
 import "package:app/api/models/session.dart";
 import "package:logging/logging.dart";
-import "package:sqflite/sqflite.dart";
 
 var log = Logger("Chime");
 late UserSession session;

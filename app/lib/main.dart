@@ -100,7 +100,6 @@ class _MainAppState extends State<MainApp> {
         primaryColor: Colors.yellow[800],
         colorScheme: ColorScheme.fromSwatch(
           accentColor: Colors.amber[600],
-          primaryColorDark: Colors.yellow[800],
         ),
 
         inputDecorationTheme: InputDecorationTheme(

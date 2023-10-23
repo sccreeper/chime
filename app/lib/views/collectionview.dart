@@ -3,11 +3,13 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:app/api/api.dart';
+import 'package:app/api/downloads.dart';
 import 'package:app/api/endpoints.dart';
 import 'package:app/api/models/collections.dart';
 import 'package:app/player.dart';
 import 'package:app/shared.dart';
 import 'package:app/widgets/borderedchip.dart';
+import 'package:app/widgets/downloads.dart';
 import 'package:app/widgets/loadingspinner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -135,7 +137,9 @@ class CollectionScaffold extends StatelessWidget {
               const SizedBox(width: 5,),
               BorderedChip(text: "${collection.tracks.length} tracks"),
               const SizedBox(width: 5,),
-              BorderedChip(text: Util.convertDurationVerbose(collection.tracks.fold(0.0, (prevValue, e) => prevValue + e.duration)))
+              BorderedChip(text: Util.convertDurationVerbose(collection.tracks.fold(0.0, (prevValue, e) => prevValue + e.duration))),
+              const SizedBox(width: 5,),
+              CollectionDownloadButton(id: collection.id,)
             ],
           ),
           const Divider(),
