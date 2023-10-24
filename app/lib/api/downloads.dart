@@ -67,49 +67,39 @@ class DownloadManager {
 
         // Add to database
 
-        dbMgr.addTrack(track);
+        dbMgr.addTrackRecord(track);
       }
     }
 
     // Finally add collection.
-    dbMgr.addCollection(collection);
+    dbMgr.addCollectionRecord(collection);
 
     GetIt.I<DownloadNotifier>().downloading = false;
   }
 
-  // Download a specific track, and add it's collection details to db if needed.
-  static void downloadTrack(String id) async {
+  static void deleteCollection(String id) async {
 
-    String basePath = (await getApplicationDocumentsDirectory()).path;
+    // Figure out if tracks in collection are present in any other collections, if they are we can't delete them.
 
-    GetIt.I<DownloadNotifier>().downloading = true;
-    GetIt.I<DownloadNotifier>().downloadingId = id;
-    GetIt.I<DownloadNotifier>().downloadType = DownloadType.track;
+    Collection collection = await dbMgr.getCollectionRecord(id) as Collection; //can never be null, if it is something very bad has happened.
 
-    TrackMetadata metadata = await ChimeAPI.getTrackMetadata(id);
-
-    if (await dbMgr.getTrack(id) == null) {
-
-      var trackResult = await http.get(
-            Uri.parse("${session.serverOrigin}$apiDownload/$id"), headers: {"Cookie": "session=${session.sessionBase64}"});
-        Directory("$basePath/$trackDownloadDirectory/$id").createSync();
-
-        File trackFile = File("$trackDownloadDirectory/$id");
-        trackFile.writeAsBytes(trackResult.bodyBytes);
-
-      dbMgr.addTrack(Track.fromMetadata(id, metadata));
-
-    }
-
-    // Download cover if cover doesn't exist
-
-    if (!File("$basePath/$coverDownloadDirectory/${metadata.coverId}").existsSync()) {
+    for (var t in collection.tracks) {
       
+      if (await dbMgr.countCollectionRecords(t.id) == 1) {
+        
+        File("${(await getApplicationDocumentsDirectory()).path}/$trackDownloadDirectory/${t.id}").deleteSync();
+        dbMgr.deleteTrackRecord(t.id);
+
+      } else {
+        continue;
+      }
+
     }
 
-    GetIt.I<DownloadNotifier>().downloading = false;
+    dbMgr.deleteCollectionRecord(id);
 
   }
+
 }
 
 // Used for updating UI details and notifications.
@@ -244,7 +234,7 @@ class DownloadDatabaseManager {
   }
 
   // Add a track to the database
-  void addTrack(Track track) {
+  void addTrackRecord(Track track) {
     db.execute(
         "INSERT INTO $tableTracks (id, name, released, artist, duration, album_id, cover, original, size, position, album_name) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
         [
@@ -264,7 +254,7 @@ class DownloadDatabaseManager {
   }
 
   // Add a collection to the database
-  void addCollection(Collection collection) {
+  void addCollectionRecord(Collection collection) {
 
     db.execute(
         "INSERT INTO $tableCollections (id, name, description, cover_id, is_album, tracks, dates) VALUES (?,?,?,?,?,?,?)",
@@ -275,22 +265,22 @@ class DownloadDatabaseManager {
           collection.coverId,
           collection.isAlbum ? 1 : 0,
           collection.tracks.map((e) => e.id).toList().join(","),
-          collection.dates.join(","),
+          collection.dates.join(",")
         ]);
   }
 
   // Remove a collection from the database (for when it is "un-downloaded")
-  void deleteCollection(String id) {
-    db.delete(tableCollections, where: "id = ?", whereArgs: [id]);
+  void deleteCollectionRecord(String id) async {
+    await db.delete(tableCollections, where: "id = ?", whereArgs: [id]);
   }
 
   // Deletes a track from the database when it is "un-downloaded".
-  void deleteTrack(String id) {
-    db.delete(tableTracks, where: "id = ?", whereArgs: [id]);
+  void deleteTrackRecord(String id) async {
+    await db.delete(tableTracks, where: "id = ?", whereArgs: [id]);
   }
 
   // Returns track data from the database, if the track is not found, returns null.
-  Future<Track?> getTrack(String id) async {
+  Future<Track?> getTrackRecord(String id) async {
     List<Map<String, dynamic>> results =
         await db.rawQuery("SELECT * FROM $tableTracks WHERE id = ?", [id]);
 
@@ -305,17 +295,18 @@ class DownloadDatabaseManager {
           artist: results[0]["artist"],
           albumId: results[0]["album_name"],
           duration: results[0]["duration"],
-          coverId: results[0]["cover_id"],
+          coverId: results[0]["cover"],
           position: results[0]["position"]);
     }
   }
 
   // Returns a collection from the database
-  Future<Collection?> getCollection(String id) async {
+  Future<Collection?> getCollectionRecord(String id) async {
     List<Map<String, dynamic>> results =
         await db.rawQuery("SELECT * FROM $tableCollections WHERE id = ?", [id]);
 
     if (results.isEmpty) {
+      log.fine("No collection with id $id in database");
       return null;
     } else {
       List<Track> tracks = [];
@@ -323,7 +314,7 @@ class DownloadDatabaseManager {
       // Query tracks.
 
       for (var t in (results[0]["tracks"] as String).split(",")) {
-        Track? temp = await getTrack(t);
+        Track? temp = await getTrackRecord(t);
 
         if (temp == null) {
           return null;
@@ -338,9 +329,21 @@ class DownloadDatabaseManager {
           coverId: results[0]["cover_id"],
           isAlbum: results[0]["is_album"] == 1,
           tracks: tracks,
-          dates: (results[0]["dates"] as String).split(","),
+          dates: (results[0]["dates"] as int).toString().split(","),
           description: results[0]["description"],
           protected: false);
     }
+  }
+
+  Future<int> countCollectionRecords(String trackId) async {
+
+    return (await db.rawQuery("SELECT * FROM $tableCollections WHERE tracks LIKE ?", ["%$trackId%"])).length;
+    
+  }
+
+  Future<bool> collectionRecordExists(String id) async {
+
+    return (await getCollectionRecord(id)) != null;
+
   }
 }

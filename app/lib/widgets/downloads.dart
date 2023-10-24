@@ -1,4 +1,5 @@
 import 'package:app/api/downloads.dart';
+import 'package:app/shared.dart';
 import 'package:app/widgets/borderedchip.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -14,9 +15,20 @@ class CollectionDownloadButton extends StatefulWidget {
 
 class _CollectionDownloadButtonState extends State<CollectionDownloadButton> {
 
+  bool isDownloaded = false;
+
   @override
   void initState() {
     GetIt.I<DownloadNotifier>().addListener(() {setState(() {});});
+
+    (() async {
+
+      isDownloaded = await dbMgr.collectionRecordExists(widget.id);
+      setState(() {});
+
+      log.fine(isDownloaded);
+    
+    })();
 
     super.initState();
   }
@@ -34,11 +46,18 @@ class _CollectionDownloadButtonState extends State<CollectionDownloadButton> {
         icon: Icons.stop, 
         onTap: () => {}
       );      
-    } else {
+    } else if(!isDownloaded) {
+
       return BorderedChipButton(
         text: "Download", 
         icon: Icons.download, 
         onTap: () => { DownloadManager.downloadCollection(widget.id) }
+      );
+    } else {
+      return BorderedChipButton(
+        text: "Delete download", 
+        icon: Icons.delete, 
+        onTap: () { DownloadManager.deleteCollection(widget.id); setState(() {});}
       );
     }
     
