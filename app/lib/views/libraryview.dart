@@ -13,12 +13,12 @@ class LibrayView extends StatefulWidget {
     const LibrayView({super.key});
 
     @override
-    _LibaryViewState createState() => _LibaryViewState();
+    LibaryViewState createState() => LibaryViewState();
 
 }
 
 
-class _LibaryViewState extends State<LibrayView> {
+class LibaryViewState extends State<LibrayView> {
 
   final _service = GetIt.I<LibraryViewChangeNotifier>();
 
@@ -97,7 +97,7 @@ class _LibaryViewState extends State<LibrayView> {
 
       }, 
       child: Container(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: GetIt.I<LibraryViewChangeNotifier>().activeWidget,
       )
     );
@@ -125,11 +125,11 @@ class LibaryItem extends StatefulWidget {
     LibaryItem({super.key,required this.id, required this.type, required this.name});
 
     @override
-    _LibraryItemState createState() => _LibraryItemState();
+    LibraryItemState createState() => LibraryItemState();
 
 }
 
-class _LibraryItemState extends State<LibaryItem> {
+class LibraryItemState extends State<LibaryItem> {
   
 
   @override

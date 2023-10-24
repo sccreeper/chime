@@ -11,12 +11,12 @@ import 'package:google_fonts/google_fonts.dart';
 class DockedPlayer extends StatefulWidget {
 
   @override
-  _DockedPlayerState createState() => _DockedPlayerState();
+  DockedPlayerState createState() => DockedPlayerState();
 
 }
 
 
-class _DockedPlayerState extends State<DockedPlayer> {
+class DockedPlayerState extends State<DockedPlayer> {
 
   @override
   void initState() {
@@ -50,7 +50,7 @@ class _DockedPlayerState extends State<DockedPlayer> {
               offset: const Offset(0, 3)
             )
           ],
-          borderRadius: BorderRadius.all(Radius.circular(4.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
         ),
         child: SizedBox(
           height: 50,
@@ -60,7 +60,7 @@ class _DockedPlayerState extends State<DockedPlayer> {
               GetIt.I<PlayerStatusNotifier>().coverID == "0" ? 
                 Image.asset("assets/no_cover.png", fit: BoxFit.cover,) : 
                 Image.network(
-                  "${session.serverOrigin}${apiGetCover}/${GetIt.I<PlayerStatusNotifier>().coverID}",
+                  "${session.serverOrigin}$apiGetCover/${GetIt.I<PlayerStatusNotifier>().coverID}",
                   headers: {"Cookie":"session=${session.sessionBase64}"},
                   fit: BoxFit.cover,
               ),
@@ -84,11 +84,11 @@ class _DockedPlayerState extends State<DockedPlayer> {
                                     child: GetIt.I<PlayerStatusNotifier>().coverID == "0" ? 
                                     Image.asset("assets/no_cover.png") : 
                                     Image.network(
-                                      "${session.serverOrigin}${apiGetCover}/${GetIt.I<PlayerStatusNotifier>().coverID}",
+                                      "${session.serverOrigin}$apiGetCover/${GetIt.I<PlayerStatusNotifier>().coverID}",
                                       headers: {"Cookie":"session=${session.sessionBase64}"},
                                       )
                                   ),
-                                  SizedBox(width: 5,),
+                                  const SizedBox(width: 5,),
                                   Expanded(
                                     flex: 5,
                                     child: Column(

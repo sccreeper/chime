@@ -8,11 +8,11 @@ import 'package:google_fonts/google_fonts.dart';
 class FullPlayerView extends StatefulWidget {
 
   @override
-  _FullPlayerViewState createState() => _FullPlayerViewState();
+  FullPlayerViewState createState() => FullPlayerViewState();
 
 }
 
-class _FullPlayerViewState extends State<FullPlayerView> {
+class FullPlayerViewState extends State<FullPlayerView> {
 
   @override
   void initState() {
@@ -50,11 +50,11 @@ class _FullPlayerViewState extends State<FullPlayerView> {
                 )
               ]
             ),
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: GetIt.I<PlayerStatusNotifier>().coverID == "0" ? 
                 Image.asset("assets/no_cover.png", width: 350, height: 350,) : 
                 Image.network(
-                  "${session.serverOrigin}${apiGetCover}/${GetIt.I<PlayerStatusNotifier>().coverID}",
+                  "${session.serverOrigin}$apiGetCover/${GetIt.I<PlayerStatusNotifier>().coverID}",
                   headers: {"Cookie":"session=${session.sessionBase64}"},
                   width: 350, height: 350,
                 ),

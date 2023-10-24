@@ -61,7 +61,7 @@ class Player {
     
     await audioPlayer.setAudioSource(
       AudioSource.uri(
-        Uri.parse("${session.serverOrigin}${apiStream}/${trackId}"),
+        Uri.parse("${session.serverOrigin}$apiStream/$trackId"),
         headers: {"Cookie":"session=${session.sessionBase64}"},
       )
     );
@@ -172,7 +172,6 @@ class PlayerStatusNotifier extends ChangeNotifier {
   String _currentTrackName = "No track playing";
   String _currentArtist = "No artist";
   bool _active = false;
-  double _completion = 0.0;
   String _coverId = "0";
   bool _playing = false;
   bool _shuffle = false;

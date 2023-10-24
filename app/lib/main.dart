@@ -49,10 +49,10 @@ class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
     @override
-    _MainAppState createState() => _MainAppState();
+    MainAppState createState() => MainAppState();
 }
 
-class _MainAppState extends State<MainApp> {
+class MainAppState extends State<MainApp> {
 
   late io.Directory appDocuments;
 
@@ -85,7 +85,7 @@ class _MainAppState extends State<MainApp> {
     return MaterialApp(
       theme: baseTheme.copyWith( 
         primaryTextTheme: GoogleFonts.anuphanTextTheme(),
-        scaffoldBackgroundColor: Color.fromARGB(255, 43, 43, 43),
+        scaffoldBackgroundColor: const Color.fromARGB(255, 43, 43, 43),
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.grey[800],
           titleTextStyle: GoogleFonts.anuphan(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)
@@ -105,10 +105,10 @@ class _MainAppState extends State<MainApp> {
         inputDecorationTheme: InputDecorationTheme(
           labelStyle: GoogleFonts.anuphan(color: Colors.white70),
           hintStyle: GoogleFonts.anuphan(color: Colors.white70),
-          enabledBorder: UnderlineInputBorder(
+          enabledBorder: const UnderlineInputBorder(
             borderSide: BorderSide(color: Colors.white54),
           ),
-          focusedBorder: UnderlineInputBorder(
+          focusedBorder: const UnderlineInputBorder(
             borderSide: BorderSide(color: Colors.orange),
           )
         ),
@@ -164,19 +164,19 @@ class _MainAppState extends State<MainApp> {
       
       // Check session
 
-      var config_file = io.File("${appDocuments.path}/config.json").readAsStringSync();
+      var configFile = io.File("${appDocuments.path}/config.json").readAsStringSync();
 
       try {
-        session = new UserSession.fromJSON(jsonDecode(config_file));
+        session = UserSession.fromJSON(jsonDecode(configFile));
 
         if (session.serverOrigin == "" || session.sessionBase64 == "" || session.sessionID == "" || session.username == "") {  
           log.warning("Session file has empty fields.");
-          throw FormatException("Session fields empty");
+          throw const FormatException("Session fields empty");
         }
 
       } on FormatException {
         log.warning("Error in config file formatting, changing to login screen");
-        GetIt.I<ActiveMainViewNotifier>().widget = LoginScreen();
+        GetIt.I<ActiveMainViewNotifier>().widget = const LoginScreen();
         return;
       }
       

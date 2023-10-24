@@ -13,10 +13,10 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class LoginScreenState extends State<LoginScreen> {
   String loginPassword = "";
   String loginUsername = "";
   String loginServerAddress = "";
@@ -32,14 +32,14 @@ class _LoginScreenState extends State<LoginScreen> {
           title: const Text("Chime"),
         ),
         body: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-        Text("Chime"),
+        const Text("Chime"),
         Text(
           errorText,
-          style: TextStyle(color: Colors.red),
+          style: const TextStyle(color: Colors.red),
         ),
         TextField(
           onChanged: (value) => {loginUsername = value},
@@ -64,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _login() async {
     log.fine("Logging in...");
 
-    final url = Uri.parse("${loginServerAddress}${apiAuth}");
+    final url = Uri.parse("$loginServerAddress$apiAuth");
     var request = http.MultipartRequest("POST", url);
 
     request.fields["u"] = loginUsername;
@@ -74,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
       
     String jsonString = await response.stream.bytesToString();
 
-    log.fine("Recieved JSON: ${jsonString}");
+    log.fine("Recieved JSON: $jsonString");
     Map<String,dynamic> responseJson = jsonDecode(jsonString);
 
     String sessionB64 =

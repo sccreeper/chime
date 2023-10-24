@@ -1,9 +1,7 @@
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:app/api/api.dart';
-import 'package:app/api/downloads.dart';
 import 'package:app/api/endpoints.dart';
 import 'package:app/api/models/collections.dart';
 import 'package:app/player.dart';
@@ -22,11 +20,11 @@ class CollectionView extends StatefulWidget {
     const CollectionView({super.key, required this.id});
 
     @override
-    _CollectionViewState createState() => _CollectionViewState();
+    CollectionViewState createState() => CollectionViewState();
 
 }
 
-class _CollectionViewState extends State<CollectionView> {
+class CollectionViewState extends State<CollectionView> {
 
   Widget _childWidget = LoadingSpinner();
 
@@ -82,7 +80,7 @@ class CollectionScaffold extends StatelessWidget {
   final Collection collection;
   final Uint8List coverBytes;
 
-  CollectionScaffold({super.key, required this.collection, required this.coverBytes});
+  const CollectionScaffold({super.key, required this.collection, required this.coverBytes});
 
   @override
   Widget build(BuildContext context) {
@@ -101,9 +99,7 @@ class CollectionScaffold extends StatelessWidget {
       )
     );
     
-    return Container(
-
-      child: Column(children: [
+    return Column(children: [
           
           // SizedBox with stack for blurred image background
           SizedBox(
@@ -150,9 +146,7 @@ class CollectionScaffold extends StatelessWidget {
               )
             ),
           )
-      ]),
-
-    );
+      ]);
     
   }
 
@@ -176,7 +170,7 @@ class TrackScaffold extends StatelessWidget {
       ),
       subtitle: Text("${track.artist} ● ${Util.convertDuration(track.duration)}"),
       dense: true,
-      contentPadding: EdgeInsets.all(0.0),
+      contentPadding: const EdgeInsets.all(0.0),
       onTap: () {
           
         Player.playCollection(collectionId, track.id, index, track);
@@ -202,16 +196,16 @@ class TrackScaffold extends StatelessWidget {
                     child: (track.coverId == "0" ? 
                       Image.asset("assets/no_cover.png", width: 100, height: 100,) : 
                       Image.network(
-                        "${session.serverOrigin}${apiGetCover}/${track.coverId}", 
+                        "${session.serverOrigin}$apiGetCover/${track.coverId}", 
                         headers: {"Cookie":"session=${session.sessionBase64}"}, 
                         width: 100,
                         height: 100,
                         )
                     ),
                   ),
-                  Divider(),
+                  const Divider(),
                   Text(track.name),
-                  Divider(),
+                  const Divider(),
                   RichText(
                     text: TextSpan(
                       children: [

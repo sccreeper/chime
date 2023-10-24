@@ -15,11 +15,11 @@ class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
 
   @override
-  _SettingsViewState createState() => _SettingsViewState();
+  SettingsViewState createState() => SettingsViewState();
 
 }
 
-class _SettingsViewState extends State<SettingsView> {
+class SettingsViewState extends State<SettingsView> {
 
   String _documentsDirectory = "";
   String _downloadSize = "";

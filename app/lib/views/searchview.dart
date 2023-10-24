@@ -9,7 +9,6 @@ import 'package:app/views/radioview.dart';
 import 'package:app/widgets/borderedchip.dart';
 import 'package:app/widgets/iconlabel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -18,11 +17,11 @@ class SearchView extends StatefulWidget {
   const SearchView({super.key});
 
   @override
-  _SearchViewState createState() => _SearchViewState();
+  SearchViewState createState() => SearchViewState();
 
 }
 
-class _SearchViewState extends State<SearchView> {
+class SearchViewState extends State<SearchView> {
 
   String searchQuery = "";
   List<SearchTrack> tracks = [];
@@ -124,35 +123,35 @@ class _SearchViewState extends State<SearchView> {
         Expanded(
           child: Scrollbar( 
             child: ListView(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
               children: [
                   const IconLabel(icon: Icons.album, label: "Albums"),
                   const Divider(),
                   SingleChildScrollView(
-                    padding: EdgeInsets.all(4.0),
+                    padding: const EdgeInsets.all(4.0),
                     scrollDirection: Axis.horizontal,
                     child: Row(children: albumChildren),
                   ),
                   const IconLabel(icon: Icons.playlist_play_rounded, label: "Playlists"),
                   const Divider(),
                   SingleChildScrollView(
-                    padding: EdgeInsets.all(4.0),
+                    padding: const EdgeInsets.all(4.0),
                     scrollDirection: Axis.horizontal,
                     child: Row(children: playlistChildren),
                   ),
                   const IconLabel(icon: Icons.radio_rounded, label: "Radios"),
                   const Divider(),
                   SingleChildScrollView(
-                    padding: EdgeInsets.all(4.0),
+                    padding: const EdgeInsets.all(4.0),
                     scrollDirection: Axis.horizontal,
                     child: Row(children: radioChildren),
                   ),
                   const IconLabel(icon: Icons.music_note_rounded, label: "Tracks"),
                   const Divider(),
                   ...tracks.map((e) => TrackSearchResultScaffold(track: e)).toList(),
-                  SizedBox(height: 64.0,)
+                  const SizedBox(height: 64.0,)
 
                 ],
             )
@@ -214,7 +213,7 @@ class LargeSearchResultScaffold extends StatelessWidget {
               child: Image(image: coverId == "0" ? 
                 Image.asset("assets/no_cover.png").image :
                 Image.network(
-                  "${session.serverOrigin}${apiGetCover}/${coverId}",
+                  "${session.serverOrigin}$apiGetCover/$coverId",
                   headers: {"Cookie":"session=${session.sessionBase64}"},
                 ).image,
                 width: 100,  
@@ -253,7 +252,7 @@ class TrackSearchResultScaffold extends StatelessWidget {
       ),
       subtitle: Text("${track.artist} ● ${Util.convertDuration(track.duration)}"),
       dense: true,
-      contentPadding: EdgeInsets.all(0.0),
+      contentPadding: const EdgeInsets.all(0.0),
       onTap: () { 
         GetIt.I<LibraryViewChangeNotifier>().changeActiveWidget(CollectionView(id: track.albumId)); 
         GetIt.I<ScreenChangeNotifier>().currentIndex = 0;

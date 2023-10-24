@@ -12,14 +12,14 @@ class RadioView extends StatefulWidget {
 
   final String id;
 
-  RadioView({super.key, required this.id});
+  const RadioView({super.key, required this.id});
 
   @override
-  _RadioViewState createState() => _RadioViewState();
+  RadioViewState createState() => RadioViewState();
 
 }
 
-class _RadioViewState extends State<RadioView> {
+class RadioViewState extends State<RadioView> {
 
   @override
   void initState() {
@@ -57,9 +57,9 @@ class _RadioViewState extends State<RadioView> {
 
 class RadioScaffold extends StatelessWidget {
   
-  RadioModel radio;
+  final RadioModel radio;
 
-  RadioScaffold({super.key, required this.radio});
+  const RadioScaffold({super.key, required this.radio});
   
   @override
   Widget build(BuildContext context) {
@@ -77,11 +77,11 @@ class RadioScaffold extends StatelessWidget {
           headers: {"Cookie:":"session=${session.sessionBase64}"}, 
           width: 256, height: 256,)),
 
-          SizedBox(height: 32,),
+          const SizedBox(height: 32,),
 
           Text(radio.name, textAlign: TextAlign.center, style: GoogleFonts.anuphan(color: Colors.white, fontSize: 24.0, fontWeight: FontWeight.bold)),
 
-          SizedBox(height: 16,),
+          const SizedBox(height: 16,),
 
           ElevatedButton.icon(
             onPressed: () => Player.playRadio(radio), 
