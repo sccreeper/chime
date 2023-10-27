@@ -210,12 +210,7 @@ class LargeSearchResultScaffold extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Image(image: coverId == "0" ? 
-                Image.asset("assets/no_cover.png").image :
-                Image.network(
-                  "${session.serverOrigin}$apiGetCover/$coverId",
-                  headers: {"Cookie":"session=${session.sessionBase64}"},
-                ).image,
+              child: Image(image: ChimeAPI.getCover(coverId),
                 width: 100,  
                 height: 100,
               )

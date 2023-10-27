@@ -19,7 +19,13 @@ class _CollectionDownloadButtonState extends State<CollectionDownloadButton> {
 
   @override
   void initState() {
-    GetIt.I<DownloadNotifier>().addListener(() {setState(() {});});
+    GetIt.I<DownloadNotifier>().addListener(() {
+
+      if (mounted) {
+        setState(() {});
+      }
+
+    });
 
     (() async {
 

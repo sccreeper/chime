@@ -71,11 +71,7 @@ class RadioScaffold extends StatelessWidget {
 
         children: [
 
-          (radio.coverId == "0" ? 
-          Image.asset("assets/no_cover.png", width: 256, height: 256,) : 
-          Image.network("${session.serverOrigin}$apiGetCover/${radio.coverId}", 
-          headers: {"Cookie:":"session=${session.sessionBase64}"}, 
-          width: 256, height: 256,)),
+          Image(image: ChimeAPI.getCover(radio.coverId), width: 256, height: 256,),
 
           const SizedBox(height: 32,),
 

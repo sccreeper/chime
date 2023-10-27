@@ -1,8 +1,10 @@
+import 'dart:typed_data';
+
+import 'package:app/api/api.dart';
 import 'package:app/player.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:app/shared.dart';
-import 'package:app/api/endpoints.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class FullPlayerView extends StatefulWidget {
@@ -51,13 +53,7 @@ class FullPlayerViewState extends State<FullPlayerView> {
               ]
             ),
             padding: const EdgeInsets.all(8.0),
-            child: GetIt.I<PlayerStatusNotifier>().coverID == "0" ? 
-                Image.asset("assets/no_cover.png", width: 350, height: 350,) : 
-                Image.network(
-                  "${session.serverOrigin}$apiGetCover/${GetIt.I<PlayerStatusNotifier>().coverID}",
-                  headers: {"Cookie":"session=${session.sessionBase64}"},
-                  width: 350, height: 350,
-                ),
+            child:  Image(image: ChimeAPI.getCover(GetIt.I<PlayerStatusNotifier>().coverID)),
           ),
           const SizedBox(height: 24,),
           Text(GetIt.I<PlayerStatusNotifier>().currentTrack, textAlign: TextAlign.center, style: GoogleFonts.anuphan(fontWeight: FontWeight.bold, fontSize: 20, ),),

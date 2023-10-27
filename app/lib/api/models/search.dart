@@ -9,7 +9,7 @@ class SearchResults {
     required this.radios,
   });
 
-  factory SearchResults.fronJson(Map<String, dynamic> json) => SearchResults(
+  factory SearchResults.fromJson(Map<String, dynamic> json) => SearchResults(
     tracks: (json["tracks"] as List<dynamic>).map((e) => SearchTrack.fromJson(e)).toList(), 
     collections: (json["collections"] as List<dynamic>).map((e) => SearchCollection.fromJson(e)).toList(), 
     radios: (json["radios"] as List<dynamic>).map((e) => SearchRadio.fromJson(e)).toList()

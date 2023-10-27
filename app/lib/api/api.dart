@@ -1,51 +1,171 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:io';
 
+import 'package:app/api/downloads.dart';
 import 'package:app/api/models/collections.dart';
+import 'package:app/api/models/misc.dart';
 import 'package:app/api/models/radio.dart';
 import 'package:app/api/models/search.dart';
 import 'package:app/shared.dart';
 import 'package:app/api/endpoints.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class ChimeAPI {
 
-  static Future<Library> getLibary() async {
+  static Future<Library> getLibrary() async {
+
+    if (connected) {
+      
+      final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetCollections"), headers: {"Cookie": "session=${session.sessionBase64}"});
+      return Library.fromJSON(jsonDecode(req.body)); 
     
-    final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetCollections"), headers: {"Cookie": "session=${session.sessionBase64}"});
-    return Library.fromJSON(jsonDecode(req.body));
+    } else {
+
+      var results = await dbMgr.db.query("collections");
+
+      Library lib = Library(
+        albums: [], playlists: [], radios: []
+      );
+
+      for (var element in results) {
+        
+        if (element["is_album"] as int == 1) {
+          
+          lib.albums.add(LibraryItem(
+              id: element["id"] as String, 
+              name: element["name"] as String,
+            )
+          );
+
+        } else {
+          
+            lib.playlists.add(LibraryItem(
+              id: element["id"] as String, 
+              name: element["name"] as String,
+            )
+          );
+
+        }
+
+      }
+
+      return lib;
+
+    }
 
   }
 
   static Future<Collection> getCollection(String id) async {
+
+    if (connected) {
+      
+      final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetCollection/$id"), headers: {"Cookie": "session=${session.sessionBase64}"});
+      return Collection.fromJSON(jsonDecode(req.body), id); 
     
-    final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetCollection/$id"), headers: {"Cookie": "session=${session.sessionBase64}"});
-    return Collection.fromJSON(jsonDecode(req.body), id);
+    } else {
+
+      // Shouldn't ever be null.
+      return (await dbMgr.getCollectionRecord(id))!;
+
+    }
 
   }
 
-  static Future<Uint8List> getCover(String id) async {
+  // static Future<Uint8List> getCover(String id) async {
 
-    final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetCover/$id"), headers: {"Cookie": "session=${session.sessionBase64}"});
-    return req.bodyBytes;
+  //   if (id == "0") {
+      
+  //     return ( await rootBundle.load("assets/no_cover.png") ).buffer.asUint8List();
+
+  //   } else if (connected) {
+        
+  //       final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetCover/$id"), headers: {"Cookie": "session=${session.sessionBase64}"});
+  //       return req.bodyBytes; 
+    
+  //   } else {
+
+  //     if (File("${(await getApplicationDocumentsDirectory()).path}/$coverDownloadDirectory/$id").existsSync()) {
+    
+  //       return await File("${(await getApplicationDocumentsDirectory()).path}/$coverDownloadDirectory/$id").readAsBytes();
+
+  //     } else {
+        
+  //       return ( await rootBundle.load("assets/no_cover.png") ).buffer.asUint8List();
+      
+  //     }
+
+  //   }
   
+  // }
+
+  static ImageProvider getCover(String id) {
+
+    if (id == "0") {
+      
+      return Image.asset("assets/no_cover.png").image;
+
+    } else if (connected) {
+        
+        return Image.network(
+                  "${session.serverOrigin}$apiGetCover/$id",
+                  headers: {"Cookie":"session=${session.sessionBase64}"},
+                ).image;
+    
+    } else {
+
+      if (File("$docDirectory/$coverDownloadDirectory/$id").existsSync()) {
+    
+        return Image.file(File("$docDirectory/$coverDownloadDirectory/$id")).image;
+
+      } else {
+        
+        return Image.asset("assets/no_cover.png").image;
+      
+      }
+
+    }
+
   }
 
   static Future<TrackMetadata> getTrackMetadata(String id) async {
 
-    final req = await http.get(Uri.parse("${session.serverOrigin}$apiTrackMetadata/$id"), headers: {"Cookie": "session=${session.sessionBase64}"});
-    return TrackMetadata.fromJSON(jsonDecode(req.body));
+    if (connected) {
+      
+      final req = await http.get(Uri.parse("${session.serverOrigin}$apiTrackMetadata/$id"), headers: {"Cookie": "session=${session.sessionBase64}"});
+      return TrackMetadata.fromJSON(jsonDecode(req.body)); 
+    
+    } else {
+
+      return TrackMetadata.fromDatabaseMap(
+        (await dbMgr.db.query("tracks", where: "id = ?", whereArgs: [id]))[0],
+        id 
+      );
+
+    }
 
   }
 
   static Future<List<String>> getTracks(int limit) async {
 
-    final req = await http.post(
-      Uri.parse("${session.serverOrigin}$apiAllTracks"),
-      headers: {"Cookie":"session=${session.sessionBase64}"},
-      body: jsonEncode(<String,int>{"limit":limit})
-    );
-    return jsonDecode(req.body) as List<String>;
+    if (connected) {
+      
+      final req = await http.post(
+        Uri.parse("${session.serverOrigin}$apiAllTracks"),
+        headers: {"Cookie":"session=${session.sessionBase64}"},
+        body: jsonEncode(<String,int>{"limit":limit})
+      );
+
+      return jsonDecode(req.body) as List<String>; 
+
+    } else {
+
+      return (await dbMgr.db.query("tracks", columns: ["id"])).map((e) => e["id"] as String).toList();
+
+    }
 
   }
 
@@ -58,13 +178,68 @@ class ChimeAPI {
 
   static Future<SearchResults> search(String query) async {
 
-    final req = await http.post(
-      Uri.parse("${session.serverOrigin}$apiSearch"),
-      headers: {"Cookie":"session=${session.sessionBase64}"},
-      body: jsonEncode(<String,String>{"query":query})
-    );
-    return SearchResults.fronJson(jsonDecode(req.body));
+    if (connected) {
+      
+      final req = await http.post(
+        Uri.parse("${session.serverOrigin}$apiSearch"),
+        headers: {"Cookie":"session=${session.sessionBase64}"},
+        body: jsonEncode(<String,String>{"query":query})
+      );
+      
+      return SearchResults.fromJson(jsonDecode(req.body)); 
+    
+    } else {
+
+      List<Map<String, Object?>> collectionResults = await dbMgr.db.query("collections", where: "name LIKE ?", whereArgs: ["%$query%"]);
+      List<Map<String, Object?>> trackResults = await dbMgr.db.query("tracks", where: "name LIKE ?", whereArgs: ["%$query%"]);
+
+      SearchResults results = SearchResults(
+        tracks: [], collections: [], radios: []
+      );
+
+      for (var res in collectionResults) {
+        
+        results.collections.add(
+          SearchCollection(
+            id: res["id"] as String, 
+            title: res["name"] as String, 
+            coverId: res["cover_id"] as String, 
+            isAlbum: (res["is_album"] as int) == 1
+          )
+        );
+
+      }
+
+      for (var res in trackResults) {
+        
+        results.tracks.add(
+          SearchTrack(
+            id: res["id"] as String, 
+            albumId: res["album_id"] as String, 
+            artist: res["artist"] as String, 
+            title: res["name"] as String, 
+            duration: res["duration"] as double, 
+            coverId: res["cover"] as String
+          )
+        );
+
+      }
+
+      return results;
+    
+    }
 
   }
+
+  static Future<PingResult> ping(String serverOrigin) async {
+
+    try {
+      final req = await http.get(Uri.parse("$serverOrigin$apiPing")).timeout(const Duration(seconds: 5));
+      return PingResult.fromJson(jsonDecode(req.body));
+    } on TimeoutException catch(e) {
+      return PingResult(serverId: "", message: "", successful: false);
+    }
+
+  } 
 
 }

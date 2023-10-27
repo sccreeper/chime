@@ -1,10 +1,12 @@
 import 'dart:ui';
 
+import 'package:app/api/api.dart';
 import 'package:app/api/endpoints.dart';
 import 'package:app/player.dart';
 import 'package:app/shared.dart';
 import 'package:app/views/fullplayerview.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -20,8 +22,10 @@ class DockedPlayerState extends State<DockedPlayer> {
 
   @override
   void initState() {
+
       super.initState();
       GetIt.I<PlayerStatusNotifier>().addListener(updatePlayerDetails);
+
   }
 
   void updatePlayerDetails() {
@@ -57,13 +61,7 @@ class DockedPlayerState extends State<DockedPlayer> {
           child: Stack(
             fit:  StackFit.expand,
             children: [
-              GetIt.I<PlayerStatusNotifier>().coverID == "0" ? 
-                Image.asset("assets/no_cover.png", fit: BoxFit.cover,) : 
-                Image.network(
-                  "${session.serverOrigin}$apiGetCover/${GetIt.I<PlayerStatusNotifier>().coverID}",
-                  headers: {"Cookie":"session=${session.sessionBase64}"},
-                  fit: BoxFit.cover,
-              ),
+              Image(image: ChimeAPI.getCover(GetIt.I<PlayerStatusNotifier>().coverID), fit: BoxFit.cover,),
               ClipRRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -81,12 +79,7 @@ class DockedPlayerState extends State<DockedPlayer> {
                                 children: [
                                   Expanded(
                                     flex: 1,
-                                    child: GetIt.I<PlayerStatusNotifier>().coverID == "0" ? 
-                                    Image.asset("assets/no_cover.png") : 
-                                    Image.network(
-                                      "${session.serverOrigin}$apiGetCover/${GetIt.I<PlayerStatusNotifier>().coverID}",
-                                      headers: {"Cookie":"session=${session.sessionBase64}"},
-                                      )
+                                    child: Image(image: ChimeAPI.getCover(GetIt.I<PlayerStatusNotifier>().coverID),)
                                   ),
                                   const SizedBox(width: 5,),
                                   Expanded(

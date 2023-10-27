@@ -103,6 +103,8 @@ class LoginScreenState extends State<LoginScreen> {
 
       log.fine("Writing session JSON: ${jsonEncode(session.toJson())}");
 
+      connected = true;
+
       // Change login screen
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
     } else {

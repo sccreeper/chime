@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
 import 'package:app/api/api.dart';
+import 'package:app/api/downloads.dart';
 import 'package:app/api/endpoints.dart';
 import 'package:app/api/models/collections.dart';
 import 'package:app/player.dart';
@@ -43,19 +45,10 @@ class CollectionViewState extends State<CollectionView> {
     
     Collection collection = await ChimeAPI.getCollection(widget.id);
 
-    Uint8List image;
-
-    if (collection.coverId == "0") {
-      image = ( await rootBundle.load("assets/no_cover.png") ).buffer.asUint8List();
-    } else {
-      image = await ChimeAPI.getCover(collection.coverId);
-    }
-
     if (mounted) {
       setState(() {
         _childWidget = CollectionScaffold(
-          collection: collection, 
-          coverBytes: image
+          collection: collection,
         );
       }); 
     }
@@ -78,9 +71,8 @@ class CollectionViewState extends State<CollectionView> {
 class CollectionScaffold extends StatelessWidget {
 
   final Collection collection;
-  final Uint8List coverBytes;
 
-  const CollectionScaffold({super.key, required this.collection, required this.coverBytes});
+  const CollectionScaffold({super.key, required this.collection});
 
   @override
   Widget build(BuildContext context) {
@@ -107,14 +99,14 @@ class CollectionScaffold extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.memory(coverBytes,fit: BoxFit.cover,),
+                Image(image: ChimeAPI.getCover(collection.coverId),fit: BoxFit.cover,),
                 ClipRRect(
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: Container(
                       alignment: Alignment.center,
                       color: Colors.grey.withOpacity(0.1),
-                      child: Image.memory(coverBytes, width: 200, height: 200,),
+                      child: Image(image: ChimeAPI.getCover(collection.coverId), width: 200, height: 200,),
                     ),  
                   ),
                 )
@@ -193,15 +185,7 @@ class TrackScaffold extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Center(
-                    child: (track.coverId == "0" ? 
-                      Image.asset("assets/no_cover.png", width: 100, height: 100,) : 
-                      Image.network(
-                        "${session.serverOrigin}$apiGetCover/${track.coverId}", 
-                        headers: {"Cookie":"session=${session.sessionBase64}"}, 
-                        width: 100,
-                        height: 100,
-                        )
-                    ),
+                    child: Image(image: ChimeAPI.getCover(track.coverId), width: 100, height: 100,),
                   ),
                   const Divider(),
                   Text(track.name),

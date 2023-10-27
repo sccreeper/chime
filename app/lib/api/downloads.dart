@@ -61,13 +61,15 @@ class DownloadManager {
         var trackResult = await http.get(
             Uri.parse("${session.serverOrigin}$apiDownload/${track.id}"), headers: {"Cookie": "session=${session.sessionBase64}"});
 
+        var metadata = await ChimeAPI.getTrackMetadata(track.id);
+
         File trackFile = File("$basePath/$trackDownloadDirectory/${track.id}");
         trackFile.createSync();
         await trackFile.writeAsBytes(trackResult.bodyBytes);
 
         // Add to database
 
-        dbMgr.addTrackRecord(track);
+        dbMgr.addTrackRecord(track, metadata.size, metadata.originalFile, metadata.format);
       }
     }
 
@@ -219,7 +221,8 @@ class DownloadDatabaseManager {
             cover STRING,
             original STRING,
             position INTEGER,
-            size INTEGER);
+            size INTEGER,
+            type STRING);
           """);
       }
 
@@ -234,9 +237,9 @@ class DownloadDatabaseManager {
   }
 
   // Add a track to the database
-  void addTrackRecord(Track track) {
+  void addTrackRecord(Track track, int size, String original, String type) {
     db.execute(
-        "INSERT INTO $tableTracks (id, name, released, artist, duration, album_id, cover, original, size, position, album_name) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO $tableTracks (id, name, released, artist, duration, album_id, cover, original, size, position, album_name, type) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
         [
           track.id,
           track.name,
@@ -245,10 +248,11 @@ class DownloadDatabaseManager {
           track.duration,
           track.albumId,
           track.coverId,
-          "",
-          0,
+          original,
+          size,
           track.position,
           track.albumName,
+          type,
 
         ]);
   }

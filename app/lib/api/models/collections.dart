@@ -183,6 +183,18 @@ class Track {
     position: metadata.position
   );
 
+  factory Track.fromDatabaseMap(Map<String, Object> dbMap, String id) => Track(
+    id: id, 
+    name: dbMap["name"] as String, 
+    albumName: dbMap["album_name"] as String, 
+    released: dbMap["released"] as int, 
+    artist: dbMap["artist"] as String, 
+    albumId: dbMap["album_id"] as String, 
+    duration: dbMap["duration"] as double, 
+    coverId: dbMap["cover"] as String, 
+    position: dbMap["position"] as int,
+  );
+
 }
 
 class TrackMetadata {
@@ -240,5 +252,19 @@ class TrackMetadata {
     "size":size,
     "position":position
   };
+
+  factory TrackMetadata.fromDatabaseMap(Map<String, Object?> dbMap, String id) => TrackMetadata(
+    title: dbMap["name"] as String, 
+    albumName: dbMap["album_name"] as String, 
+    albumId: dbMap["album_id"] as String, 
+    coverId: dbMap["cover"] as String, 
+    artist: dbMap["artist"] as String, 
+    originalFile: dbMap["original"] as String, 
+    format: dbMap["type"] as String, 
+    duration: dbMap["duration"] as double, 
+    released: dbMap["released"] as int, 
+    size: dbMap["size"] as int, 
+    position: dbMap["position"] as int
+  );
 
 }

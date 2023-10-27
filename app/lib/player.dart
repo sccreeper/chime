@@ -1,8 +1,10 @@
 // Contains everything needed for managing the audio player.
 
+import 'dart:io';
 import 'dart:math';
 
 import 'package:app/api/api.dart';
+import 'package:app/api/downloads.dart';
 import 'package:app/api/endpoints.dart';
 import 'package:app/api/models/collections.dart';
 import 'package:app/api/models/radio.dart';
@@ -10,6 +12,7 @@ import 'package:app/shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:path_provider/path_provider.dart';
 
 AudioPlayer audioPlayer = AudioPlayer();
 
@@ -59,12 +62,20 @@ class Player {
 
   static void playTrackId(String trackId) async {
     
-    await audioPlayer.setAudioSource(
-      AudioSource.uri(
-        Uri.parse("${session.serverOrigin}$apiStream/$trackId"),
-        headers: {"Cookie":"session=${session.sessionBase64}"},
-      )
-    );
+    if (File("${(await getApplicationDocumentsDirectory()).path}/$trackDownloadDirectory/$trackId").existsSync()) {
+      
+      await audioPlayer.setAudioSource(
+        AudioSource.file("${(await getApplicationDocumentsDirectory()).path}/$trackDownloadDirectory/$trackId")
+      );
+
+    } else {
+      await audioPlayer.setAudioSource(
+        AudioSource.uri(
+          Uri.parse("${session.serverOrigin}$apiStream/$trackId"),
+          headers: {"Cookie":"session=${session.sessionBase64}"},
+        )
+      );
+    }
 
     GetIt.I<PlayerStatusNotifier>().playingRadio = false;
     GetIt.I<PlayerStatusNotifier>().active = true;

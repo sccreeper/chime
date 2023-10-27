@@ -1,4 +1,5 @@
 import "dart:io";
+import "dart:typed_data";
 
 import "package:app/api/downloads.dart";
 import "package:app/api/models/session.dart";
@@ -7,6 +8,8 @@ import "package:logging/logging.dart";
 var log = Logger("Chime");
 late UserSession session;
 late DownloadDatabaseManager dbMgr;
+late String docDirectory;
+bool connected = false;
 
 String currentCollection = "";
 

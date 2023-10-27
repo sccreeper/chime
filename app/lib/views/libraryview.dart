@@ -42,7 +42,7 @@ class LibaryViewState extends State<LibrayView> {
       return;
     }
 
-    final Library lib = await ChimeAPI.getLibary();
+    final Library lib = await ChimeAPI.getLibrary();
     
     List<Widget> content = [];
 
@@ -51,7 +51,7 @@ class LibaryViewState extends State<LibrayView> {
 
     for (var album in lib.albums) {      
       content.addAll(
-        [LibaryItem(id: album.id, type: LibaryItemType.album, name: album.name,), const Divider()]
+        [LibraryItemWidget(id: album.id, type: LibaryItemType.album, name: album.name,), const Divider()]
       );
     }
 
@@ -60,7 +60,7 @@ class LibaryViewState extends State<LibrayView> {
 
     for (var playlist in lib.playlists) {      
       content.addAll(
-        [LibaryItem(id: playlist.id, type: LibaryItemType.playlist, name: playlist.name,), const Divider()]
+        [LibraryItemWidget(id: playlist.id, type: LibaryItemType.playlist, name: playlist.name,), const Divider()]
       );
     }
 
@@ -69,7 +69,7 @@ class LibaryViewState extends State<LibrayView> {
 
     for (var radio in lib.radios) {      
       content.addAll(
-        [LibaryItem(id: radio.id, type: LibaryItemType.radio, name: radio.name,), const Divider()]
+        [LibraryItemWidget(id: radio.id, type: LibaryItemType.radio, name: radio.name,), const Divider()]
       );
       
     }
@@ -116,20 +116,20 @@ class LibraryViewChangeNotifier extends ChangeNotifier {
 
 }
 
-class LibaryItem extends StatefulWidget {
+class LibraryItemWidget extends StatefulWidget {
 
     final String name;
     final String id;
     final LibaryItemType type;
 
-    LibaryItem({super.key,required this.id, required this.type, required this.name});
+    LibraryItemWidget({super.key,required this.id, required this.type, required this.name});
 
     @override
     LibraryItemState createState() => LibraryItemState();
 
 }
 
-class LibraryItemState extends State<LibaryItem> {
+class LibraryItemState extends State<LibraryItemWidget> {
   
 
   @override

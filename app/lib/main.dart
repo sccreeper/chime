@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
+import 'package:app/api/api.dart';
 import 'package:app/api/downloads.dart';
 import 'package:app/api/endpoints.dart';
 import 'package:app/player.dart';
@@ -7,6 +8,8 @@ import 'package:app/shared.dart';
 import 'package:app/mainscreen.dart';
 import 'package:app/views/libraryview.dart';
 import 'package:app/views/radioview.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -41,6 +44,10 @@ void main() async {
   GetIt.I.registerSingleton<ActiveMainViewNotifier>(ActiveMainViewNotifier());
   GetIt.I.registerSingleton<DownloadNotifier>(DownloadNotifier());
 
+  // Load no_cover image
+
+  docDirectory = (await getApplicationDocumentsDirectory()).path;
+
   runApp(const MaterialApp(home: MainApp()));
   
 }
@@ -64,7 +71,7 @@ class MainAppState extends State<MainApp> {
     
     GetIt.I<ActiveMainViewNotifier>().addListener(updateView);
 
-    _checkConfig();
+    mainInit();
     super.initState();
   }
 
@@ -152,7 +159,9 @@ class MainAppState extends State<MainApp> {
     );
   }
 
-  Future _checkConfig() async {
+  Future mainInit() async {
+
+    // Check config
     
     appDocuments = await getApplicationDocumentsDirectory();
 
@@ -179,27 +188,60 @@ class MainAppState extends State<MainApp> {
         GetIt.I<ActiveMainViewNotifier>().widget = const LoginScreen();
         return;
       }
-      
-      log.fine("Checking session with server and authenticating");
 
-      // Try logging in with stored json.
+      // Check if connected to internet
 
-      // ignore: unnecessary_brace_in_string_interps
-      var resp = await http.get(Uri.parse("${session.serverOrigin}${apiAuthSessionExists}/${session.sessionID}"));
-      var respJson = jsonDecode(resp.body);
+      var connectivity = await (Connectivity().checkConnectivity());
 
-      log.fine(resp.body);
-
-      if (respJson["status"] == "exists") {
-        log.fine("Session exists, continuing to main screen");
-        
-        GetIt.I<ActiveMainViewNotifier>().widget = const MainScreen();
-
+      if (connectivity == ConnectivityResult.none) {
+        connected = false;
       } else {
-        log.fine("Session does not exist, continuing to login screen");
-        
-        GetIt.I<ActiveMainViewNotifier>().widget = const LoginScreen();
 
+        var result = await io.InternetAddress.lookup(Uri.parse(session.serverOrigin).host);
+        
+        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+          connected = true;
+        } else {
+          
+          // Check if server is "alive"
+
+          var ping = await ChimeAPI.ping(session.serverOrigin);
+          connected = ping.successful;
+
+        }
+      }
+
+      if (connected) {
+        // Auth if we are
+      
+        log.fine("Checking session with server and authenticating");
+
+        // Try logging in with stored json.
+
+        // ignore: unnecessary_brace_in_string_interps
+        var resp = await http.get(Uri.parse("${session.serverOrigin}${apiAuthSessionExists}/${session.sessionID}"));
+        var respJson = jsonDecode(resp.body);
+
+        log.fine(resp.body);
+
+        if (respJson["status"] == "exists") {
+          log.fine("Session exists, continuing to main screen");
+          
+          GetIt.I<ActiveMainViewNotifier>().widget = const MainScreen();
+
+        } else {
+          log.fine("Session does not exist, continuing to login screen");
+          
+          GetIt.I<ActiveMainViewNotifier>().widget = const LoginScreen();
+
+        } 
+      
+      } else {
+        
+        log.fine("Unable to establish session with server, reverting to offline mode");
+
+        GetIt.I<ActiveMainViewNotifier>().widget = const MainScreen();
+      
       }
 
 
