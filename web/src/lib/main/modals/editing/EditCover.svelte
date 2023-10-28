@@ -82,7 +82,7 @@
           {#if current_cover == "0"}
             <CoverCard id="0" selected="true" target_id={get(active_view).id} data_callback={data_callback}/>
           {:else}
-            <CoverCard id="0" selected="false"/>
+            <CoverCard id="0" selected="false" target_id={get(active_view).id} data_callback={data_callback}/>
             <CoverCard id="{current_cover}" target_id={get(active_view).id} selected="true" data_callback={data_callback}/>
           {/if}
 

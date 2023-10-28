@@ -405,23 +405,23 @@ func handle_edit_cover(ctx *gin.Context) {
 
 		database.Table(table_playlists).Model(&collection).UpdateColumn("cover", cover_id)
 
-		// Then update tracks if album
+	}
 
-		if collection.IsAlbum == 1 {
+	if collection.IsAlbum == 1 {
 
-			track_ids := strings.Split(collection.Tracks, ",")
+		track_ids := strings.Split(collection.Tracks, ",")
 
-			for _, v := range track_ids {
+		for _, v := range track_ids {
 
-				var track track_model
-				track_id, _ := strconv.ParseInt(v, 16, 64)
-				database.Table(table_tracks).Where("id = ?", track_id).First(&track)
-				database.Table(table_tracks).Model(&track).UpdateColumn("cover", cover_id)
-
-			}
+			var track track_model
+			track_id, _ := strconv.ParseInt(v, 16, 64)
+			database.Table(table_tracks).Where("id = ?", track_id).First(&track)
+			database.Table(table_tracks).Model(&track).UpdateColumn("cover", cover_id)
 
 		}
 
 	}
+
+	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
 
 }
