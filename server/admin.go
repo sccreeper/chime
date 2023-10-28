@@ -36,15 +36,9 @@ type change_username_query struct {
 func handle_change_username(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	user_id, err := strconv.ParseInt(session.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 
@@ -143,15 +137,9 @@ type change_password_query struct {
 func handle_change_password(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	user_id, err := strconv.ParseInt(session.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 
@@ -200,15 +188,9 @@ type reset_password_query struct {
 func handle_reset_password(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	user_id, err := strconv.ParseInt(session.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 
@@ -274,15 +256,9 @@ type get_users_resp struct {
 func handle_get_users(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	user_id, err := strconv.ParseInt(session.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 
@@ -341,15 +317,9 @@ type user_query struct {
 func handle_add_user(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, admin_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	admin_id, err := strconv.ParseInt(session.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 
@@ -423,15 +393,9 @@ type delete_user_query struct {
 func handle_delete_user(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, admin_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	admin_id, err := strconv.ParseInt(session.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 
@@ -511,15 +475,9 @@ type toggle_admin_query struct {
 func handle_toggle_admin(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, admin_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	admin_id, err := strconv.ParseInt(session.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 
@@ -581,15 +539,9 @@ type storage_resp struct {
 func handle_get_storage(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	user_id, err := strconv.ParseInt(session.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 
@@ -604,7 +556,7 @@ func handle_get_storage(ctx *gin.Context) {
 	// Calculate storage usage
 	var size int64
 
-	err = filepath.Walk("/var/lib/chime/", func(path string, info fs.FileInfo, err error) error {
+	err := filepath.Walk("/var/lib/chime/", func(path string, info fs.FileInfo, err error) error {
 
 		if err != nil {
 			return err
@@ -663,13 +615,11 @@ var backup_lock = sync.RWMutex{}
 
 func handle_start_backup(ctx *gin.Context) {
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, admin_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-
-	admin_id, _ := strconv.ParseInt(session.UserID, 16, 64)
 
 	var admin user_model
 	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)
@@ -715,13 +665,11 @@ type backup_status_query struct {
 func handle_get_backup_status(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, admin_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-
-	admin_id, _ := strconv.ParseInt(session.UserID, 16, 64)
 
 	var admin user_model
 	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)
@@ -752,13 +700,11 @@ func handle_get_backup_status(ctx *gin.Context) {
 func handle_download_backup(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, admin_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-
-	admin_id, _ := strconv.ParseInt(session.UserID, 16, 64)
 
 	var admin user_model
 	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)
@@ -915,13 +861,11 @@ func read_backup_value(id int64) backup {
 func handle_clear_backups(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, session := verify_user(ctx.Request)
+	verified, admin_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-
-	admin_id, _ := strconv.ParseInt(session.UserID, 16, 64)
 
 	var admin user_model
 	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)

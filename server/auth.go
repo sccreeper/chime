@@ -43,11 +43,11 @@ func init() {
 }
 
 // See if user ID matches session and if session actually exists.
-func verify_user(request *http.Request) (bool, session) {
+func verify_user(request *http.Request) (bool, int64) {
 
 	if session_cookie, err := request.Cookie("session"); err != nil {
 		fmt.Println(err.Error())
-		return false, session{}
+		return false, 0
 	} else {
 
 		// "Escapes" base64
@@ -63,11 +63,14 @@ func verify_user(request *http.Request) (bool, session) {
 		json.Unmarshal(escaped, &s)
 
 		if _, ok := sessions[s.ID]; !ok {
-			return false, session{}
+			return false, 0
 		} else if sessions[s.ID].UserID != s.UserID {
-			return false, session{}
+			return false, 0
 		} else {
-			return true, s
+
+			user_id, _ := strconv.ParseInt(s.UserID, 16, 64)
+
+			return true, user_id
 		}
 	}
 

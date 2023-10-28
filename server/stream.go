@@ -17,7 +17,7 @@ type stream_param struct {
 func handle_stream(ctx *gin.Context) {
 
 	// Verify user
-	verified, request_body := verify_user(ctx.Request)
+	verified, owner_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -42,12 +42,6 @@ func handle_stream(ctx *gin.Context) {
 		return
 	}
 
-	owner_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
 	database.Table(table_tracks).Select("owner", "original").Where("id = ?", track_id).First(&track)
 
 	if owner_id != track.Owner {
@@ -69,7 +63,7 @@ type download_track_query struct {
 func handle_download_track_original(ctx *gin.Context) {
 
 	// Verify user
-	verified, request_body := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -83,12 +77,6 @@ func handle_download_track_original(ctx *gin.Context) {
 	}
 
 	var track track_model
-
-	user_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
 
 	track_id, err := strconv.ParseInt(query.ID, 16, 64)
 	if err != nil {

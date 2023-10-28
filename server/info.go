@@ -26,7 +26,7 @@ type get_favourites_resp struct {
 func handle_favourite(ctx *gin.Context) {
 
 	// Verify user & extract request body
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -45,8 +45,6 @@ func handle_favourite(ctx *gin.Context) {
 		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad ID"))
 		return
 	}
-
-	user_id, _ := strconv.ParseInt(session.UserID, 16, 64)
 
 	// Check if track exists
 
@@ -105,13 +103,11 @@ func handle_favourite(ctx *gin.Context) {
 func handle_get_favourites(ctx *gin.Context) {
 
 	// Verify user & extract request body
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-
-	user_id, _ := strconv.ParseInt(session.UserID, 16, 64)
 
 	var user user_model
 	database.Table(table_users).Select("favourites").Where("id = ?", user_id).First(&user)
@@ -137,13 +133,11 @@ type reorder_collection_query struct {
 func handle_reorder_collection(ctx *gin.Context) {
 
 	// Verify user & extract request body
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-
-	user_id, _ := strconv.ParseInt(session.UserID, 16, 64)
 
 	var query reorder_collection_query
 
@@ -198,7 +192,7 @@ type edit_collection_query struct {
 func handle_edit_collection(ctx *gin.Context) {
 
 	// Verify user & extract request body
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -217,7 +211,6 @@ func handle_edit_collection(ctx *gin.Context) {
 
 	// Verify ownersip of record
 
-	user_id, _ := strconv.ParseInt(session.UserID, 16, 64)
 	collection_id, _ := strconv.ParseInt(query.CollectionID, 16, 64)
 
 	var collection playlist_model
@@ -262,7 +255,7 @@ type edit_track_query struct {
 
 func handle_edit_track(ctx *gin.Context) {
 	// Verify user & extract request body
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -281,7 +274,6 @@ func handle_edit_track(ctx *gin.Context) {
 
 	// Verify ownership of record
 
-	user_id, _ := strconv.ParseInt(session.UserID, 16, 64)
 	collection_id, _ := strconv.ParseInt(query.TrackID, 16, 64)
 
 	var track track_model
@@ -320,7 +312,7 @@ type edit_radio_query struct {
 
 func handle_edit_radio(ctx *gin.Context) {
 	// Verify user & extract request body
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -337,7 +329,6 @@ func handle_edit_radio(ctx *gin.Context) {
 		return
 	}
 
-	user_id, _ := strconv.ParseInt(session.UserID, 16, 64)
 	radio_id, _ := strconv.ParseInt(query.RadioID, 16, 64)
 
 	var radio radio_model
@@ -364,13 +355,11 @@ type edit_cover_query struct {
 
 func handle_edit_cover(ctx *gin.Context) {
 
-	verified, r := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-
-	user_id, _ := strconv.ParseInt(r.UserID, 16, 64)
 
 	var count int64
 	var collection playlist_model

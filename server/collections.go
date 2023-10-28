@@ -55,7 +55,7 @@ type track_response struct {
 func handle_get_collections(ctx *gin.Context) {
 
 	// Verify user
-	verified, request_body := verify_user(ctx.Request)
+	verified, owner_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -63,12 +63,6 @@ func handle_get_collections(ctx *gin.Context) {
 
 	var collections = []playlist_model{}
 	var radios = []radio_model{}
-
-	owner_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
 
 	database.Table(table_playlists).
 		Select("name", "is_album", "id").
@@ -208,7 +202,7 @@ type get_cover_query struct {
 func handle_get_cover(ctx *gin.Context) {
 
 	// Verify user
-	verified, request_body := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -221,12 +215,6 @@ func handle_get_cover(ctx *gin.Context) {
 	cover_id, err := strconv.ParseInt(query.CoverID, 16, 64)
 	if err != nil {
 		fmt.Println(query.CoverID)
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	user_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
-	if err != nil {
-		fmt.Println(request_body.UserID)
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -352,7 +340,7 @@ func handle_get_radio(ctx *gin.Context) {
 
 	// Verify user & request
 
-	verified, r := verify_user(ctx.Request)
+	verified, owner_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -366,12 +354,6 @@ func handle_get_radio(ctx *gin.Context) {
 	}
 
 	radio_id, err := strconv.ParseInt(query.ID, 16, 64)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-
-	owner_id, err := strconv.ParseInt(r.UserID, 16, 64)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
@@ -414,7 +396,7 @@ func handle_add_collection(ctx *gin.Context) {
 
 	// Verify user & request
 
-	verified, r := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -429,12 +411,6 @@ func handle_add_collection(ctx *gin.Context) {
 
 	if err := json.Unmarshal([]byte(ctx.PostForm("data")), &playlist); err != nil {
 		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid request body"))
-		return
-	}
-
-	user_id, err := strconv.ParseInt(r.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: User ID invalid"))
 		return
 	}
 
@@ -498,15 +474,9 @@ func handle_add_to_collection(ctx *gin.Context) {
 
 	// Verify user & request
 
-	verified, r := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	user_id, err := strconv.ParseInt(r.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 
@@ -560,7 +530,7 @@ type collection_to_collection_query struct {
 // Add an entire playlist/album to another playlist/album
 func handle_add_collection_to_collection(ctx *gin.Context) {
 
-	verified, session := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -569,12 +539,6 @@ func handle_add_collection_to_collection(ctx *gin.Context) {
 	var query collection_to_collection_query
 	if err := ctx.ShouldBindJSON(&query); err != nil {
 		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid request body"))
-	}
-
-	user_id, err := strconv.ParseInt(session.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
-		return
 	}
 
 	var user user_model
@@ -586,7 +550,7 @@ func handle_add_collection_to_collection(ctx *gin.Context) {
 	var destination_id int64
 	var count int64
 
-	source_id, err = strconv.ParseInt(query.Source, 16, 64)
+	source_id, err := strconv.ParseInt(query.Source, 16, 64)
 	database.Table(table_playlists).Select("*").Where("id = ?", source_id).Count(&count)
 	if err != nil || count == 0 {
 		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid source ID"))
@@ -628,7 +592,7 @@ func handle_delete_collection(ctx *gin.Context) {
 
 	// Verify user & request
 
-	verified, r := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -638,12 +602,6 @@ func handle_delete_collection(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&query); err != nil {
 		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad JSON"))
-		return
-	}
-
-	user_id, err := strconv.ParseInt(r.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Bad user ID"))
 		return
 	}
 
@@ -724,15 +682,9 @@ func handle_get_track_ids(ctx *gin.Context) {
 
 	// Verify user & request
 
-	verified, r := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	user_id, err := strconv.ParseInt(r.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 
@@ -775,13 +727,12 @@ type get_covers_response struct {
 
 func handle_get_covers(ctx *gin.Context) {
 
-	verified, r := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
-	user_id, _ := strconv.ParseInt(r.UserID, 16, 64)
 	var cover_ids_int []int64
 	var cover_ids []string
 

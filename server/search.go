@@ -40,17 +40,9 @@ func handle_search(ctx *gin.Context) {
 
 	// Verify user
 
-	verified, r := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
-	// Verify request
-
-	user_id, err := strconv.ParseInt(r.UserID, 16, 64)
-	if err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 

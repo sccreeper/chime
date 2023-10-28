@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"math"
 	"net/http"
 	"os"
@@ -22,12 +21,10 @@ func handle_upload(ctx *gin.Context) {
 
 	// Parse form and verify user
 
-	var request_body session
-
 	ctx.Request.ParseMultipartForm(int64(math.Pow10(8) * 2.5)) //250mb
 
 	// Verify user
-	verified, request_body := verify_user(ctx.Request)
+	verified, owner_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -73,13 +70,6 @@ func handle_upload(ctx *gin.Context) {
 		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Failed to probe duration!"))
 	}
 
-	owner_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
-	if err != nil {
-		log.Println("Failed to user id string to int!")
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
 	// If album doesn't exist then add to default "Unsorted" collection.
 
 	if metadata.Title() == "" {
@@ -110,12 +100,7 @@ func handle_upload(ctx *gin.Context) {
 		var album_title string = metadata.Album()
 		var count int64
 
-		user_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
-		if err != nil {
-			ctx.AbortWithStatus(http.StatusInternalServerError)
-		}
-
-		database.Table(table_playlists).Where("name = ? AND is_album = 1 AND owner = ?", album_title, user_id).Count(&count)
+		database.Table(table_playlists).Where("name = ? AND is_album = 1 AND owner = ?", album_title, owner_id).Count(&count)
 
 		if count == 0 {
 
@@ -214,10 +199,8 @@ type add_radio_query struct {
 
 func handle_add_radio(ctx *gin.Context) {
 
-	var request_body session
-
 	// Verify user
-	verified, request_body := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
@@ -232,12 +215,6 @@ func handle_add_radio(ctx *gin.Context) {
 	}
 
 	radio_id := generate_id(table_radio)
-
-	user_id, err := strconv.ParseInt(request_body.UserID, 16, 64)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
 
 	database.Table(table_radio).Create(&radio_model{
 		ID:    radio_id,
@@ -255,13 +232,12 @@ func handle_add_radio(ctx *gin.Context) {
 
 func handle_upload_cover(ctx *gin.Context) {
 
-	verified, r := verify_user(ctx.Request)
+	verified, user_id := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
-	user_id, _ := strconv.ParseInt(r.UserID, 16, 64)
 	cover_id := generate_id(table_covers)
 
 	ctx.Request.ParseMultipartForm(int64(math.Pow10(6) * 50)) //50mb
