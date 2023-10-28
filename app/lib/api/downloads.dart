@@ -286,7 +286,7 @@ class DownloadDatabaseManager {
   // Returns track data from the database, if the track is not found, returns null.
   Future<Track?> getTrackRecord(String id) async {
     List<Map<String, dynamic>> results =
-        await db.rawQuery("SELECT * FROM $tableTracks WHERE id = ?", [id]);
+        await db.query(tableTracks, where: "id = ?", whereArgs: [id]);
 
     if (results.isEmpty) {
       return null;
@@ -307,7 +307,7 @@ class DownloadDatabaseManager {
   // Returns a collection from the database
   Future<Collection?> getCollectionRecord(String id) async {
     List<Map<String, dynamic>> results =
-        await db.rawQuery("SELECT * FROM $tableCollections WHERE id = ?", [id]);
+        await db.query(tableCollections, where: "id = ?", whereArgs: [id]);
 
     if (results.isEmpty) {
       log.fine("No collection with id $id in database");
@@ -341,7 +341,7 @@ class DownloadDatabaseManager {
 
   Future<int> countCollectionRecords(String trackId) async {
 
-    return (await db.rawQuery("SELECT * FROM $tableCollections WHERE tracks LIKE ?", ["%$trackId%"])).length;
+    return (await db.query(tableCollections, where: "tracks LIKE ?", whereArgs: ["%$trackId%"])).length;
     
   }
 
