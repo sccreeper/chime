@@ -494,7 +494,7 @@ type add_to_collection_query struct {
 }
 
 // Add tracks to a collection
-func add_to_collection(ctx *gin.Context) {
+func handle_add_to_collection(ctx *gin.Context) {
 
 	// Verify user & request
 
@@ -720,7 +720,7 @@ type get_track_ids_query struct {
 }
 
 // Returns the ID of a random track from a user's library.
-func get_track_ids(ctx *gin.Context) {
+func handle_get_track_ids(ctx *gin.Context) {
 
 	// Verify user & request
 
@@ -760,6 +760,38 @@ func get_track_ids(ctx *gin.Context) {
 	response_struct := get_track_ids_resp{IDs: track_strings}
 
 	resp_bytes, err := json.Marshal(response_struct)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEJSON, resp_bytes)
+
+}
+
+type get_covers_response struct {
+	CoverIDs []string `json:"cover_ids"`
+}
+
+func handle_get_covers(ctx *gin.Context) {
+
+	verified, r := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	user_id, _ := strconv.ParseInt(r.UserID, 16, 64)
+	var cover_ids_int []int64
+	var cover_ids []string
+
+	database.Table(table_covers).Select("id").Where("owner = ?", user_id).Find(&cover_ids_int)
+
+	for _, v := range cover_ids_int {
+		cover_ids = append(cover_ids, strconv.FormatInt(v, 16))
+	}
+
+	resp_bytes, err := json.Marshal(get_covers_response{CoverIDs: cover_ids})
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return

@@ -185,7 +185,7 @@ class TrackScaffold extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Center(
-                    child: Image(image: ChimeAPI.getCover(track.coverId), width: 100, height: 100,),
+                    child: Image(image: ChimeAPI.getCover(trackMetadata.coverId), width: 100, height: 100,),
                   ),
                   const Divider(),
                   Text(track.name),

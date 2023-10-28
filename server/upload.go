@@ -24,7 +24,7 @@ func handle_upload(ctx *gin.Context) {
 
 	var request_body session
 
-	ctx.Request.ParseMultipartForm(int64(math.Pow10(8) * 2.5))
+	ctx.Request.ParseMultipartForm(int64(math.Pow10(8) * 2.5)) //250mb
 
 	// Verify user
 	verified, request_body := verify_user(ctx.Request)
@@ -250,5 +250,34 @@ func handle_add_radio(ctx *gin.Context) {
 	})
 
 	ctx.Data(http.StatusOK, "text/plain", []byte{})
+
+}
+
+func handle_upload_cover(ctx *gin.Context) {
+
+	verified, r := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	user_id, _ := strconv.ParseInt(r.UserID, 16, 64)
+	cover_id := generate_id(table_covers)
+
+	ctx.Request.ParseMultipartForm(int64(math.Pow10(6) * 50)) //50mb
+
+	file, _ := ctx.FormFile("file")
+
+	ctx.SaveUploadedFile(file, fmt.Sprintf("/var/lib/chime/covers/%s", strconv.FormatInt(cover_id, 16)))
+
+	database.Table(table_covers).Create(&cover_model{
+		ID:      cover_id,
+		Owner:   user_id,
+		AlbumID: 0,
+	})
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"id": strconv.FormatInt(cover_id, 16),
+	})
 
 }

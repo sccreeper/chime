@@ -87,6 +87,7 @@ func main() {
 
 	r.POST("/api/upload", handle_upload)
 	r.POST("/api/add_radio", handle_add_radio)
+	r.POST("/api/upload_cover", handle_upload_cover)
 
 	// Download methods for streaming locally
 	r.GET("/api/download/:track_id")
@@ -109,8 +110,9 @@ func main() {
 	r.POST("/api/collection/delete", handle_delete_collection)
 	r.POST("/api/collection/add", handle_add_collection)
 	r.POST("/api/collection/add_collection", handle_add_collection_to_collection)
-	r.POST("/api/collection/add_track", add_to_collection)
-	r.POST("/api/library/get_track_ids", get_track_ids)
+	r.POST("/api/collection/add_track", handle_add_to_collection)
+	r.POST("/api/library/get_track_ids", handle_get_track_ids)
+	r.GET("/api/library/get_covers", handle_get_covers)
 
 	// Edit endpoints
 	r.POST("/api/edit/collection", handle_edit_collection)
@@ -118,6 +120,7 @@ func main() {
 	r.POST("/api/edit/track", handle_edit_track)
 	r.POST("/api/edit/radio", handle_edit_radio)
 	r.POST("/api/edit/favourite", handle_favourite)
+	r.POST("/api/edit/cover", handle_edit_cover)
 
 	//Search
 

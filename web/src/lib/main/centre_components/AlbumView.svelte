@@ -10,8 +10,8 @@
     import { audio_source, playing, playing_collection, shuffle, viewing_tracks } from "../../player";
     import CollectionAdd from "../modals/CollectionAdd.svelte";
     import EditCollection from "../modals/editing/EditCollection.svelte";
-    import { xlink_attr } from "svelte/internal";
     import { convertDurationLong } from "../../util";
+    import EditCover from "../modals/editing/EditCover.svelte";
 
     let collection_title = "";
     let collection_cover_src = no_cover_image;
@@ -22,6 +22,8 @@
     let is_protected = false;
 
     let title_font = "4.5vw";
+
+    let cover_id = "";
 
     let collection_duration = "";
 
@@ -56,6 +58,8 @@
                     } else {
                         collection_cover_src = `/api/collection/get_cover/${data.cover}`
                     }
+
+                    cover_id = data.cover;
 
                     if (collection_title.length > 35) {
                         title_font = "2vw"
@@ -131,6 +135,23 @@
 
     }
 
+    function editCover() {
+        
+        openModal(EditCover, {
+            current_cover: cover_id,
+            target_cover: get(active_view).id,
+            data_callback: editCoverCallback,
+            
+        })
+
+    }
+
+    function editCoverCallback(id) {
+        
+        actual_album_cover = id == "0" ? no_cover_image : `/api/collection/get_cover/${id}`
+
+    }
+
     $: actual_album_cover = collection_cover_src == "" ? no_cover_image : collection_cover_src
 
     $: {
@@ -147,7 +168,7 @@
 <div class="m-2 h-full overflow-y-scroll">
     <div class="bg-image" style={`background-image: url(${actual_album_cover});`}>
         <div class="album-title-container">
-            <img
+            <img on:click={() => {window.open(`${window.location.protocol}//${window.location.hostname}${actual_album_cover}`)}}
                 src={actual_album_cover}
                 class="album-cover"
             />
@@ -161,6 +182,7 @@
                     {#if !is_protected}
                         <MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>
                         <MinorButtonText callback={editCollection} text="Edit" icon="pencil-fill"/>
+                        <MinorButtonText callback={editCover} text="Edit cover" icon="image"/>
                     {/if}
                     {#if is_album}<MinorButtonText callback={addToCollection} text="Add to" icon="plus-lg"/>{/if}
                 </div>
@@ -219,6 +241,7 @@
     .album-cover {
         width: 256px;
         min-width: 128px;
+        @apply cursor-zoom-in;
     }
 
     table {
@@ -234,11 +257,10 @@
         @apply bg-no-repeat;
         @apply bg-cover;    
         @apply bg-center;
-        @apply -z-20;
     }
 
     .album-title-container {
-        @apply flex flex-row items-center gap-4 backdrop-blur-lg backdrop-brightness-50 w-full -z-50;
+        @apply flex flex-row items-center gap-4 backdrop-blur-lg backdrop-brightness-50 w-full;
     }
 
 </style>
