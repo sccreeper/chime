@@ -1,5 +1,6 @@
 <script>
 import { active_view } from "../../stores";
+    import { goto } from "../../util";
 
 
 export let album_id;
@@ -7,6 +8,7 @@ export let name;
 
 function open_album() {
     active_view.set({name: "album", id: album_id})
+    goto(`/collection/${album_id}`, "album", album_id)
 }
 
 </script>

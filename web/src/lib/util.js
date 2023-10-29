@@ -1,6 +1,7 @@
 // Utility functions & constants
 
 import { duration } from "./player"
+import { active_view } from "./stores"
 
 export const allowed_username_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_-"
 
@@ -48,4 +49,12 @@ export function verifyString(s, check) {
 
 export function clamp(val, min, max) {
     return Math.max(min, Math.min(val, max))
+}
+
+export function goto(url, name, id) {
+    history.pushState({name: name, id: id}, "", url)
+}
+
+window.onpopstate = (data) => {
+    active_view.set(data.state);
 }

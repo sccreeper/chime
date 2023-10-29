@@ -1,12 +1,14 @@
 <script>
 
     import { active_view } from "../../stores";
+    import { goto } from "../../util";
 
     export let name;
     export let radio_id;
 
     function loadRadio() {
         active_view.set({name: "radio", id: radio_id})
+        goto(`/radio/${radio_id}`, "radio", radio_id)
     }
 
 </script>

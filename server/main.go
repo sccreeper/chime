@@ -79,6 +79,14 @@ func main() {
 		ctx.Data(http.StatusOK, "text/html; charset=utf-8", homepage)
 	})
 
+	r.GET("/collection/:id", func(ctx *gin.Context) {
+		ctx.Data(http.StatusOK, "text/html; charset=utf-8", homepage)
+	})
+
+	r.GET("/radio/:id", func(ctx *gin.Context) {
+		ctx.Data(http.StatusOK, "text/html; charset=utf-8", homepage)
+	})
+
 	// Streaming
 
 	r.GET("/api/stream/:track_id", handle_stream)

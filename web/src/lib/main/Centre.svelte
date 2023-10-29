@@ -1,4 +1,5 @@
 <script>
+    import { onMount } from "svelte";
     import { active_view } from "../stores";
     import Search from "./Search.svelte";
     import AlbumList from "./centre_components/AlbumList.svelte";
@@ -6,6 +7,23 @@
     import DetailsView from "./centre_components/DetailsView.svelte";
     import RadioView from "./centre_components/RadioView.svelte";
     import BlankPage from "./general/BlankPage.svelte";
+
+    onMount(() => {
+
+        switch (window.location.pathname.split("/")[1]) {
+        case "":
+          break;
+        case "collection":
+          active_view.set({name: "album", id: window.location.pathname.split("/")[2]})
+          break;
+        case "radio":
+          active_view.set({name: "radio", id: window.location.pathname.split("/")[2]})
+          break;
+        default:
+          break;
+      }
+
+    })
 
 </script>
 <div class="flex h-full grow overflow-hidden">

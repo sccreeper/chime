@@ -7,6 +7,7 @@
     import { createNotification, notifications } from "./notifications";
     import { onMount } from "svelte";
     import Notification from "./main/notifications/Notification.svelte";
+    import { active_view } from "./stores";
 
     onMount(() => {
       createNotification(Notification, {icon: "check-lg", text: "Logged in", expiry: 3000})
