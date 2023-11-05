@@ -2,6 +2,7 @@
     import { active_view } from "../../stores";
 
     import no_cover from "../../../assets/no_cover.png"
+    import { goto } from "../../util";
 
     export var type = ""
     export var view_type = ""
@@ -10,16 +11,15 @@
     export var cover = ""
 
     function setView() {
-        active_view.set({
-            name: view_type,
-            id: id,
-        })
+
+        goto(`/${view_type == "album" ? "collection" : "radio"}/${id}`, view_type, id)
+
     }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div on:click={setView} title={name}>
-    <img src={cover == "0" ? no_cover : `/api/collection/get_cover/${cover}`} width="108" height="108"/>
+    <img src={cover == "0" ? no_cover : `/api/collection/get_cover/${cover}?width=108&height=108`} width="108" height="108"/>
     <h1 class="">{name}</h1>
     <p>{type}</p>
 </div>

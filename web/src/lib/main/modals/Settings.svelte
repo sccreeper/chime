@@ -23,9 +23,18 @@
     let username_error = {text: "", ok: false}
 
     // Storage
-    let total_storage = 0
-    let used_by_others = 0
-    let used_by_chime = 0
+    let storage_data = {
+      total_volume_space: 0,
+      used_by_others: 0,
+      used_by_chime: 0,
+
+      breakdown: {
+        backups: 0,
+        cache: 0,
+        covers: 0,
+        tracks: 0,
+      }
+    }
 
     // New users
     let show_new_user_ui = false
@@ -219,9 +228,7 @@
         ).then(response => response.json()).then(
           data => {
 
-            total_storage = data.total_volume_space
-            used_by_others = data.used_by_others
-            used_by_chime = data.used_by_chime
+            storage_data = data;
             
           }
         )
@@ -281,9 +288,18 @@
       </table>  
 
       <h1><i class="bi bi-device-hdd-fill"></i> Storage</h1>
-      <p>Total storage: {Math.round(total_storage / Math.pow(10, 9))}GB</p>
-      <p>Used by other data: {Math.round(used_by_others / Math.pow(10, 9))}GB</p>
-      <p>Used by Chime: {Math.round(used_by_chime / Math.pow(10, 6))}MB</p>
+      
+      <p class="small-heading text-sm">System</p>
+      <p>Total storage: {Math.round(storage_data.total_volume_space / Math.pow(10, 9))}GB</p>
+      <p>Used by other data: {Math.round(storage_data.used_by_others / Math.pow(10, 9))}GB</p>
+      <p>Used by Chime: {Math.round(storage_data.used_by_chime / Math.pow(10, 6))}MB</p>
+
+      <p class="small-heading text-sm">Chime</p>
+      <p>Backups: {Math.round(storage_data.breakdown.backups / Math.pow(10, 6))}MB</p>
+      <p>Cache: {Math.round(storage_data.breakdown.cache / Math.pow(10, 3))}KB</p>
+      
+      <p>Tracks: {Math.round(storage_data.breakdown.tracks / Math.pow(10, 6))}MB</p>
+      <p>Covers: {Math.round(storage_data.breakdown.covers / Math.pow(10, 6))}MB</p>
 
       <h1><i class="bi bi-database-fill-down"></i> Backup</h1>
       <MinorButtonText text="Download backup" icon="download" callback={backup} bind:disabled={backup_processing}/>

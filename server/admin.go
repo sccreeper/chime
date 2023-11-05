@@ -534,6 +534,14 @@ type storage_resp struct {
 	TotalVolumeSpace int64 `json:"total_volume_space"`
 	UsedByOthers     int64 `json:"used_by_others"`
 	UsedByChime      int64 `json:"used_by_chime"`
+
+	Breakdown struct {
+		Backups int64 `json:"backups"`
+		Cache   int64 `json:"cache"`
+
+		Covers int64 `json:"covers"`
+		Tracks int64 `json:"tracks"`
+	} `json:"breakdown"`
 }
 
 func handle_get_storage(ctx *gin.Context) {
@@ -554,20 +562,82 @@ func handle_get_storage(ctx *gin.Context) {
 	}
 
 	// Calculate storage usage
-	var size int64
+	var chime_size int64
+	var backup_size int64
+	var cache_size int64
+	var covers_size int64
+	var tracks_size int64
+
+	// Do all files
 
 	err := filepath.Walk("/var/lib/chime/", func(path string, info fs.FileInfo, err error) error {
-
 		if err != nil {
 			return err
 		}
 
 		if !info.IsDir() {
-			size += info.Size()
+			chime_size += info.Size()
 		}
 
 		return err
+	})
 
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Internal server error"))
+		return
+	}
+
+	// Do backups
+
+	backup_files, err := os.ReadDir("/var/lib/chime/backups")
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Internal server error"))
+		return
+	}
+
+	for _, v := range backup_files {
+		info, _ := os.Stat(fmt.Sprintf("/var/lib/chime/backups/%s", v.Name()))
+		backup_size += info.Size()
+	}
+
+	// Do cache
+
+	cache_files, err := os.ReadDir("/var/lib/chime/cache")
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Internal server error"))
+		return
+	}
+
+	for _, v := range cache_files {
+		info, _ := os.Stat(fmt.Sprintf("/var/lib/chime/cache/%s", v.Name()))
+		cache_size += info.Size()
+	}
+
+	// Do covers
+
+	cover_files, err := os.ReadDir("/var/lib/chime/covers")
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Internal server error"))
+		return
+	}
+
+	for _, v := range cover_files {
+		info, _ := os.Stat(fmt.Sprintf("/var/lib/chime/covers/%s", v.Name()))
+		covers_size += info.Size()
+	}
+
+	// Finally do tracks
+
+	err = filepath.Walk("/var/lib/chime/tracks", func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			tracks_size += info.Size()
+		}
+
+		return err
 	})
 
 	if err != nil {
@@ -585,8 +655,19 @@ func handle_get_storage(ctx *gin.Context) {
 
 	resp := storage_resp{
 		TotalVolumeSpace: sys_total,
-		UsedByOthers:     sys_usage - size,
-		UsedByChime:      size,
+		UsedByOthers:     sys_usage - chime_size,
+		UsedByChime:      chime_size,
+		Breakdown: struct {
+			Backups int64 `json:"backups"`
+			Cache   int64 `json:"cache"`
+			Covers  int64 `json:"covers"`
+			Tracks  int64 `json:"tracks"`
+		}{
+			Backups: backup_size,
+			Cache:   cache_size,
+			Covers:  covers_size,
+			Tracks:  tracks_size,
+		},
 	}
 
 	resp_bytes, err := json.Marshal(resp)
@@ -883,6 +964,40 @@ func handle_clear_backups(ctx *gin.Context) {
 
 	for _, v := range backups {
 		if err := os.Remove(fmt.Sprintf("/var/lib/chime/backups/%s", v.Name())); err != nil {
+			ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Internal server error"))
+			return
+		}
+	}
+
+	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
+
+}
+
+func handle_clear_cache(ctx *gin.Context) {
+
+	// Verify user & request
+	verified, admin_id := verify_user(ctx.Request)
+	if !verified {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	var admin user_model
+	database.Table(table_users).Select("is_admin").Where("id = ?", admin_id).First(&admin)
+
+	if admin.IsAdmin != 1 {
+		ctx.Data(http.StatusForbidden, gin.MIMEPlain, []byte("403: User is not admin"))
+		return
+	}
+
+	cached_files, err := os.ReadDir("/var/lib/chime/cache")
+	if err != nil {
+		ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Internal server error"))
+		return
+	}
+
+	for _, v := range cached_files {
+		if err := os.Remove(fmt.Sprintf("/var/lib/chime/cache/%s", v.Name())); err != nil {
 			ctx.Data(http.StatusInternalServerError, gin.MIMEPlain, []byte("500: Internal server error"))
 			return
 		}

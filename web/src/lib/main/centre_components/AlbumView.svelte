@@ -148,11 +148,11 @@
 
     function editCoverCallback(id) {
         
-        actual_album_cover = id == "0" ? no_cover_image : `/api/collection/get_cover/${id}`
+        actual_album_cover = id == "0" ? no_cover_image : `/api/collection/get_cover/${id}?width=300&height=300`
 
     }
 
-    $: actual_album_cover = collection_cover_src == "" ? no_cover_image : collection_cover_src
+    $: actual_album_cover = collection_cover_src == "" ? no_cover_image : `${collection_cover_src}?width=300&height=300`
 
     $: {
         

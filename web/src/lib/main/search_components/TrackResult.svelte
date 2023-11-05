@@ -20,7 +20,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <tr on:click={setView} class="display_div">
-<td style="text-align: center;"><img src="/api/collection/get_cover/{cover}" alt="Album cover for song {title}" width="32" height="32"/></td>
+<td style="text-align: center;"><img src="/api/collection/get_cover/{cover}?width=32&height=32" alt="Album cover for song {title}" width="32" height="32"/></td>
 <td class="font-semibold text-base">{title}</td>
 <td>{artist}</td>
 <td>{convertDuration(duration)}</td>

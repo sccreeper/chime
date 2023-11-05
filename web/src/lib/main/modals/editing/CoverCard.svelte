@@ -23,7 +23,7 @@
 
 </script>
 
-<img on:click={clicked} src="{id == "0" ? default_cover : `/api/collection/get_cover/${id}`}" data-selected="{selected}" alt="Album cover"/>
+<img on:click={clicked} src="{id == "0" ? default_cover : `/api/collection/get_cover/${id}?width=96&height=96`}" data-selected="{selected}" alt="Album cover"/>
 
 <style>
 

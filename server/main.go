@@ -152,6 +152,7 @@ func main() {
 	r.GET("/api/admin/backup_status/:id", handle_get_backup_status)
 	r.GET("/api/admin/download_backup/:id", handle_download_backup)
 	r.GET("/api/admin/clear_backups", handle_clear_backups)
+	r.GET("/api/admin/clear_cache/", handle_clear_cache)
 
 	r.POST("/api/admin/add_user", handle_add_user)
 	r.POST("/api/admin/reset_password", handle_reset_password)

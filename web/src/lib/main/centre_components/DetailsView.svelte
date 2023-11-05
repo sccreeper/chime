@@ -116,7 +116,7 @@
 {:else}
 
     <div class="flex flex-col items-center text-center m-2 overflow-y-scroll h-full">
-        <img src={metadata.cover_id == "0" ? default_cover : `/api/collection/get_cover/${metadata.cover_id}`} width="300" height="300"/>
+        <img src={metadata.cover_id == "0" ? default_cover : `/api/collection/get_cover/${metadata.cover_id}?width=300&height=300`} width="300" height="300"/>
         <h1 class="mt-2">{metadata.title}</h1>
         <p class="text-gray-300">{metadata.artist} <span class="dot">●</span> {metadata.album_name}</p>
         <HorizontalDivider/>

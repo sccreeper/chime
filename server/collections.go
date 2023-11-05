@@ -13,6 +13,11 @@ import (
 
 	"github.com/dhowden/tag"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/image/draw"
+
+	"image"
+	"image/jpeg"
+	_ "image/png"
 )
 
 type single_collection struct {
@@ -212,6 +217,9 @@ func handle_get_cover(ctx *gin.Context) {
 	var query get_cover_query
 	ctx.ShouldBindUri(&query)
 
+	resize_width := ctx.DefaultQuery("width", "0")
+	resize_height := ctx.DefaultQuery("height", "0")
+
 	cover_id, err := strconv.ParseInt(query.CoverID, 16, 64)
 	if err != nil {
 		fmt.Println(query.CoverID)
@@ -226,7 +234,61 @@ func handle_get_cover(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	} else {
-		ctx.File(fmt.Sprintf("/var/lib/chime/covers/%s", query.CoverID))
+
+		if resize_width != "0" && resize_height != "0" {
+
+			// Validate parameters
+
+			width_i, err := strconv.Atoi(resize_width)
+
+			if err != nil {
+				ctx.AbortWithStatus(http.StatusInternalServerError)
+			}
+
+			height_i, err := strconv.Atoi(resize_height)
+
+			if err != nil {
+				ctx.AbortWithStatus(http.StatusInternalServerError)
+			}
+
+			// See if cached version exists
+
+			if _, err := os.Stat(fmt.Sprintf("/var/lib/chime/cache/cover_%s_%d_%d", query.CoverID, width_i, height_i)); err == nil {
+
+				ctx.File(fmt.Sprintf("/var/lib/chime/cache/cover_%s_%d_%d", query.CoverID, width_i, height_i))
+
+			} else {
+
+				original, _ := os.Open(fmt.Sprintf("/var/lib/chime/covers/%s", query.CoverID))
+				img, _, err := image.Decode(original)
+
+				// Validate parameters.
+
+				if err != nil {
+					ctx.AbortWithStatus(http.StatusInternalServerError)
+				}
+
+				result := image.NewRGBA(image.Rect(0, 0, width_i, height_i))
+
+				draw.BiLinear.Scale(result, result.Rect, img, img.Bounds(), draw.Over, nil)
+
+				// Cache write
+
+				if cache_file, err := os.Create(fmt.Sprintf("/var/lib/chime/cache/cover_%s_%d_%d", query.CoverID, width_i, height_i)); err == nil {
+					jpeg.Encode(cache_file, result, nil)
+				} else {
+					ctx.AbortWithStatus(http.StatusInternalServerError)
+					return
+				}
+
+				jpeg.Encode(ctx.Writer, result, nil)
+
+			}
+
+		} else {
+			ctx.File(fmt.Sprintf("/var/lib/chime/covers/%s", query.CoverID))
+		}
+
 	}
 
 }
