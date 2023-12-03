@@ -49,6 +49,7 @@ type track_model struct {
 	Original string //The original file name, used for streaming and downloading
 	Size     int64  //The size of the original file in bytes
 	Position int64  //Position of a track in album.
+	Disc     int64  //What disc the track is on.
 }
 
 type radio_model struct {

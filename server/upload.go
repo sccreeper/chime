@@ -83,6 +83,7 @@ func handle_upload(ctx *gin.Context) {
 			Size:     f_size,
 			Duration: probe_data.Format.DurationSeconds,
 			Released: 1968, //Year 2001 a Space Oddesey was released.
+			Disc:     1,
 		})
 
 		var collection playlist_model
@@ -107,6 +108,8 @@ func handle_upload(ctx *gin.Context) {
 			var album_id int64 = generate_id(table_playlists)
 			var cover_id int64 = generate_id(table_covers)
 			hex_id := strconv.FormatInt(track_id, 16)
+
+			disc, _ := metadata.Disc()
 
 			// Create cover record
 
@@ -143,6 +146,7 @@ func handle_upload(ctx *gin.Context) {
 				Size:     f_size,
 				Duration: probe_data.Format.DurationSeconds,
 				Released: int64(metadata.Year()),
+				Disc:     int64(disc),
 			})
 
 		} else {
@@ -152,6 +156,7 @@ func handle_upload(ctx *gin.Context) {
 			database.Table(table_playlists).Where("name = ? AND is_album = 1", album_title).First(&collection)
 
 			track_position, _ := metadata.Track()
+			disc, _ := metadata.Disc()
 
 			// Create track record
 
@@ -167,6 +172,7 @@ func handle_upload(ctx *gin.Context) {
 				Duration: probe_data.Format.DurationSeconds,
 				Released: int64(metadata.Year()),
 				Position: int64(track_position),
+				Disc:     int64(disc),
 			})
 
 			// Update album list & reorder for album

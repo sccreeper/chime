@@ -1,5 +1,5 @@
 <script>
-    import { active_view, collection_tracks } from "../../stores";
+    import { active_view, collection_tracks, track_metadata_view } from "../../stores";
     import Track from "./Track.svelte";
     import no_cover_image from "../../../assets/no_cover.png";
     import HorizontalDivider from "../general/HorizontalDivider.svelte";
@@ -12,6 +12,7 @@
     import EditCollection from "../modals/editing/EditCollection.svelte";
     import { convertDurationLong } from "../../util";
     import EditCover from "../modals/editing/EditCover.svelte";
+    import Disc from "./Disc.svelte";
 
     let collection_title = "";
     let collection_cover_src = no_cover_image;
@@ -26,6 +27,7 @@
     let cover_id = "";
 
     let collection_duration = "";
+    let disc_count = 0;
 
     function updateView(data) {
         if (data.name == "radio" || data.name == "search") {
@@ -163,6 +165,66 @@
 
     }
 
+    let disc_collection_tracks = [];
+
+    $: {
+
+        disc_collection_tracks = [];
+        disc_count = 0;
+
+        if ($collection_tracks.length == 0) {
+            
+        } else if (is_album) {
+
+            let i = 0;
+
+            $collection_tracks.forEach(element => {
+            // Calculate disc number
+                    
+                if (element.disc > disc_count) {
+                    disc_count++
+                    disc_collection_tracks.push({
+                        type: "disc",
+                        data: {number: disc_count}
+                    })
+                }
+
+                disc_collection_tracks.push({
+                        type: "track",
+                        data: {t: element, i: i}
+                    })
+                
+                i++;
+
+                disc_collection_tracks = disc_collection_tracks;
+
+            });
+
+            console.log("album")
+            console.log(disc_collection_tracks)
+            
+            
+        } else {
+
+            let i = 0
+
+            $collection_tracks.forEach(element => {
+                disc_collection_tracks.push({
+                        type: "track",
+                        data: {t: element, i: i}
+                    })
+
+                i++
+            })
+
+            console.log("playlist")
+            console.log(disc_collection_tracks)
+
+            disc_collection_tracks = disc_collection_tracks;
+
+        }
+    }
+
 </script>
 
 <div class="m-2 h-full overflow-y-scroll">
@@ -216,16 +278,24 @@
                     <th>Duration</th>
                 </tr>
 
-            {#each $collection_tracks as track, i}
-                <Track
-                    index={i+1}
-                    id={track.id}
-                    title={track.name}
-                    artist={track.artist}
-                    duration={track.duration}
-                    album_name={track.album_name}
-                />
-            {/each}
+                {#each disc_collection_tracks as item, i}
+
+                    {#if item.type == "disc"}
+                        <Disc disc_number={item.data.number}/>
+                    {:else}
+
+                        <Track
+                            index={item.data.i+1}
+                            id={item.data.t.id}
+                            title={item.data.t.name}
+                            artist={item.data.t.artist}
+                            duration={item.data.t.duration}
+                            album_name={item.data.t.album_name}
+                        />
+                    
+                    {/if}
+
+                {/each}
 
             </table>
         {/if}

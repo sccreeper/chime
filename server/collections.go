@@ -55,6 +55,7 @@ type track_response struct {
 	AlbumID   string  `json:"album_id"`
 	Duration  float64 `json:"duration"`
 	CoverID   string  `json:"cover_id"`
+	Disc      int     `json:"disc"`
 }
 
 func handle_get_collections(ctx *gin.Context) {
@@ -184,6 +185,7 @@ func handle_get_collection(ctx *gin.Context) {
 			Duration:  track.Duration,
 			CoverID:   strconv.FormatInt(track_collection.Cover, 16),
 			Position:  int(track.Position),
+			Disc:      int(track.Disc),
 		})
 
 	}
@@ -309,6 +311,7 @@ type track_metadata_response struct {
 	Released     int     `json:"released"`
 	Size         int     `json:"size"`
 	Position     int     `json:"position"`
+	Disc         int     `json:"disc"`
 }
 
 func handle_get_track_metadata(ctx *gin.Context) {
@@ -346,6 +349,7 @@ func handle_get_track_metadata(ctx *gin.Context) {
 		Size:         int(track.Size),
 		AlbumID:      strconv.FormatInt(track.AlbumID, 16),
 		Position:     int(track.Position),
+		Disc:         int(track.Disc),
 	}
 
 	var track_album playlist_model
