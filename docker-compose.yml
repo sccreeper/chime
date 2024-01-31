@@ -5,12 +5,16 @@ services:
     container_name: chime
     build: .
     ports:
-      - "80:80"
+      - "8042:8042"
     volumes:
       - ~/chime:/var/lib/chime
     restart: unless-stopped
     extra_hosts:
         - "host.docker.internal:host-gateway"
+  web:
+    container_name: web
+    build: ./web-v2
+    restart: unless-stopped
   castproxy:
     container_name: castproxy
     build: ./castproxy

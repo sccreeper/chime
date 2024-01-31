@@ -75,6 +75,18 @@ func main() {
 
 	r.Static("/assets/", "/dist/assets/")
 
+	r.GET("/app", func(ctx *gin.Context) {
+		handle_proxy(ctx, "/app")
+	})
+
+	r.Any("/app/*proxy", func(ctx *gin.Context) {
+		handle_proxy(ctx, "/app")
+	})
+
+	r.Any("/_app/*proxy", func(ctx *gin.Context) {
+		handle_proxy(ctx, "/_app")
+	})
+
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.Data(http.StatusOK, "text/html; charset=utf-8", homepage)
 	})
@@ -177,6 +189,6 @@ func main() {
 	r.GET("/api/cast/get_status/:uuid", handle_cast_get_status)
 	r.POST("/api/cast/play_media", handle_cast_play_media)
 
-	r.Run("0.0.0.0:80")
+	r.Run("0.0.0.0:8042")
 
 }
