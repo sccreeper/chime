@@ -1,7 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@100;200;300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-h1 {
-    @apply text-xl text-blue-500;
+body,html {
+    @apply text-white;
+    @apply bg-gray-700;
+    font-family: 'Anuphan', sans-serif;
+
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
 }
+
+button {
+
+    @apply bg-yellow-600;
+    @apply text-white;
+    @apply hover:bg-yellow-700;
+    @apply transition-all;
+    @apply rounded-lg;
+    @apply p-2;
+  
+}
+
+input[type=text],input[type=password],select {
+
+    @apply appearance-none;
+    @apply bg-transparent;
+    @apply border-b-gray-500;
+    @apply border-b;
+    @apply text-gray-400;
+    @apply placeholder:text-gray-400;
+    @apply outline-none;
+    @apply p-1;
+  
+  }

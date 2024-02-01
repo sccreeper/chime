@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -17,9 +16,9 @@ func handle_proxy(ctx *gin.Context, path_prefix string) {
 		return
 	}
 
-	fmt.Println(ctx.Param("proxy"))
-
 	proxy := httputil.NewSingleHostReverseProxy(remote)
+
+	ctx.Request.Header.Set("Origin", "http://chime:8042")
 
 	proxy.Director = func(r *http.Request) {
 		r.Header = ctx.Request.Header

@@ -45,33 +45,56 @@ func init() {
 // See if user ID matches session and if session actually exists.
 func verify_user(request *http.Request) (bool, int64) {
 
-	if session_cookie, err := request.Cookie("session"); err != nil {
-		fmt.Println(err.Error())
-		return false, 0
-	} else {
+	if session_id, err := request.Cookie("session_id"); err != nil {
 
-		// "Escapes" base64
-
-		escaped, _ := base64.StdEncoding.DecodeString(
-			strings.ReplaceAll(
-				strings.ReplaceAll(
-					strings.ReplaceAll(session_cookie.Value, ".", "="),
-					"_", "+"),
-				"/", "-"))
-
-		var s session
-		json.Unmarshal(escaped, &s)
-
-		if _, ok := sessions[s.ID]; !ok {
-			return false, 0
-		} else if sessions[s.ID].UserID != s.UserID {
+		// Legacy for dev purposes atm
+		if session_cookie, err := request.Cookie("session"); err != nil {
+			fmt.Println(err.Error())
 			return false, 0
 		} else {
 
-			user_id, _ := strconv.ParseInt(s.UserID, 16, 64)
+			// "Escapes" base64
+
+			escaped, _ := base64.StdEncoding.DecodeString(
+				strings.ReplaceAll(
+					strings.ReplaceAll(
+						strings.ReplaceAll(session_cookie.Value, ".", "="),
+						"_", "+"),
+					"/", "-"))
+
+			var s session
+			json.Unmarshal(escaped, &s)
+
+			if _, ok := sessions[s.ID]; !ok {
+				return false, 0
+			} else if sessions[s.ID].UserID != s.UserID {
+				return false, 0
+			} else {
+
+				user_id, _ := strconv.ParseInt(s.UserID, 16, 64)
+
+				return true, user_id
+			}
+		}
+
+	} else {
+
+		user_id, err := request.Cookie("user_id")
+		if err != nil {
+			return false, 0
+		}
+
+		if _, ok := sessions[session_id.Value]; !ok {
+			return false, 0
+		} else if sessions[session_id.Value].UserID != user_id.Value {
+			return false, 0
+		} else {
+
+			user_id, _ := strconv.ParseInt(user_id.Value, 16, 64)
 
 			return true, user_id
 		}
+
 	}
 
 }

@@ -8,10 +8,8 @@ export async function load({ cookies }) {
 
     if (sessionId === undefined ) {
         throw redirect(303, "/app/login")
-    } else if (await sessionExists(sessionId)) {
-        throw redirect(303, "/app/main")
+    } else if (!await sessionExists(sessionId)) {
+        throw redirect(303, "/app/login")
     }
-
-    throw redirect(303, "/app/login")
 
 }
