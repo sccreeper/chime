@@ -36,4 +36,8 @@ input[type=text],input[type=password],select {
     @apply outline-none;
     @apply p-1;
   
-  }
+}
+
+h1 {
+    @apply font-bold;
+}

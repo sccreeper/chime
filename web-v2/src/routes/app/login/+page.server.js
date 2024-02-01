@@ -1,6 +1,8 @@
 import { loginUser } from '$lib/api/auth';
 import { error, redirect } from '@sveltejs/kit';
 
+const MAX_COOKIE_AGE = 7 * 24 * 3600
+
 /** @type {import('./$types').Actions} */
 export const actions = {
     default: async ({cookies, request}) => {
@@ -15,9 +17,9 @@ export const actions = {
         const auth = await loginUser(username, password)
 
         if (auth.successful) {
-            cookies.set("session_id", auth.sessionId, {path: "/", sameSite: false})
-            cookies.set("user_id", auth.userId, {path: "/", sameSite: false})
-            cookies.set("is_admin", auth.isAdmin, {path: "/", sameSite: false})
+            cookies.set("session_id", auth.sessionId, {path: "/", sameSite: false, httpOnly: false, secure: false, maxAge: MAX_COOKIE_AGE})
+            cookies.set("user_id", auth.userId, {path: "/", sameSite: false, httpOnly: false, secure: false, maxAge: MAX_COOKIE_AGE})
+            cookies.set("is_admin", auth.isAdmin, {path: "/", sameSite: false, httpOnly: false, secure: false, maxAge: MAX_COOKIE_AGE})
     
             throw redirect(303, "/app/main")   
         } else {

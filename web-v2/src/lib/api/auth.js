@@ -56,3 +56,17 @@ export async function loginUser(username, password) {
     }
     
 }
+
+/**
+ * Pings server
+ * Server responds with "pong" and server id
+ * @returns {Promise<string>}
+ */
+export async function pingServer() {
+    
+    const req = await fetch(`${browser ? '' : process.env.ORIGIN}/api/ping`)
+    const resp = await req.json()
+
+    return resp.server_id
+
+}
