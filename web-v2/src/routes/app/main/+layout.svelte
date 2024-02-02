@@ -1,4 +1,8 @@
 <script>
+    import BlankPage from '$lib/components/general/BlankPage.svelte';
+    import ListDivider from '$lib/components/general/ListDivider.svelte';
+    import LibraryItem from '$lib/components/main/library/LibraryItem.svelte';
+
     /** @type {import('./$types').LayoutData} */
     export let data;
 </script>
@@ -7,10 +11,88 @@
     <title>Home - Chime</title>
 </svelte:head>
 
-<h1>Main</h1>
+<div class="flex flex-col h-full w-full">
 
-{#each data.lib.albums as item}
-    <p>{item.name}</p>
-{/each}
 
-<slot/>
+    <!-- Search, navigation, settings etc. -->
+    <div>
+        <h1>Top Bar</h1>
+    </div>
+
+    <!-- Central content -->
+
+    <div class="flex h-full grow overflow-hidden">
+        
+        <div class="centre-left">
+
+            <div class="m-2">
+
+                <ListDivider text="Albums" icon="vinyl-fill"/>
+
+                {#each data.lib.albums as item}
+                <LibraryItem name={item.name} item_id={item.id} type="collection"/>
+                {/each}
+
+                <ListDivider text="Playlists" icon="list"/>
+
+                {#each data.lib.playlists as item}
+                <LibraryItem name={item.name} item_id={item.id} type="collection"/>
+                {/each}
+
+                <ListDivider text="Radios" icon="broadcast"/>
+
+                {#each data.lib.radios as item}
+                <LibraryItem name={item.name} item_id={item.id} type="radio"/>
+                {/each}
+
+            </div>
+
+        </div>
+
+        <div class="grow centre">
+            <slot />
+        </div>
+
+        <div class="centre-right">
+
+            <BlankPage icon="music-note-list" text="Not examining anything right now"/>
+
+        </div>
+
+    </div>
+
+    <!-- Player -->
+
+    <div>
+
+        <div class="h-28">
+            <p>Player</p>
+        </div>
+
+    </div>
+
+
+</div>
+
+<style lang="postcss">
+
+    .centre-left {
+        width: 15%;
+        background-color: rgb(45, 53, 66);
+
+        @apply h-full;
+        @apply select-none;
+        @apply overflow-y-scroll;
+
+    }
+
+    .centre-right {
+        width: 450px;
+        background-color: rgb(45, 53, 66);
+    }
+
+    .centre {
+        background-color: rgb(38, 45, 56);
+    }
+
+</style>
