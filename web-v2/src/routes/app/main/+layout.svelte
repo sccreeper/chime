@@ -1,4 +1,5 @@
 <script>
+    import { navigating } from '$app/stores';
     import BlankPage from '$lib/components/general/BlankPage.svelte';
     import ListDivider from '$lib/components/general/ListDivider.svelte';
     import LibraryItem from '$lib/components/main/library/LibraryItem.svelte';
@@ -10,6 +11,15 @@
 <svelte:head>
     <title>Home - Chime</title>
 </svelte:head>
+
+{#if $navigating}
+
+<div class="loader">
+    <span>
+    </span>
+</div>
+
+{/if}
 
 <div class="flex flex-col h-full w-full">
 
@@ -93,6 +103,54 @@
 
     .centre {
         background-color: rgb(38, 45, 56);
+    }
+
+    /* Loading bar */
+
+    .loader {
+        @apply w-full;
+        @apply absolute;
+        @apply bg-yellow-600;
+        @apply h-1;
+        @apply overflow-hidden;
+
+        @apply left-0;
+        @apply top-0;
+    }
+
+    @keyframes loader-animation {
+
+        0% {
+            @apply left-0;
+            @apply right-full;
+            @apply w-0;
+        }
+
+        10% {
+            @apply left-0;
+            @apply right-3/4;
+            @apply w-1/4;
+        }
+
+        90% {
+            @apply right-0;
+            @apply left-3/4;
+            @apply w-1/4;
+        }
+
+        100% {
+            @apply left-full;
+            @apply right-0;
+            @apply w-0;
+        }
+
+    }
+
+    .loader > span {
+        @apply absolute;
+        @apply h-full;
+        @apply bg-yellow-500;
+        animation: loader-animation 1s infinite;
     }
 
 </style>
