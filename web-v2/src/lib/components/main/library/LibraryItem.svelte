@@ -1,4 +1,7 @@
 <script>
+
+    import {page} from "$app/stores";
+
     /**
      * @type {string}
      */
@@ -12,9 +15,11 @@
     */
    export let type;
 
+   $: href = `/app/main/${type}/${item_id}`
+
 </script>
 
-<a href="/app/main/{type}/{item_id}">{name}</a>
+<a {href} class:current="{$page.url.pathname === href}">{name}</a>
 
 <style lang="postcss">
 
@@ -28,11 +33,11 @@
         @apply block;
     }
 
-    a:hover {
+    a.current {
         @apply text-yellow-600;
     }
 
-    .active {
+    a:hover {
         @apply text-yellow-600;
     }
 

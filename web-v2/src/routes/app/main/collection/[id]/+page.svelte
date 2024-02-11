@@ -2,15 +2,22 @@
 
     import no_cover from "$lib/assets/no_cover.png";
     import MinorButtonText from "$lib/components/general/MinorButtonText.svelte";
+    import HorizontalDivider from "$lib/components/general/HorizontalDivider.svelte";
     import { convertDurationLong } from "$lib/util";
+    import BlankPage from "$lib/components/general/BlankPage.svelte";
+    import Disc from "$lib/components/main/collection/Disc.svelte";
+    import Track from "$lib/components/main/collection/Track.svelte";
 
     /**
      * @type {import('./$types').PageData}
      */
     export let data
 
+    // Reactive variables in UI.
+
     $: actual_album_cover = data.collection.cover == "0" ? no_cover : `/api/collection/get_cover/${data.collection.cover}?width=300&height=300`
     
+    // Find out total duration of collection in hh:mm
     /** @type {string} */
     let total_duration;
     $: {
@@ -21,6 +28,48 @@
         total_duration = convertDurationLong(duration)
 
     }
+
+    // Sort tracks into 2D array, each 1D array being tracks on a different disc.
+    /** @type {import('$lib/api/api').CollectionTrack[][]} */
+    let discs;
+    $: {
+
+        discs = [];
+
+        if (!data.collection.is_album) {
+            
+            discs.push([])
+            discs[0].push(...data.collection.tracks)
+
+        } else {
+
+            let disc_count = 0;
+
+            discs.push([]);
+
+            for (let i = 0; i < data.collection.tracks.length; i++) {
+                const element = data.collection.tracks[i];
+
+                if (element.disc-1 > disc_count) {
+                    
+                    discs.push([])
+                    disc_count++
+
+                    discs[disc_count].push(element)
+
+                    continue
+
+                }
+
+                discs[disc_count].push(element)
+                
+            }
+
+        }
+
+    }
+
+    // Component methods.
 
     // Play
 
@@ -79,7 +128,7 @@
 
                 <div class="flex flex-row items-center gap-3">
 
-                    <button on:click={playCollection}><i class="bi bi-play-fill">Play</i></button>
+                    <button on:click={playCollection}><i class="bi bi-play-fill"></i> Play</button>
                     {#if !data.collection.protected}
     
                         <MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>
@@ -95,6 +144,58 @@
             </div>
 
         </div>
+
+    </div>
+
+    <HorizontalDivider/>
+
+    <!-- Collection table -->
+
+    <div>
+
+        {#if data.collection.tracks.length == 0}
+            
+            <BlankPage icon="folder2-open" text="Collection is empty"/>
+
+        {:else}
+
+        <table>
+
+            <colgroup>
+                <col span="1" style="width: 5%;"> <!-- no. -->
+                <col span="1" style="width: 35%;"> <!-- title -->
+                <col span="1" style="width: 15%;"> <!-- artist -->
+                <col span="1" style="width: 35%;"> <!-- duration -->
+                <col span="1" style="width: 10%;"> <!-- favourite -->
+            </colgroup>
+
+            <tr class="text-left">
+                <th>No.</th>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Duration</th>
+            </tr>
+
+            {#each discs as disc, i}
+                
+                {#if data.collection.is_album}
+                    
+                    <Disc number={i}/>
+
+                {/if}
+
+                {#each disc as track, j }
+                    
+                    <Track track={track} index={j}/>
+
+                {/each}
+
+            {/each}
+
+        </table>
+
+        {/if}
 
     </div>
 
@@ -128,6 +229,16 @@
         @apply text-gray-300;
         @apply font-bold;
         font-size: clamp(1rem, 2vw, 2rem);
+    }
+
+    table {
+        max-width: 100%;
+        @apply overflow-hidden;
+        @apply m-2;
+    }
+
+    th {
+        @apply font-thin;
     }
 
 </style>

@@ -18,4 +18,6 @@ export interface CollectionTrack {
     album_id: string;
     duration: number;
     cover_id: string;
+    disc: number;
+    album_name: string;
 }
