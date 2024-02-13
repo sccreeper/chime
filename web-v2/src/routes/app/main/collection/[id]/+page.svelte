@@ -7,11 +7,19 @@
     import BlankPage from "$lib/components/general/BlankPage.svelte";
     import Disc from "$lib/components/main/collection/Disc.svelte";
     import Track from "$lib/components/main/collection/Track.svelte";
+    import { getContext } from "svelte";
+    import { PLAYER_CONTEXT_KEY } from "$lib/player";
 
     /**
      * @type {import('./$types').PageData}
      */
     export let data
+
+    /** @type {import('$lib/player').ChimePlayer} */
+    const player = getContext(PLAYER_CONTEXT_KEY)
+
+    /** @type {import('$lib/player').ChimePlayer} */
+    const {playing, collectionId} = getContext(PLAYER_CONTEXT_KEY)
 
     // Reactive variables in UI.
 
@@ -30,7 +38,7 @@
     }
 
     // Sort tracks into 2D array, each 1D array being tracks on a different disc.
-    /** @type {import('$lib/api/api').CollectionTrack[][]} */
+    /** @type {{index: number, track: import('$lib/api/api').CollectionTrack}[][]} */
     let discs;
     $: {
 
@@ -39,7 +47,7 @@
         if (!data.collection.is_album) {
             
             discs.push([])
-            discs[0].push(...data.collection.tracks)
+            discs[0].push(...data.collection.tracks.map((val, index) => ({track: val, index: index})))
 
         } else {
 
@@ -55,13 +63,13 @@
                     discs.push([])
                     disc_count++
 
-                    discs[disc_count].push(element)
+                    discs[disc_count].push({index: i, track: element})
 
                     continue
 
                 }
 
-                discs[disc_count].push(element)
+                discs[disc_count].push({index: i, track: element})
                 
             }
 
@@ -74,7 +82,21 @@
     // Play
 
     function playCollection() {
-        
+
+        if ($playing && data.collection_id == $collectionId) {
+            
+            $playing = !$playing
+
+        } else {
+
+            if (data.collection_id == $collectionId) {
+                $playing = !$playing
+            } else {
+                player.playCollection(data.collection, 0, data.collection_id)
+            }
+
+        }
+    
     }
 
     // Edit functions
@@ -128,7 +150,12 @@
 
                 <div class="flex flex-row items-center gap-3">
 
+                    {#if data.collection_id == $collectionId && $playing }
+                    <button on:click={playCollection}><i class="bi bi-pause-fill"></i> Pause</button>
+                    {:else}
                     <button on:click={playCollection}><i class="bi bi-play-fill"></i> Play</button>
+                    {/if}
+                    
                     {#if !data.collection.protected}
     
                         <MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>
@@ -185,9 +212,9 @@
 
                 {/if}
 
-                {#each disc as track, j }
+                {#each disc as track }
                     
-                    <Track track={track} index={j}/>
+                    <Track track={track.track} index={track.index}/>
 
                 {/each}
 
