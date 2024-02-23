@@ -16,7 +16,7 @@
     setContext(PLAYER_CONTEXT_KEY, new ChimePlayer());
 
     /** @type {import('$lib/player').ChimePlayer} */
-    const { playing, durationString, currentTimeString, duration, currentTime } = getContext(PLAYER_CONTEXT_KEY);
+    const { playing, durationString, currentTimeString, duration, currentTime, shuffle, repeat, volume } = getContext(PLAYER_CONTEXT_KEY);
     /** @type {import('$lib/player').ChimePlayer} */
     const player = getContext(PLAYER_CONTEXT_KEY);
 </script>
@@ -95,8 +95,8 @@
                 <!-- Controls -->
         
                 <div class="grid grid-rows-1 grid-cols-5 gap-3 items-center justify-items-center">
-                    <ToggleButton callback={(x) => {}} icon="shuffle"/>
-                    <button class="control-button" on:click={()=>{}}><i class="bi bi-skip-backward"></i></button>
+                    <ToggleButton callback={() => {}} icon="shuffle" bind:active={$shuffle}/>
+                    <button class="control-button" on:click={()=>{ player.nextTrack("backward") }}><i class="bi bi-skip-backward"></i></button>
                     
                     <button 
                         class="control-button" 
@@ -104,14 +104,15 @@
                             {#if !$playing}<i class="bi bi-play-fill"></i>{:else}<i class="bi bi-pause-fill"></i>{/if}
                     </button>
                     
-                    <button class="control-button" on:click={() => {}}><i class="bi bi-skip-forward"></i></button>
-                    <ToggleButton callback={(x) => {}} icon="repeat"/>
+                    <button class="control-button" on:click={() => { player.nextTrack("forward") }}><i class="bi bi-skip-forward"></i></button>
+                    <ToggleButton callback={() => {}} icon="repeat" bind:active={$repeat}/>
                 </div>
         
                 <!-- Volume -->
         
                 <div class="grid grid-rows-1 grid-cols-2 volume-grid items-center justify-items-center">
-                    <i class="bi bi-{'volume-up'} mr-1 text-slate-400" on:click={()=>{}}></i><input class="seek" type="range" min="0" max="1.0" step="0.05"/>
+                    <i class="bi bi-{'volume-up'} mr-1 text-slate-400" on:click={()=>{}}></i>
+                    <input class="seek" type="range" min="0" max="1.0" step="0.05" bind:value={$volume}/>
                 </div>
         
         

@@ -13,12 +13,17 @@ export class ChimePlayer {
     duration = writable(0);
     currentTime = writable(0);
 
+    /** @type {import('svelte/store').Writable<number>} */
+    volume = writable(1.0);
+
     /** @type {import('svelte/store').Writable<string>} */
     durationString = writable("");
     currentTimeString = writable("");
 
     /** @type {import('svelte/store').Writable<boolean>} */
     playing = writable(false);
+    shuffle = writable(false);
+    repeat = writable(false);
 
     // Track information
 
@@ -60,6 +65,10 @@ export class ChimePlayer {
                 }
             })
 
+            this.audioElement.addEventListener("ended", () => {
+                this.nextTrack("forward")
+            })
+
             // Store subscriptions
 
             this.duration.subscribe((val) => {
@@ -83,6 +92,16 @@ export class ChimePlayer {
                 }
             })
 
+            this.volume.subscribe((val) => {
+
+                if (this.audioElement == undefined) {
+                    return
+                } else {
+                    this.audioElement.volume = val
+                }
+
+            })
+
         }
 
     }
@@ -96,6 +115,9 @@ export class ChimePlayer {
         if (this.audioElement == null) {
             return
         }
+
+        this.audioElement.pause()
+        this.playing.set(false)
 
         this.audioElement.src = `/api/stream/${track.id}`
         this.currentTrack.set(track)
@@ -114,9 +136,6 @@ export class ChimePlayer {
         if (this.audioElement == null) {
             return
         }
-
-        this.audioElement.pause()
-        this.playing.set(false)
 
         this.currentCollection.set(collection)
         this.collectionId.set(id)
@@ -137,6 +156,70 @@ export class ChimePlayer {
         } else {
             this.audioElement.currentTime = time
         }
+    }
+
+    /**
+     * Goes to the next track
+     * @param {'forward' | 'backward'} direction 
+     */
+    nextTrack(direction) {
+
+        if (get(this.repeat)) {
+            
+            if (get(this.currentTrack) != undefined) {
+                // @ts-ignore
+                this.#playTrack(get(this.currentTrack))
+            }
+
+        } else if (get(this.shuffle)) {
+            
+            if (this.currentCollection != undefined) {
+                
+                //This formatting is so cursed but idk
+
+                this.#playTrack(
+
+                    //@ts-ignore
+                    get(this.currentCollection)?.tracks[ //@ts-ignore
+                        Math.floor(Math.random() * get(this.currentCollection)?.tracks.length-1)
+                    ]
+
+                )
+            }
+
+
+        } else {
+
+            if (this.collectionIndex == undefined || this.currentCollection == undefined) {
+                return
+            }
+
+            if (direction == "forward") {
+                
+                //@ts-ignore
+                if (this.collectionIndex+1 >= get(this.currentCollection)?.tracks.length) {
+                    return
+                } else {
+                    this.collectionIndex++
+                    //@ts-ignore
+                    this.#playTrack(get(this.currentCollection)?.tracks[this.collectionIndex])
+                }
+
+            } else if (direction == "backward") {
+
+                //@ts-ignore
+                if (this.collectionIndex-1 < 0) {
+                    return
+                } else {
+                    this.collectionIndex--
+                    //@ts-ignore
+                    this.#playTrack(get(this.currentCollection)?.tracks[this.collectionIndex])
+                }
+
+            }
+
+        }
+
     }
 
 
