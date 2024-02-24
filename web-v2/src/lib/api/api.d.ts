@@ -21,3 +21,18 @@ export interface CollectionTrack {
     disc: number;
     album_name: string;
 }
+
+export interface TrackMetadata {
+    title: string;
+    album_name: string;
+    album_id: string;
+    cover_id: string;
+    artist: string;
+    original_file: string;
+    format: string;
+    duration: number;
+    released: number;
+    size: number;
+    position: number;
+    disc: number;
+}

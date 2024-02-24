@@ -24,7 +24,7 @@ export async function getUserLibrary(fetch) {
  * @param {fetch} fetch 
  * @param {string} id 
  * 
- * @returns {Promise<import("./api").Collection>}
+ * @returns {Promise<import('./api').Collection>}
  */
 export async function getCollection(fetch, id) {
     
@@ -32,5 +32,19 @@ export async function getCollection(fetch, id) {
     const collection = await req.json()
 
     return collection
+
+}
+
+/**
+ * 
+ * @param {string} id 
+ * @returns {Promise<import('./api').TrackMetadata>}
+ */
+export async function getTrackMetadata(id) {
+    
+    const req = await fetch(`/api/get_track_metadata/${id}`)
+    const metadata = await req.json()
+
+    return metadata
 
 }

@@ -1,13 +1,18 @@
 <script>
     import { browser } from '$app/environment';
     import { navigating } from '$app/stores';
+    import { examineTrackId } from '$lib';
+    import { getTrackMetadata } from '$lib/api/library';
     import BlankPage from '$lib/components/general/BlankPage.svelte';
     import ListDivider from '$lib/components/general/ListDivider.svelte';
     import ToggleButton from '$lib/components/general/ToggleButton.svelte';
     import LibraryItem from '$lib/components/main/library/LibraryItem.svelte';
     import { ChimePlayer, PLAYER_CONTEXT_KEY } from '$lib/player';
     import { getContext, setContext } from 'svelte';
-    import { get, writable } from 'svelte/store';
+    import defaultCover from '$lib/assets/no_cover.png';
+    import HorizontalDivider from '$lib/components/general/HorizontalDivider.svelte';
+    import { convertDuration } from '$lib/util';
+    import MinorButton from '$lib/components/general/MinorButton.svelte';
 
     /** @type {import('./$types').LayoutData} */
     export let data;
@@ -16,9 +21,27 @@
     setContext(PLAYER_CONTEXT_KEY, new ChimePlayer());
 
     /** @type {import('$lib/player').ChimePlayer} */
-    const { playing, durationString, currentTimeString, duration, currentTime, shuffle, repeat, volume } = getContext(PLAYER_CONTEXT_KEY);
+    const { playing, durationString, currentTimeString, duration, currentTime, shuffle, repeat, volume, currentTrack } = getContext(PLAYER_CONTEXT_KEY);
     /** @type {import('$lib/player').ChimePlayer} */
     const player = getContext(PLAYER_CONTEXT_KEY);
+
+    /** @type {import('$lib/api/api').TrackMetadata} */
+    let trackMetadata;
+
+    currentTrack.subscribe((val) => {
+        if (val != undefined && browser) {
+            examineTrackId.set(val?.id);   
+        }
+    })
+
+    examineTrackId.subscribe(async (val) => {
+
+        if (val == "") {
+            return
+        }
+
+        trackMetadata = await getTrackMetadata(val)
+    })
 </script>
 
 <svelte:head>
@@ -78,7 +101,42 @@
 
         <div class="centre-right">
 
-            <BlankPage icon="music-note-list" text="Not looking at anything right now"/>
+            {#if $examineTrackId == "" || $examineTrackId == undefined || trackMetadata == undefined}
+                <BlankPage icon="music-note-list" text="Not looking at anything right now"/>
+            {:else}
+
+                <div class="flex flex-col items-center text-center overflow-y-scroll overflow-x-hidden h-full w-full text-gray-500">
+
+                    <img src={trackMetadata.cover_id == "0" ? defaultCover : `/api/collection/get_cover/${trackMetadata.cover_id}?width=350&height=350`} width="300" height="300" class="mt-3"/>
+
+                    <h1 class="mt-2 text-2xl font-bold text-gray-300">{trackMetadata.title}</h1>
+                    <p class="text-gray-300 mb-2">{trackMetadata.artist} <span class="text-yellow-600">●</span> {trackMetadata.album_name}</p>
+                    <HorizontalDivider/>
+                    <table class="text-left w-full text-sm m-2">
+                        <colgroup>
+                            <col span="1" style="width: 25%;">
+                            <col span="1" style="width: 75%;">
+                        </colgroup>
+
+                        <tr><td class="font-semibold">Released:</td><td>{trackMetadata.released}</td></tr>
+                        <tr><td class="font-semibold">Duration:</td><td>{convertDuration(trackMetadata.duration)}</td></tr>
+                        <tr><td class="font-semibold">Format:</td><td>{trackMetadata.format}</td></tr>
+                        <tr><td class="font-semibold">Original file:</td><td>{trackMetadata.original_file}</td></tr>
+                        <tr><td class="font-semibold">File size:</td><td>{(trackMetadata.size / Math.pow(10, 6)).toFixed(2)} mb</td></tr>
+
+                    </table>
+
+                    <HorizontalDivider/>
+
+                    <div class="w-full flex-col items-center gap-3 mt-3">
+                        <MinorButton icon="download" callback={() => {}} hint="Download original file"/>
+                        <MinorButton icon="plus-lg" callback={() => {}} hint="Add to collection"/>
+                        <MinorButton icon="pencil-fill" callback={() => {}} hint="Edit"/>
+                    </div>
+
+                </div>
+
+            {/if}
 
         </div>
 
