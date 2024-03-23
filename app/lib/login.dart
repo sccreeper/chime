@@ -64,7 +64,7 @@ class LoginScreenState extends State<LoginScreen> {
   void _login() async {
     log.fine("Logging in...");
 
-    final url = Uri.parse("$loginServerAddress$apiAuth");
+    final url = Uri.parse("$loginServerAddress:8042$apiAuth");
     var request = http.MultipartRequest("POST", url);
 
     request.fields["u"] = loginUsername;
@@ -90,9 +90,12 @@ class LoginScreenState extends State<LoginScreen> {
     log.fine(responseJson["status"]);
 
     if (responseJson["status"].toString() == "correct") {
+      log.fine("Login successful");
+
       session = UserSession(
         sessionID: responseJson["session"]["session_id"], 
-        username: responseJson["user"]["username"], 
+        username: responseJson["user"]["username"],
+        userID: responseJson["session"]["user_id"], 
         sessionBase64: sessionB64, 
         serverOrigin: url.origin);
 
@@ -108,6 +111,8 @@ class LoginScreenState extends State<LoginScreen> {
       // Change login screen
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
     } else {
+
+      log.warning("Unable to login");
 
       setState(() {
         errorText = "Incorrect password";

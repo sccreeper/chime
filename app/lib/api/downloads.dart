@@ -48,7 +48,7 @@ class DownloadManager {
         log.fine("Downloading cover: ${track.coverId}");
 
         var coverResult = await http.get(Uri.parse(
-            "${session.serverOrigin}$apiGetCover/${track.coverId}"), headers: {"Cookie": "session=${session.sessionBase64}"});
+            "${session.serverOrigin}$apiGetCover/${track.coverId}"), headers: Util.genAuthHeaders());
 
         File coverFile = File("$basePath/$coverDownloadDirectory/${track.coverId}");
         coverFile.createSync();
@@ -59,7 +59,7 @@ class DownloadManager {
         log.fine("Downloading track: ${track.id}");
 
         var trackResult = await http.get(
-            Uri.parse("${session.serverOrigin}$apiDownload/${track.id}"), headers: {"Cookie": "session=${session.sessionBase64}"});
+            Uri.parse("${session.serverOrigin}$apiDownload/${track.id}"), headers: Util.genAuthHeaders());
 
         var metadata = await ChimeAPI.getTrackMetadata(track.id);
 

@@ -1,5 +1,4 @@
 import 'package:app/api/api.dart';
-import 'package:app/api/endpoints.dart';
 import 'package:app/api/models/search.dart';
 import 'package:app/mainscreen.dart';
 import 'package:app/shared.dart';
@@ -216,7 +215,7 @@ class LargeSearchResultScaffold extends StatelessWidget {
               )
             ),
             const SizedBox(height: 6,),
-            Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.anuphan(fontSize: 14),),
+            Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.ibmPlexSans(fontSize: 14),),
             const SizedBox(height: 4,),
             BorderedChip(text: type.name[0].toUpperCase() + type.name.substring(1))
           ],
@@ -243,7 +242,7 @@ class TrackSearchResultScaffold extends StatelessWidget {
     return ListTile(
       title: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Text(track.title, maxLines: 1, style: GoogleFonts.anuphan(color: Colors.white, fontWeight: FontWeight.w500))
+          child: Text(track.title, maxLines: 1, style: GoogleFonts.ibmPlexSans(color: Colors.white, fontWeight: FontWeight.w500))
       ),
       subtitle: Text("${track.artist} ● ${Util.convertDuration(track.duration)}"),
       dense: true,

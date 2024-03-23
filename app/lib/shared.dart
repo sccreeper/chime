@@ -1,5 +1,4 @@
 import "dart:io";
-import "dart:typed_data";
 
 import "package:app/api/downloads.dart";
 import "package:app/api/models/session.dart";
@@ -51,6 +50,12 @@ class Util {
     });
 
     return size;
+
+  }
+
+  static Map<String, String> genAuthHeaders() {
+
+    return {"Cookie" : "session_id=${session.sessionID};user_id=${session.userID}"};
 
   }
 

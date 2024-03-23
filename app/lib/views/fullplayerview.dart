@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 import 'package:app/api/api.dart';
 import 'package:app/player.dart';
@@ -56,9 +55,9 @@ class FullPlayerViewState extends State<FullPlayerView> {
             child:  Image(image: ChimeAPI.getCover(GetIt.I<PlayerStatusNotifier>().coverID)),
           ),
           const SizedBox(height: 24,),
-          Text(GetIt.I<PlayerStatusNotifier>().currentTrack, textAlign: TextAlign.center, style: GoogleFonts.anuphan(fontWeight: FontWeight.bold, fontSize: 20, ),),
+          Text(GetIt.I<PlayerStatusNotifier>().currentTrack, textAlign: TextAlign.center, style: GoogleFonts.ibmPlexSans(fontWeight: FontWeight.bold, fontSize: 20, ),),
           const SizedBox(height: 8,),
-          Text(GetIt.I<PlayerStatusNotifier>().currentArtist, textAlign: TextAlign.center, style: GoogleFonts.anuphan(fontSize: 12),),
+          Text(GetIt.I<PlayerStatusNotifier>().currentArtist, textAlign: TextAlign.center, style: GoogleFonts.ibmPlexSans(fontSize: 12),),
           const SizedBox(height: 16,),
           Row(
             children: [

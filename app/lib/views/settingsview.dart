@@ -74,8 +74,8 @@ class SettingsViewState extends State<SettingsView> {
               showDialog(context: context, builder: (BuildContext context) => AlertDialog(
                 backgroundColor: Colors.grey[800],
                 title: const Text("Logout"),
-                titleTextStyle: GoogleFonts.anuphan(color: Colors.white, fontSize: 14.0),
-                contentTextStyle: GoogleFonts.anuphan(),
+                titleTextStyle: GoogleFonts.ibmPlexSans(color: Colors.white, fontSize: 14.0),
+                contentTextStyle: GoogleFonts.ibmPlexSans(),
                 content: const Text("Are you sure you want to log out? This will delete all your downloaded content from your device."),
                 actions: [
                   TextButton(

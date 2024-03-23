@@ -21,7 +21,7 @@ class IconLabel extends StatelessWidget {
       ),
       Expanded(
         flex: 9,
-        child: Text(label, style: GoogleFonts.anuphan(color: Colors.yellow[800], fontSize:16, fontWeight: FontWeight.bold)),
+        child: Text(label, style: GoogleFonts.ibmPlexSans(color: Colors.yellow[800], fontSize:16, fontWeight: FontWeight.bold)),
       )
     ],
     );

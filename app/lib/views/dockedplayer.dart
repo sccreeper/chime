@@ -1,9 +1,7 @@
 import 'dart:ui';
 
 import 'package:app/api/api.dart';
-import 'package:app/api/endpoints.dart';
 import 'package:app/player.dart';
-import 'package:app/shared.dart';
 import 'package:app/views/fullplayerview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -89,14 +87,14 @@ class DockedPlayerState extends State<DockedPlayer> {
                                       children: [
                                         Text(
                                           GetIt.I<PlayerStatusNotifier>().currentTrack,
-                                          style: GoogleFonts.anuphan(fontSize: 16),
+                                          style: GoogleFonts.ibmPlexSans(fontSize: 16),
                                           overflow: TextOverflow.ellipsis,
                                           maxLines: 1,
                                           softWrap: false,
                                         ),
                                         Text(
                                           GetIt.I<PlayerStatusNotifier>().currentArtist,
-                                          style: GoogleFonts.anuphan(fontSize: 10),
+                                          style: GoogleFonts.ibmPlexSans(fontSize: 10),
                                         )
                                       ],
                                     ),

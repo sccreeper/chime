@@ -1,10 +1,7 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
 import 'package:app/api/api.dart';
-import 'package:app/api/downloads.dart';
-import 'package:app/api/endpoints.dart';
 import 'package:app/api/models/collections.dart';
 import 'package:app/player.dart';
 import 'package:app/shared.dart';
@@ -115,7 +112,7 @@ class CollectionScaffold extends StatelessWidget {
           ),
           // Title and other details about collection
           const Divider(),
-          Text(collection.title, textAlign: TextAlign.center, style: GoogleFonts.anuphan(color: Colors.white, fontSize: 24.0, fontWeight: FontWeight.bold)),
+          Text(collection.title, textAlign: TextAlign.center, style: GoogleFonts.ibmPlexSans(color: Colors.white, fontSize: 24.0, fontWeight: FontWeight.bold)),
           const Divider(),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -158,9 +155,9 @@ class TrackScaffold extends StatelessWidget {
     return ListTile(
       title: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Text(track.name, maxLines: 1, style: GoogleFonts.anuphan(color: Colors.white, fontWeight: FontWeight.w500))
+          child: Text(track.name, maxLines: 1, style: GoogleFonts.ibmPlexSans(color: Colors.white, fontWeight: FontWeight.w500))
       ),
-      subtitle: Text("${track.artist} ● ${Util.convertDuration(track.duration)}"),
+      subtitle: Text("${track.artist} ● ${Util.convertDuration(track.duration)}", style: GoogleFonts.ibmPlexSans(color: Colors.white),),
       dense: true,
       contentPadding: const EdgeInsets.all(0.0),
       onTap: () {
@@ -178,8 +175,8 @@ class TrackScaffold extends StatelessWidget {
             builder: (BuildContext context) => AlertDialog(
               backgroundColor: Colors.grey[800],
               title: const Text("Track metadata"),
-              contentTextStyle: GoogleFonts.anuphan(),
-              titleTextStyle: GoogleFonts.anuphan(),
+              contentTextStyle: GoogleFonts.ibmPlexSans(),
+              titleTextStyle: GoogleFonts.ibmPlexSans(),
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,

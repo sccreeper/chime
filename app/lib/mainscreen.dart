@@ -73,8 +73,8 @@ class MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.grey[800],
         unselectedItemColor: Colors.white70,
         selectedItemColor: Colors.yellow[800],
-        selectedLabelStyle: GoogleFonts.anuphan(),
-        unselectedLabelStyle: GoogleFonts.anuphan(),
+        selectedLabelStyle: GoogleFonts.ibmPlexSans(),
+        unselectedLabelStyle: GoogleFonts.ibmPlexSans(),
         onTap: _onItemTapped,
       ),
     );

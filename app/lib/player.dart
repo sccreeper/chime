@@ -72,7 +72,7 @@ class Player {
       await audioPlayer.setAudioSource(
         AudioSource.uri(
           Uri.parse("${session.serverOrigin}$apiStream/$trackId"),
-          headers: {"Cookie":"session=${session.sessionBase64}"},
+          headers: Util.genAuthHeaders(),
         )
       );
     }

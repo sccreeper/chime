@@ -10,9 +10,7 @@ import 'package:app/api/models/search.dart';
 import 'package:app/shared.dart';
 import 'package:app/api/endpoints.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 
 class ChimeAPI {
 
@@ -20,7 +18,7 @@ class ChimeAPI {
 
     if (connected) {
       
-      final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetCollections"), headers: {"Cookie": "session=${session.sessionBase64}"});
+      final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetCollections"), headers: Util.genAuthHeaders());
       return Library.fromJSON(jsonDecode(req.body)); 
     
     } else {
@@ -63,7 +61,7 @@ class ChimeAPI {
 
     if (connected) {
       
-      final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetCollection/$id"), headers: {"Cookie": "session=${session.sessionBase64}"});
+      final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetCollection/$id"), headers: Util.genAuthHeaders());
       return Collection.fromJSON(jsonDecode(req.body), id); 
     
     } else {
@@ -112,7 +110,7 @@ class ChimeAPI {
         
         return Image.network(
                   "${session.serverOrigin}$apiGetCover/$id",
-                  headers: {"Cookie":"session=${session.sessionBase64}"},
+                  headers: Util.genAuthHeaders(),
                 ).image;
     
     } else {
@@ -135,7 +133,7 @@ class ChimeAPI {
 
     if (connected) {
       
-      final req = await http.get(Uri.parse("${session.serverOrigin}$apiTrackMetadata/$id"), headers: {"Cookie": "session=${session.sessionBase64}"});
+      final req = await http.get(Uri.parse("${session.serverOrigin}$apiTrackMetadata/$id"), headers: Util.genAuthHeaders());
       return TrackMetadata.fromJSON(jsonDecode(req.body)); 
     
     } else {
@@ -155,7 +153,7 @@ class ChimeAPI {
       
       final req = await http.post(
         Uri.parse("${session.serverOrigin}$apiAllTracks"),
-        headers: {"Cookie":"session=${session.sessionBase64}"},
+        headers: Util.genAuthHeaders(),
         body: jsonEncode(<String,int>{"limit":limit})
       );
 
@@ -171,7 +169,7 @@ class ChimeAPI {
 
   static Future<RadioModel> getRadio(String id) async {
 
-    final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetRadio/$id"), headers: {"Cookie":"session=${session.sessionBase64}"});
+    final req = await http.get(Uri.parse("${session.serverOrigin}$apiGetRadio/$id"), headers: Util.genAuthHeaders());
     return RadioModel.fromJson(jsonDecode(req.body));
 
   }
@@ -182,7 +180,7 @@ class ChimeAPI {
       
       final req = await http.post(
         Uri.parse("${session.serverOrigin}$apiSearch"),
-        headers: {"Cookie":"session=${session.sessionBase64}"},
+        headers: Util.genAuthHeaders(),
         body: jsonEncode(<String,String>{"query":query})
       );
       
@@ -233,12 +231,8 @@ class ChimeAPI {
 
   static Future<PingResult> ping(String serverOrigin) async {
 
-    try {
       final req = await http.get(Uri.parse("$serverOrigin$apiPing")).timeout(const Duration(seconds: 5));
       return PingResult.fromJson(jsonDecode(req.body));
-    } on TimeoutException catch(e) {
-      return PingResult(serverId: "", message: "", successful: false);
-    }
 
   } 
 

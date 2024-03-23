@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'package:app/api/api.dart';
@@ -10,6 +11,7 @@ import 'package:app/views/libraryview.dart';
 import 'package:app/views/radioview.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -91,18 +93,18 @@ class MainAppState extends State<MainApp> {
 
     return MaterialApp(
       theme: baseTheme.copyWith( 
-        primaryTextTheme: GoogleFonts.anuphanTextTheme(),
+        primaryTextTheme: GoogleFonts.ibmPlexSansTextTheme(),
         scaffoldBackgroundColor: const Color.fromARGB(255, 43, 43, 43),
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.grey[800],
-          titleTextStyle: GoogleFonts.anuphan(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)
+          titleTextStyle: GoogleFonts.ibmPlexSans(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)
         ),
         textTheme: baseTheme.textTheme.copyWith(
-          bodySmall: GoogleFonts.anuphan(color: Colors.white, fontSize: 14),
-          bodyMedium: GoogleFonts.anuphan(color: Colors.white, fontSize: 16),
-          bodyLarge: GoogleFonts.anuphan(color: Colors.white, fontSize: 18),
-          headlineSmall: GoogleFonts.anuphan(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-          titleMedium: GoogleFonts.anuphan(color: Colors.white)
+          bodySmall: GoogleFonts.ibmPlexSans(color: Colors.white, fontSize: 14),
+          bodyMedium: GoogleFonts.ibmPlexSans(color: Colors.white, fontSize: 16),
+          bodyLarge: GoogleFonts.ibmPlexSans(color: Colors.white, fontSize: 18),
+          headlineSmall: GoogleFonts.ibmPlexSans(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          titleMedium: GoogleFonts.ibmPlexSans(color: Colors.white)
         ),
         primaryColor: Colors.yellow[800],
         colorScheme: ColorScheme.fromSwatch(
@@ -110,8 +112,8 @@ class MainAppState extends State<MainApp> {
         ),
 
         inputDecorationTheme: InputDecorationTheme(
-          labelStyle: GoogleFonts.anuphan(color: Colors.white70),
-          hintStyle: GoogleFonts.anuphan(color: Colors.white70),
+          labelStyle: GoogleFonts.ibmPlexSans(color: Colors.white70),
+          hintStyle: GoogleFonts.ibmPlexSans(color: Colors.white70),
           enabledBorder: const UnderlineInputBorder(
             borderSide: BorderSide(color: Colors.white54),
           ),
@@ -125,13 +127,13 @@ class MainAppState extends State<MainApp> {
             foregroundColor: MaterialStateColor.resolveWith((states) => Colors.white),
             overlayColor: MaterialStateColor.resolveWith((states) => const Color(0xFFF57F17)),
             backgroundColor: MaterialStateColor.resolveWith((states) => const Color(0xFFF9A825)),
-            textStyle: MaterialStateTextStyle.resolveWith((states) => GoogleFonts.anuphan(color: Colors.white))
+            textStyle: MaterialStateTextStyle.resolveWith((states) => GoogleFonts.ibmPlexSans(color: Colors.white))
           )
         ),
 
         textButtonTheme: TextButtonThemeData(
           style: ButtonStyle(
-            textStyle: MaterialStateTextStyle.resolveWith((states) => GoogleFonts.anuphan(color: const Color(0xFFF9A825))),
+            textStyle: MaterialStateTextStyle.resolveWith((states) => GoogleFonts.ibmPlexSans(color: const Color(0xFFF9A825))),
             foregroundColor: MaterialStateColor.resolveWith((states) => const Color(0xFFF9A825)),
             overlayColor: MaterialStateColor.resolveWith((states) => const Color(0xFFF57F17))
           )
@@ -152,6 +154,10 @@ class MainAppState extends State<MainApp> {
           thumbColor: Colors.yellow[800],
           overlayColor: Colors.grey.withOpacity(0.25),
           
+        ),
+
+        dividerTheme: DividerThemeData(
+          color: Colors.grey.withOpacity(0.25)
         )
 
       ),
@@ -194,21 +200,22 @@ class MainAppState extends State<MainApp> {
       var connectivity = await (Connectivity().checkConnectivity());
 
       if (connectivity == ConnectivityResult.none) {
+        log.warning("No internet layer available");
         connected = false;
       } else {
 
-        var result = await io.InternetAddress.lookup(Uri.parse(session.serverOrigin).host);
-        
-        if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-          connected = true;
-        } else {
+          log.fine("Pinging server address");
           
           // Check if server is "alive"
 
-          var ping = await ChimeAPI.ping(session.serverOrigin);
-          connected = ping.successful;
-
-        }
+          try {
+            var ping = await ChimeAPI.ping(session.serverOrigin).timeout(const Duration(seconds: 1));
+            connected = ping.successful;
+          } on TimeoutException catch (e) {
+            log.warning(e.message);
+            connected = false;
+          }
+      
       }
 
       if (connected) {
@@ -229,10 +236,14 @@ class MainAppState extends State<MainApp> {
           
           GetIt.I<ActiveMainViewNotifier>().widget = const MainScreen();
 
+          Fluttertoast.showToast(msg: "Logged in");
+
         } else {
           log.fine("Session does not exist, continuing to login screen");
           
           GetIt.I<ActiveMainViewNotifier>().widget = const LoginScreen();
+
+          Fluttertoast.showToast(msg: "No session");
 
         } 
       
@@ -241,6 +252,8 @@ class MainAppState extends State<MainApp> {
         log.fine("Unable to establish session with server, reverting to offline mode");
 
         GetIt.I<ActiveMainViewNotifier>().widget = const MainScreen();
+
+        Fluttertoast.showToast(msg: "In offline mode");
       
       }
 

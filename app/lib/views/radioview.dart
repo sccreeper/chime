@@ -1,8 +1,6 @@
 import 'package:app/api/api.dart';
-import 'package:app/api/endpoints.dart';
 import 'package:app/api/models/radio.dart';
 import 'package:app/player.dart';
-import 'package:app/shared.dart';
 import 'package:app/widgets/loadingspinner.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -75,7 +73,7 @@ class RadioScaffold extends StatelessWidget {
 
           const SizedBox(height: 32,),
 
-          Text(radio.name, textAlign: TextAlign.center, style: GoogleFonts.anuphan(color: Colors.white, fontSize: 24.0, fontWeight: FontWeight.bold)),
+          Text(radio.name, textAlign: TextAlign.center, style: GoogleFonts.ibmPlexSans(color: Colors.white, fontSize: 24.0, fontWeight: FontWeight.bold)),
 
           const SizedBox(height: 16,),
 
