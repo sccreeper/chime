@@ -96,14 +96,14 @@ class CollectionScaffold extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image(image: ChimeAPI.getCover(collection.coverId),fit: BoxFit.cover,),
+                Image(image: ChimeAPI.getCover(collection.coverId, width: 300, height: 300),fit: BoxFit.cover,),
                 ClipRRect(
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: Container(
                       alignment: Alignment.center,
                       color: Colors.grey.withOpacity(0.1),
-                      child: Image(image: ChimeAPI.getCover(collection.coverId), width: 200, height: 200,),
+                      child: Image(image: ChimeAPI.getCover(collection.coverId, width: 300, height: 300), width: 200, height: 200,),
                     ),  
                   ),
                 )
@@ -182,7 +182,7 @@ class TrackScaffold extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Center(
-                    child: Image(image: ChimeAPI.getCover(trackMetadata.coverId), width: 100, height: 100,),
+                    child: Image(image: ChimeAPI.getCover(trackMetadata.coverId, width: 120, height: 120), width: 100, height: 100,),
                   ),
                   const Divider(),
                   Text(track.name),

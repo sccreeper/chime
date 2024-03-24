@@ -69,7 +69,7 @@ class RadioScaffold extends StatelessWidget {
 
         children: [
 
-          Image(image: ChimeAPI.getCover(radio.coverId), width: 256, height: 256,),
+          Image(image: ChimeAPI.getCover(radio.coverId, width: 300, height: 300), width: 256, height: 256,),
 
           const SizedBox(height: 32,),
 

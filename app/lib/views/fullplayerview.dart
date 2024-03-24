@@ -52,7 +52,7 @@ class FullPlayerViewState extends State<FullPlayerView> {
               ]
             ),
             padding: const EdgeInsets.all(8.0),
-            child:  Image(image: ChimeAPI.getCover(GetIt.I<PlayerStatusNotifier>().coverID)),
+            child:  Image(image: ChimeAPI.getCover(GetIt.I<PlayerStatusNotifier>().coverID, width: 500, height: 500)),
           ),
           const SizedBox(height: 24,),
           Text(GetIt.I<PlayerStatusNotifier>().currentTrack, textAlign: TextAlign.center, style: GoogleFonts.ibmPlexSans(fontWeight: FontWeight.bold, fontSize: 20, ),),

@@ -19,6 +19,7 @@ import 'package:http/http.dart' as http;
 import 'package:app/login.dart';
 import 'package:app/api/models/session.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:logging/logging.dart';
 
@@ -36,6 +37,13 @@ void main() async {
 
   session = UserSession.empty();
   dbMgr = DownloadDatabaseManager();
+
+  await JustAudioBackground.init(
+    androidNotificationChannelId: "net.oscarcp.chime.channel.audio",
+    androidNotificationChannelName: "Audio playback",
+    androidNotificationOngoing: true
+  );
+
   Player.init();
 
   // Register change notifiers.

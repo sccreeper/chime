@@ -1,3 +1,7 @@
+import 'package:app/api/endpoints.dart';
+import 'package:app/shared.dart';
+import 'package:just_audio_background/just_audio_background.dart';
+
 class Library {
 
   final List<LibraryItem> albums;
@@ -162,7 +166,7 @@ class Track {
   Map<String, dynamic> toJson() => {
     "id":id,
     "name":name,
-    "album_name":name,
+    "album_name":albumName,
     "released":released,
     "artist":artist,
     "album_id":albumId,
@@ -194,6 +198,16 @@ class Track {
     coverId: dbMap["cover"] as String, 
     position: dbMap["position"] as int,
   );
+
+  MediaItem toMediaItem() => MediaItem(
+    id: id, 
+    title: name,
+    duration: Duration(seconds: duration.toInt()),
+    artUri: Uri.parse("${session.serverOrigin}$apiGetCover/$coverId"),
+    artHeaders: Util.genAuthHeaders(),
+    album: albumName,
+    artist: artist,
+    );
 
 }
 

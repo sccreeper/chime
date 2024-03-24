@@ -59,7 +59,7 @@ class DockedPlayerState extends State<DockedPlayer> {
           child: Stack(
             fit:  StackFit.expand,
             children: [
-              Image(image: ChimeAPI.getCover(GetIt.I<PlayerStatusNotifier>().coverID), fit: BoxFit.cover,),
+              Image(image: ChimeAPI.getCover(GetIt.I<PlayerStatusNotifier>().coverID, width: 300, height: 300), fit: BoxFit.cover,),
               ClipRRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -77,7 +77,7 @@ class DockedPlayerState extends State<DockedPlayer> {
                                 children: [
                                   Expanded(
                                     flex: 1,
-                                    child: Image(image: ChimeAPI.getCover(GetIt.I<PlayerStatusNotifier>().coverID),)
+                                    child: Image(image: ChimeAPI.getCover(GetIt.I<PlayerStatusNotifier>().coverID, width: 100, height: 100),)
                                   ),
                                   const SizedBox(width: 5,),
                                   Expanded(

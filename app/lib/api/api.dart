@@ -100,7 +100,7 @@ class ChimeAPI {
   
   // }
 
-  static ImageProvider getCover(String id) {
+  static ImageProvider getCover(String id, {int width = 500, int height = 500}) {
 
     if (id == "0") {
       
@@ -109,7 +109,7 @@ class ChimeAPI {
     } else if (connected) {
         
         return Image.network(
-                  "${session.serverOrigin}$apiGetCover/$id",
+                  "${session.serverOrigin}$apiGetCover/$id?width=$width&height=$height",
                   headers: Util.genAuthHeaders(),
                 ).image;
     

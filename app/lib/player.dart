@@ -12,6 +12,7 @@ import 'package:app/shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
 
 AudioPlayer audioPlayer = AudioPlayer();
@@ -51,6 +52,15 @@ class Player {
       GetIt.I<PlayerStatusNotifier>().playPause(playing);
     });
 
+    audioPlayer.durationStream.listen((event) {
+      if (event == null) {
+        GetIt.I<PlayerStatusNotifier>().duration = 1;
+      } else {
+        GetIt.I<PlayerStatusNotifier>().duration = event.inSeconds.toDouble();
+      }      
+    
+    });
+
   }
 
   static void playTrack(Track track) async {
@@ -65,7 +75,10 @@ class Player {
     if (File("${(await getApplicationDocumentsDirectory()).path}/$trackDownloadDirectory/$trackId").existsSync()) {
       
       await audioPlayer.setAudioSource(
-        AudioSource.file("${(await getApplicationDocumentsDirectory()).path}/$trackDownloadDirectory/$trackId")
+        AudioSource.file(
+          "${(await getApplicationDocumentsDirectory()).path}/$trackDownloadDirectory/$trackId",
+          tag: currentTrack?.toMediaItem(),
+          )
       );
 
     } else {
@@ -73,13 +86,13 @@ class Player {
         AudioSource.uri(
           Uri.parse("${session.serverOrigin}$apiStream/$trackId"),
           headers: Util.genAuthHeaders(),
-        )
+          tag: currentTrack?.toMediaItem(),
+        ),
       );
     }
 
     GetIt.I<PlayerStatusNotifier>().playingRadio = false;
     GetIt.I<PlayerStatusNotifier>().active = true;
-    GetIt.I<PlayerStatusNotifier>().duration = audioPlayer.duration!.inSeconds.toDouble();
 
     audioPlayer.play();
   
