@@ -30,3 +30,10 @@ export function convertDuration(time) {
     return `${minutes.toString().padStart(2, "0")}:${seconds.padStart(2, "0")}`
 
 }
+
+export const coverSizes = {
+    icon: 64,
+	small: 128,
+	medium: 300,
+	large: 600,
+}

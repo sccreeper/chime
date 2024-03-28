@@ -1,10 +1,17 @@
 import { browser } from "$app/environment"
 
 /**
+ * @typedef {Object} LibraryItem
+ * @property {string} id
+ * @property {string} name
+ * @property {string} cover_id
+ */
+
+/**
  * Get's user's library
  * Server side only
  * @param {fetch} fetch
- * @returns {Promise<{albums: {id: string, name: string}[], playlists: {id: string, name: string}[], radios: {id: string, name: string}[]}>} userLibrary 
+ * @returns {Promise<{albums: LibraryItem[], playlists: LibraryItem[], radios: LibraryItem[]}>} userLibrary 
  */
 export async function getUserLibrary(fetch) {
 

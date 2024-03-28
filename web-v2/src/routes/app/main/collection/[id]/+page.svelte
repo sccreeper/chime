@@ -3,7 +3,7 @@
     import no_cover from "$lib/assets/no_cover.png";
     import MinorButtonText from "$lib/components/general/MinorButtonText.svelte";
     import HorizontalDivider from "$lib/components/general/HorizontalDivider.svelte";
-    import { convertDurationLong } from "$lib/util";
+    import { convertDurationLong, coverSizes } from "$lib/util";
     import BlankPage from "$lib/components/general/BlankPage.svelte";
     import Disc from "$lib/components/main/collection/Disc.svelte";
     import Track from "$lib/components/main/collection/Track.svelte";
@@ -23,7 +23,7 @@
 
     // Reactive variables in UI.
 
-    $: actual_album_cover = data.collection.cover == "0" ? no_cover : `/api/collection/get_cover/${data.collection.cover}?width=300&height=300`
+    $: actual_album_cover = data.collection.cover == "0" ? no_cover : `/api/collection/get_cover/${data.collection.cover}?width=${coverSizes.medium}&height=${coverSizes.medium}`
     
     // Find out total duration of collection in hh:mm
     /** @type {string} */

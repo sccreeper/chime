@@ -11,7 +11,7 @@
     import { getContext, setContext } from 'svelte';
     import defaultCover from '$lib/assets/no_cover.png';
     import HorizontalDivider from '$lib/components/general/HorizontalDivider.svelte';
-    import { convertDuration } from '$lib/util';
+    import { convertDuration, coverSizes } from '$lib/util';
     import MinorButton from '$lib/components/general/MinorButton.svelte';
 
     /** @type {import('./$types').LayoutData} */
@@ -76,19 +76,19 @@
                 <ListDivider text="Albums" icon="vinyl-fill"/>
 
                 {#each data.lib.albums as item}
-                <LibraryItem name={item.name} item_id={item.id} type="collection"/>
+                <LibraryItem data={item} type="collection"/>
                 {/each}
 
                 <ListDivider text="Playlists" icon="list"/>
 
                 {#each data.lib.playlists as item}
-                <LibraryItem name={item.name} item_id={item.id} type="collection"/>
+                <LibraryItem data={item} type="collection"/>
                 {/each}
 
                 <ListDivider text="Radios" icon="broadcast"/>
 
                 {#each data.lib.radios as item}
-                <LibraryItem name={item.name} item_id={item.id} type="radio"/>
+                <LibraryItem data={item} type="radio"/>
                 {/each}
 
             </div>
@@ -107,7 +107,7 @@
 
                 <div class="flex flex-col items-center text-center overflow-y-scroll overflow-x-hidden h-full w-full text-gray-500">
 
-                    <img src={trackMetadata.cover_id == "0" ? defaultCover : `/api/collection/get_cover/${trackMetadata.cover_id}?width=350&height=350`} width="300" height="300" class="mt-3"/>
+                    <img src={trackMetadata.cover_id == "0" ? defaultCover : `/api/collection/get_cover/${trackMetadata.cover_id}?width=${coverSizes.large}&height=${coverSizes.large}`} width="300" height="300" class="mt-3"/>
 
                     <h1 class="mt-2 text-2xl font-bold text-gray-300">{trackMetadata.title}</h1>
                     <p class="text-gray-300 mb-2">{trackMetadata.artist} <span class="text-yellow-600">●</span> {trackMetadata.album_name}</p>

@@ -17,6 +17,15 @@ var random *rand.Rand
 var db_path string = "/var/lib/chime/data.db"
 var database *gorm.DB
 
+const (
+	cover_size_icon   = 64
+	cover_size_small  = 128
+	cover_size_medium = 300
+	cover_size_large  = 600
+)
+
+var cover_sizes []int = []int{cover_size_icon, cover_size_small, cover_size_medium, cover_size_large}
+
 func init() {
 	random = rand.New(rand.NewSource(time.Now().UnixNano()))
 }

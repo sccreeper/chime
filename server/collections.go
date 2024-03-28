@@ -21,8 +21,9 @@ import (
 )
 
 type single_collection struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	CoverID string `json:"cover_id"`
 }
 
 type collection_list_response struct {
@@ -71,9 +72,9 @@ func handle_get_collections(ctx *gin.Context) {
 	var radios = []radio_model{}
 
 	database.Table(table_playlists).
-		Select("name", "is_album", "id").
+		Select("name", "is_album", "id", "cover").
 		Where("owner = ?", owner_id).Find(&collections)
-	database.Table(table_radio).Select("name", "id").Where("owner = ?", owner_id).Find(&radios)
+	database.Table(table_radio).Select("name", "id", "cover_id").Where("owner = ?", owner_id).Find(&radios)
 
 	response := collection_list_response{}
 
@@ -84,16 +85,16 @@ func handle_get_collections(ctx *gin.Context) {
 	for _, v := range collections {
 
 		if v.IsAlbum == 1 {
-			response.Albums = append(response.Albums, single_collection{Name: v.Name, ID: strconv.FormatInt(v.ID, 16)})
+			response.Albums = append(response.Albums, single_collection{Name: v.Name, ID: strconv.FormatInt(v.ID, 16), CoverID: strconv.FormatInt(v.Cover, 16)})
 		} else {
-			response.Playlists = append(response.Playlists, single_collection{Name: v.Name, ID: strconv.FormatInt(v.ID, 16)})
+			response.Playlists = append(response.Playlists, single_collection{Name: v.Name, ID: strconv.FormatInt(v.ID, 16), CoverID: strconv.FormatInt(v.Cover, 16)})
 		}
 
 	}
 
 	for _, v := range radios {
 
-		response.Radios = append(response.Radios, single_collection{Name: v.Name, ID: strconv.FormatInt(v.ID, 16)})
+		response.Radios = append(response.Radios, single_collection{Name: v.Name, ID: strconv.FormatInt(v.ID, 16), CoverID: strconv.FormatInt(v.CoverID, 16)})
 
 	}
 
@@ -277,13 +278,13 @@ func handle_get_cover(ctx *gin.Context) {
 				// Cache write
 
 				if cache_file, err := os.Create(fmt.Sprintf("/var/lib/chime/cache/cover_%s_%d_%d", query.CoverID, width_i, height_i)); err == nil {
-					jpeg.Encode(cache_file, result, nil)
+					jpeg.Encode(cache_file, result, &jpeg.Options{Quality: 90})
 				} else {
 					ctx.AbortWithStatus(http.StatusInternalServerError)
 					return
 				}
 
-				jpeg.Encode(ctx.Writer, result, nil)
+				jpeg.Encode(ctx.Writer, result, &jpeg.Options{Quality: 90})
 
 			}
 

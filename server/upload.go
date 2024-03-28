@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"image"
+	"image/jpeg"
+	_ "image/png"
 	"math"
 	"net/http"
 	"os"
@@ -11,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/image/draw"
 
 	"github.com/dhowden/tag"
 	"github.com/gin-gonic/gin"
@@ -257,6 +262,37 @@ func handle_upload_cover(ctx *gin.Context) {
 		Owner:   user_id,
 		AlbumID: 0,
 	})
+
+	//Resize cover in standard sizes
+
+	file_data, err := file.Open()
+	if err != nil {
+		goto end
+	}
+
+	for _, size := range cover_sizes {
+
+		uploaded, _, err := image.Decode(file_data)
+		if err != nil {
+			goto end
+		}
+
+		result := image.NewRGBA(image.Rect(0, 0, size, size))
+		draw.BiLinear.Scale(result, result.Rect, uploaded, uploaded.Bounds(), draw.Over, nil)
+
+		// Write the file to cache.
+
+		if cache_file, err := os.Create(fmt.Sprintf("/var/lib/chime/cache/cover_%s_%d_%d", strconv.FormatInt(cover_id, 16), size, size)); err == nil {
+			jpeg.Encode(cache_file, result, &jpeg.Options{Quality: 90})
+		} else {
+			goto end
+		}
+
+	}
+
+	goto end
+
+end:
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"id": strconv.FormatInt(cover_id, 16),
