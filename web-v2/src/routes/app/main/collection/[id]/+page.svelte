@@ -51,29 +51,39 @@
 
         } else {
 
+            // Edge cases
+
+            if (data.collection.tracks.length == 0) {
+                discs = [];
+            }
+
             let disc_count = 0;
 
             discs.push([]);
 
+            // Figure out how many discs there are in total
+            // This is required because the data returned from the server isn't in order
             for (let i = 0; i < data.collection.tracks.length; i++) {
                 const element = data.collection.tracks[i];
 
-                if (element.disc-1 > disc_count) {
-                    
-                    discs.push([])
+                if (((element.disc == 0 ? 1 : element.disc)-1) > disc_count) {
                     disc_count++
+                    discs.push([])
+                }   
+            }
 
-                    discs[disc_count].push({index: i, track: element})
+            for (let i = 0; i < data.collection.tracks.length; i++) {
+                const element = data.collection.tracks[i];
 
-                    continue
-
-                }
-
-                discs[disc_count].push({index: i, track: element})
+                discs[(element.disc == 0 ? 1 : element.disc)-1].push({index: i, track: element})
                 
             }
 
         }
+
+        discs = discs;
+
+        console.log(discs)
 
     }
 
@@ -212,9 +222,9 @@
 
                 {/if}
 
-                {#each disc as track }
+                {#each disc as track, j }
                     
-                    <Track track={track.track} index={track.index}/>
+                    <Track track={track.track} index={track.index} displayed_index={j}/>
 
                 {/each}
 

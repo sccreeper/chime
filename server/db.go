@@ -77,7 +77,11 @@ func (t by_position) Len() int {
 }
 
 func (t by_position) Less(i int, j int) bool {
-	return t[i].Position < t[j].Position
+	if t[i].Disc != t[j].Disc {
+		return t[i].Disc < t[j].Disc
+	} else {
+		return t[i].Position < t[j].Position
+	}
 }
 
 func (t by_position) Swap(i int, j int) {

@@ -11,6 +11,7 @@
 
     export let track_id = ""
     export let index = 0
+    export let displayed_index = 0
 
     let mouse_over = false
 
@@ -27,7 +28,7 @@
     {#if !mouse_over && $page.data.collection_id == $collectionId && $playing && $currentTrack?.id == track_id}
     <i class="bi bi-volume-up-fill text-yellow-500"></i>
     {:else if !mouse_over}
-    {index+1}
+    {displayed_index+1}
     {:else}
     <i class="bi bi-play-fill text-yellow-500"></i>
     {/if}

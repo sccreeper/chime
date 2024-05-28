@@ -115,6 +115,7 @@ func handle_upload(ctx *gin.Context) {
 			hex_id := strconv.FormatInt(track_id, 16)
 
 			disc, _ := metadata.Disc()
+			track, _ := metadata.Track()
 
 			// Create cover record
 
@@ -150,6 +151,7 @@ func handle_upload(ctx *gin.Context) {
 				Original: filename,
 				Size:     f_size,
 				Duration: probe_data.Format.DurationSeconds,
+				Position: int64(track),
 				Released: int64(metadata.Year()),
 				Disc:     int64(disc),
 			})

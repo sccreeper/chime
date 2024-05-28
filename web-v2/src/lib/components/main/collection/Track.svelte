@@ -15,10 +15,13 @@
     /** @type {number} */
     export let index;
 
+    /** @type {number} */
+    export let displayed_index;
+
 </script>
 
 <tr on:click={() => {}} draggable="true" on:drop={() => {}} on:dragover={() => {}} on:dragstart={() => {}} class:playing={$page.data.collection_id == $collectionId && $playing && $currentTrack?.id == track.id}>
-    <td><TrackPlay index={index} track_id={track.id}/></td>
+    <td><TrackPlay index={index} track_id={track.id} displayed_index={displayed_index}/></td>
     <td class="font-semibold">{track.name}</td>
     <td class="text-xs">{track.artist}</td>
     <td class="text-xs">{track.album_name}</td>
