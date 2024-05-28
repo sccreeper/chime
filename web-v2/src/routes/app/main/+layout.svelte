@@ -13,6 +13,7 @@
     import HorizontalDivider from '$lib/components/general/HorizontalDivider.svelte';
     import { convertDuration, coverSizes } from '$lib/util';
     import MinorButton from '$lib/components/general/MinorButton.svelte';
+    import { goto } from '$app/navigation';
 
     /** @type {import('./$types').LayoutData} */
     export let data;
@@ -42,6 +43,35 @@
 
         trackMetadata = await getTrackMetadata(val)
     })
+
+    // New radio and playlist
+
+    function newPlaylist() {
+        
+        fetch("/api/collection/add", {
+            method: "POST",
+            body: JSON.stringify({
+                "name": "Untitled Playlist",
+                "description": "",
+                "is_album": false,
+            }),
+        }).then((resp) => resp.json()).then(
+            (resp) => {
+                data.lib.playlists.push({
+                    name: "Untitled Playlist",
+                    cover_id: "0",
+                    id: resp.id,
+                })
+
+                goto(`/app/main/collection/${resp.id}`)
+            }
+        )
+
+    }
+
+    function newRadio() {
+        
+    }
 </script>
 
 <svelte:head>
@@ -79,7 +109,9 @@
                 <LibraryItem data={item} type="collection"/>
                 {/each}
 
-                <ListDivider text="Playlists" icon="list"/>
+                <ListDivider text="Playlists" icon="list">
+                    <MinorButton icon="plus" callback={newPlaylist}/> 
+                </ListDivider>
 
                 {#each data.lib.playlists as item}
                 <LibraryItem data={item} type="collection"/>

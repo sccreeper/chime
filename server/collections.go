@@ -5,7 +5,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -454,7 +453,6 @@ func handle_get_radio(ctx *gin.Context) {
 type create_playlist_query struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
-	CustomCover bool   `json:"custom_cover"`
 	IsAlbum     bool   `json:"is_album"`
 }
 
@@ -469,14 +467,9 @@ func handle_add_collection(ctx *gin.Context) {
 		return
 	}
 
-	if err := ctx.Request.ParseMultipartForm(int64(math.Pow10(6) * 5)); err != nil {
-		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Unable to parse form"))
-		return
-	}
-
 	var playlist create_playlist_query
 
-	if err := json.Unmarshal([]byte(ctx.PostForm("data")), &playlist); err != nil {
+	if err := ctx.ShouldBindJSON(&playlist); err != nil {
 		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid request body"))
 		return
 	}
@@ -491,33 +484,6 @@ func handle_add_collection(ctx *gin.Context) {
 		is_album = 0
 	}
 
-	// Handle cover
-
-	var cover_id int64 = 0
-
-	if playlist.CustomCover {
-
-		cover_id := generate_id(table_covers)
-
-		cover_file, err := ctx.FormFile("cover")
-		if err != nil {
-			ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: No cover in form"))
-			return
-		}
-
-		if err := ctx.SaveUploadedFile(cover_file, fmt.Sprintf("/var/lib/chime/covers/%s", strconv.FormatInt(cover_id, 16))); err != nil {
-			ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("500: Unable to save cover"))
-			return
-		}
-
-		database.Table(table_covers).Create(&cover_model{
-			ID:      cover_id,
-			AlbumID: 0,
-			Owner:   user_id,
-		})
-
-	}
-
 	// Create collection record finally.
 
 	database.Table(table_playlists).Create(&playlist_model{
@@ -525,9 +491,11 @@ func handle_add_collection(ctx *gin.Context) {
 		Owner:       user_id,
 		Name:        playlist.Name,
 		Description: playlist.Description,
-		Cover:       cover_id,
+		Cover:       0,
 		IsAlbum:     is_album,
 	})
+
+	ctx.JSON(http.StatusOK, gin.H{"id": strconv.FormatInt(id, 16)})
 
 }
 

@@ -9,7 +9,7 @@
     export let text;
 </script>
 
-<strong><i class="bi bi-{icon}"></i> {text}</strong>
+<strong><i class="bi bi-{icon}"></i> {text} <slot></slot></strong>
 
 <style lang="postcss">
 

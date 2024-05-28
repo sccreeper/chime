@@ -9,6 +9,7 @@
     import Track from "$lib/components/main/collection/Track.svelte";
     import { getContext } from "svelte";
     import { PLAYER_CONTEXT_KEY } from "$lib/player";
+    import { invalidateAll } from "$app/navigation";
 
     /**
      * @type {import('./$types').PageData}
@@ -20,6 +21,10 @@
 
     /** @type {import('$lib/player').ChimePlayer} */
     const {playing, collectionId} = getContext(PLAYER_CONTEXT_KEY)
+
+    let beingEdited = false;
+    let collectionTitle = data.collection.title;
+    let collectionDescription = data.collection.description;
 
     // Reactive variables in UI.
 
@@ -115,8 +120,31 @@
         
     }
 
-    function editCollection() {
-        
+    async function editCollection() {
+
+        if (beingEdited) {
+            
+            // Apply changes
+
+            await fetch("/api/edit/collection", {
+                method: "POST",
+                body: JSON.stringify({
+                    collection_id: data.collection_id,
+                    name: collectionTitle,
+                    description: collectionDescription,
+                    is_album: data.collection.is_album,
+                })
+            })
+
+            invalidateAll();
+            beingEdited = false;
+
+        } else {
+
+            beingEdited = true;
+
+        }
+
     }
 
     function editCover() {
@@ -152,8 +180,18 @@
 
                 <!-- Title, description, duration -->
 
+                {#if beingEdited}
+                    
+                    <input class="album-title" type="text" bind:value={collectionTitle} placeholder="Title">
+                    <input class="album-description" type="text" bind:value={collectionDescription} placeholder="Description">
+
+                {:else}
+                
                 <h1 class="album-title">{data.collection.title}</h1>
-                <p>{data.collection.description}</p>
+                <p class="album-description">{data.collection.description}</p>
+
+                {/if}
+
                 <p class="text-xs">{total_duration}</p>
 
                 <!-- Buttons -->
@@ -169,7 +207,7 @@
                     {#if !data.collection.protected}
     
                         <MinorButtonText callback={deleteCollection} text="Delete" icon="trash-fill"/>
-                        <MinorButtonText callback={editCollection} text="Edit" icon="pencil-fill"/>
+                        <MinorButtonText callback={editCollection} text={beingEdited ? "Apply" : "Edit"} icon={beingEdited ? "check-lg" : "pencil-fill"}/>
                         <MinorButtonText callback={editCover} text="Edit cover" icon="image"/>
     
                     {/if}
