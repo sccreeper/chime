@@ -7,9 +7,9 @@
     import BlankPage from "$lib/components/general/BlankPage.svelte";
     import Disc from "$lib/components/main/collection/Disc.svelte";
     import Track from "$lib/components/main/collection/Track.svelte";
-    import { getContext } from "svelte";
+    import { getContext, onMount } from "svelte";
     import { PLAYER_CONTEXT_KEY } from "$lib/player";
-    import { invalidateAll } from "$app/navigation";
+    import { afterNavigate, invalidateAll, onNavigate } from "$app/navigation";
 
     /**
      * @type {import('./$types').PageData}
@@ -25,6 +25,11 @@
     let beingEdited = false;
     let collectionTitle = data.collection.title;
     let collectionDescription = data.collection.description;
+    afterNavigate(() => {
+        beingEdited = false
+        collectionTitle = data.collection.title;
+        collectionDescription = data.collection.description;
+    })
 
     // Reactive variables in UI.
 
