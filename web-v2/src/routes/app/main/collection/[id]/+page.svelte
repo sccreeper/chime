@@ -7,9 +7,12 @@
     import BlankPage from "$lib/components/general/BlankPage.svelte";
     import Disc from "$lib/components/main/collection/Disc.svelte";
     import Track from "$lib/components/main/collection/Track.svelte";
-    import { getContext, onMount } from "svelte";
+    import { getContext } from "svelte";
     import { PLAYER_CONTEXT_KEY } from "$lib/player";
-    import { afterNavigate, invalidateAll, onNavigate } from "$app/navigation";
+    import { afterNavigate, invalidateAll } from "$app/navigation";
+    import Dialog from "$lib/components/dialogs/Dialog.svelte";
+    import MinorButton from "$lib/components/general/MinorButton.svelte";
+    import { applyAction } from "$app/forms";
 
     /**
      * @type {import('./$types').PageData}
@@ -121,8 +124,25 @@
 
     // Edit functions
 
-    function addToCollection() {
-        
+    let showAddToCollectionModal = false;
+    /**
+     * @param {string} id
+     */
+    async function addToCollection(id) {
+
+        await fetch("/api/collection/add_collection", {
+            method: "POST",
+
+            body: JSON.stringify(
+                {
+                    "source" : data.collection_id,
+                    "destination" : id
+                }
+            )
+        })
+
+        showAddToCollectionModal = false;
+
     }
 
     async function editCollection() {
@@ -165,6 +185,20 @@
 <svelte:head>
     <title>{data.collection.title}{data.collection.is_album && !data.collection.protected ? ` - ${data.collection.tracks[0].artist}` : ''} - Chime</title>
 </svelte:head>
+
+<!-- Dialogs -->
+
+<Dialog bind:showModal={showAddToCollectionModal} title="Add to collection" icon="plus-lg">
+
+    <div class="body-div" slot="body">
+
+        {#each data.lib.playlists as playlist }
+            <p on:click={() => {addToCollection(playlist.id)}}>{playlist.name}</p>
+        {/each}
+
+    </div>
+
+</Dialog>
 
 <div class="h-full overflow-y-scroll">
 
@@ -217,7 +251,7 @@
     
                     {/if}
     
-                    {#if data.collection.is_album}<MinorButtonText callback={addToCollection} text="Add to" icon="plus-lg"/>{/if}
+                    {#if data.collection.is_album}<MinorButtonText callback={() => {showAddToCollectionModal = true}} text="Add to" icon="plus-lg"/>{/if}
 
                 </div>
 
@@ -319,6 +353,17 @@
 
     th {
         @apply font-thin;
+    }
+
+    .body-div p {
+        @apply text-slate-400;
+        @apply transition-all;
+        @apply cursor-pointer;
+        @apply select-none;
+    }
+
+    .body-div p:hover {
+        @apply text-yellow-500;
     }
 
 </style>

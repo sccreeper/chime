@@ -1,14 +1,16 @@
 <script>
     /** @type {string} */
-    export var icon;
+    export let icon;
     /** @type {function(): void} */
-    export var callback;
+    export let callback;
     /** @type {string} */
-    export var text;
+    export let text;
     /** @type {boolean} */
-    export var disabled = false;
+    export let disabled = false;
     /** @type {string} */
     let cursor_pointer;
+    /** @type {string} */
+    export let hint = "";
 
     $: cursor_pointer = disabled ? "not-allowed" : "pointer"
 
@@ -20,7 +22,7 @@
 
 </script>
 
-<p style="cursor: {cursor_pointer}" on:click={handleClick}><i class="bi bi-{icon}"></i> <span class="span-text">{text}</span></p>
+<p style="cursor: {cursor_pointer}" on:click={handleClick} title={hint}><i class="bi bi-{icon}"></i> <span class="span-text">{text}</span></p>
 
 <style lang="postcss">
 p {
