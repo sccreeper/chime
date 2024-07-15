@@ -31,7 +31,7 @@ export async function getUserLibrary(fetch) {
  * @param {fetch} fetch 
  * @param {string} id 
  * 
- * @returns {Promise<import('./api').Collection>}
+ * @returns {Promise<import('./models').Collection>}
  */
 export async function getCollection(fetch, id) {
     
@@ -45,7 +45,7 @@ export async function getCollection(fetch, id) {
 /**
  * 
  * @param {string} id 
- * @returns {Promise<import('./api').TrackMetadata>}
+ * @returns {Promise<import('./models').TrackMetadata>}
  */
 export async function getTrackMetadata(id) {
     

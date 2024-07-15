@@ -3,7 +3,7 @@ import { error } from '@sveltejs/kit';
 
 /**  
  * @type {import('./$types').PageLoad}
- * @returns {Promise<{collection: import('$lib/api/api').Collection, collection_id: string}>}
+ * @returns {Promise<{collection: import('$lib/api/models').Collection, collection_id: string}>}
  */
 export async function load({params, fetch}) {
     

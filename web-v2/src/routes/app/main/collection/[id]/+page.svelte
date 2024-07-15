@@ -51,7 +51,7 @@
     }
 
     // Sort tracks into 2D array, each 1D array being tracks on a different disc.
-    /** @type {{index: number, track: import('$lib/api/api').CollectionTrack}[][]} */
+    /** @type {{index: number, track: import('$lib/api/models').CollectionTrack}[][]} */
     let discs;
     $: {
 
@@ -96,7 +96,6 @@
 
         discs = discs;
 
-        console.log(discs)
 
     }
 
@@ -279,8 +278,8 @@
                 <col span="1" style="width: 5%;"> <!-- no. -->
                 <col span="1" style="width: 35%;"> <!-- title -->
                 <col span="1" style="width: 15%;"> <!-- artist -->
-                <col span="1" style="width: 35%;"> <!-- duration -->
-                <col span="1" style="width: 10%;"> <!-- favourite -->
+                <col span="1" style="width: 35%;"> <!-- album -->
+                <col span="1" style="width: 10%;"> <!-- favourite+duration -->
             </colgroup>
 
             <tr class="text-left">

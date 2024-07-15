@@ -13,7 +13,7 @@
     import HorizontalDivider from '$lib/components/general/HorizontalDivider.svelte';
     import { convertDuration, coverSizes } from '$lib/util';
     import MinorButton from '$lib/components/general/MinorButton.svelte';
-    import { goto } from '$app/navigation';
+    import { goto, invalidateAll } from '$app/navigation';
 
     /** @type {import('./$types').LayoutData} */
     export let data;
@@ -26,8 +26,25 @@
     /** @type {import('$lib/player').ChimePlayer} */
     const player = getContext(PLAYER_CONTEXT_KEY);
 
-    /** @type {import('$lib/api/api').TrackMetadata} */
+    /** @type {import('$lib/api/models').TrackMetadata} */
     let trackMetadata;
+
+    /** @type {HTMLFormElement} */
+    let searchForm;
+    /** @type {number|undefined} */
+    let searchScheduler = undefined;
+
+    function scheduleSearch() {
+
+        if (searchScheduler != undefined) {
+            window.clearTimeout(searchScheduler)    
+        }
+        
+        searchScheduler = window.setTimeout(() => {
+            searchForm.requestSubmit()
+        }, 100)
+
+    }
 
     currentTrack.subscribe((val) => {
         if (val != undefined && browser) {
@@ -63,6 +80,7 @@
                     id: resp.id,
                 })
 
+                invalidateAll()
                 goto(`/app/main/collection/${resp.id}`)
             }
         )
@@ -91,8 +109,16 @@
 
 
     <!-- Search, navigation, settings etc. -->
-    <div>
-        <h1>Top Bar</h1>
+    <div class="flex flex-row flex-nowrap items-center justify-center gap-3 h-20">
+
+        <div class="w-1/5">        
+            <form bind:this={searchForm} action="/app/main/search" autocomplete="off" data-sveltekit-keepfocus>
+                <input class="w-full" type="text" name="query" placeholder="Search" on:input={scheduleSearch}/>
+            </form>
+        </div>
+
+        <i class="bi bi-search text-gray-500"></i>
+
     </div>
 
     <!-- Central content -->
@@ -127,7 +153,7 @@
 
         </div>
 
-        <div class="grow centre">
+        <div class="centre">
             <slot />
         </div>
 
@@ -256,11 +282,12 @@
     }
 
     .centre-right {
-        width: 450px;
+        width: 20%;
         background-color: rgb(45, 53, 66);
     }
 
     .centre {
+        width: 65%;
         background-color: rgb(38, 45, 56);
     }
 

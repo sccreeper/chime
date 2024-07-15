@@ -6,7 +6,7 @@
 @tailwind utilities;
 
 body,html {
-    @apply text-white;
+    @apply text-gray-300;
     @apply bg-gray-700;
     font-family: 'IBM Plex Sans', sans-serif;
 
