@@ -14,6 +14,7 @@
     import { convertDuration, coverSizes } from '$lib/util';
     import MinorButton from '$lib/components/general/MinorButton.svelte';
     import { goto, invalidateAll } from '$app/navigation';
+    import LargeLink from '$lib/components/general/LargeLink.svelte';
 
     /** @type {import('./$types').LayoutData} */
     export let data;
@@ -126,6 +127,15 @@
     <div class="flex h-full grow overflow-hidden">
         
         <div class="centre-left">
+
+            <div class="m-2">
+
+                <LargeLink icon="house-fill" text="Home" href="/app/main"/>
+                <LargeLink icon="gear-fill" text="Settings" href="/app/main/settings"/>
+
+            </div>
+
+            <HorizontalDivider/>
 
             <div class="m-2">
 

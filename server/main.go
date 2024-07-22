@@ -177,7 +177,7 @@ func main() {
 	// Auth
 
 	r.POST("/api/auth", handle_auth)
-	r.GET("/api/auth/session_exists/:session_id", handle_session_exists)
+	r.GET("/api/auth/session_exists/:session_id", handleGetUser)
 
 	// Chromecast proxy methods
 

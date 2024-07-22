@@ -191,13 +191,37 @@ func handle_auth(ctx *gin.Context) {
 
 }
 
-type session_exists struct {
+// Verify whether a session exists, and return the associated user data.
+
+type getUserQuery struct {
 	SessionID string `uri:"session_id"`
 }
 
-func handle_session_exists(ctx *gin.Context) {
+type userResp struct {
+	Username string `json:"username"`
+	IsAdmin  bool   `json:"is_admin"`
+	UserID   string `json:"user_id"`
+}
 
-	var query session_exists
+type getUserResponse struct {
+	Status string   `json:"status"`
+	User   userResp `json:"user"`
+}
+
+func getUserFromDb(userId int64) (user user_model, err error) {
+
+	var count int64
+	database.Table(table_users).Select("*").Where("id = ?", userId).First(&user).Count(&count)
+	if count == 0 {
+		err = fmt.Errorf("no user found")
+	}
+	return
+
+}
+
+func handleGetUser(ctx *gin.Context) {
+
+	var query getUserQuery
 
 	if err := ctx.BindUri(&query); err != nil {
 		ctx.AbortWithStatus(http.StatusBadRequest)
@@ -205,7 +229,31 @@ func handle_session_exists(ctx *gin.Context) {
 	}
 
 	if _, ok := sessions[query.SessionID]; ok {
-		ctx.JSON(http.StatusOK, gin.H{"status": "exists"})
+		userId, _ := strconv.ParseInt(sessions[query.SessionID].UserID, 16, 64)
+
+		usr, _ := getUserFromDb(userId)
+		var isAdmin bool
+		if usr.IsAdmin == 1 {
+			isAdmin = true
+		} else {
+			isAdmin = false
+		}
+
+		resp, err := json.Marshal(getUserResponse{
+			Status: "exists",
+			User: userResp{
+				UserID:   strconv.FormatInt(userId, 16),
+				Username: usr.Username,
+				IsAdmin:  isAdmin,
+			},
+		})
+
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		ctx.Data(200, gin.MIMEJSON, resp)
 	} else {
 		ctx.JSON(http.StatusOK, gin.H{"status": "doesnt_exist"})
 	}

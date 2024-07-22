@@ -15,7 +15,7 @@ body,html {
     overflow: hidden;
 }
 
-button {
+button, button[type="submit"] {
 
     @apply bg-yellow-600;
     @apply text-white;
@@ -40,5 +40,8 @@ input[type=text],input[type=password],select {
 }
 
 h1 {
-    @apply font-bold;
+    @apply font-light;
+    @apply text-yellow-400;
+    @apply mb-2;
+    @apply mt-1;
 }

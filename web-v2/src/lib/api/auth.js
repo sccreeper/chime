@@ -4,12 +4,12 @@ import { browser } from "$app/environment"
 /**
  * Checks if a users session is valid and exists
  * Server side only
- * @param {string} id 
+ * @param {string} sessionId 
  * @returns {Promise<boolean>}
  */
-export async function sessionExists(id) {
+export async function sessionExists(sessionId) {
     
-    const req = await fetch(`${browser ? '' : process.env.ORIGIN}/api/auth/session_exists/${id}`)
+    const req = await fetch(`${browser ? '' : process.env.ORIGIN}/api/auth/session_exists/${sessionId}`)
     if (req.status != 200) {
         return false
     }
@@ -29,7 +29,7 @@ export async function sessionExists(id) {
  * Server side only
  * @param {string} username 
  * @param {string} password 
- * @returns 
+ * @returns {Promise<{session: import("$lib/api/models").Session, successful: boolean}>}
  */
 export async function loginUser(username, password) {
 
@@ -49,12 +49,35 @@ export async function loginUser(username, password) {
     const resp = await req.json()
 
     return {
-        sessionId: resp.session.session_id,
-        userId: resp.session.user_id,
-        isAdmin: resp.user.is_admin,
+        session: {
+            sessionId: resp.session.session_id,
+            userId: resp.session.user_id,
+            isAdmin: resp.user.is_admin,
+            username: resp.user.username,
+        },
         successful: true,
     }
     
+}
+
+// TODO: Merge both of the get user and session exists methods in the future.
+/**
+ * Gets the user object from a session_exists request. TODO: This will be changed in the future.
+ * @param {string} sessionId 
+ * @returns {Promise<import("$lib/api/models").Session>}
+ */
+export async function getUser(sessionId) {
+    
+    const req = await fetch(`${browser ? '' : process.env.ORIGIN}/api/auth/session_exists/${sessionId}`)
+    const resp = await req.json()
+
+    return {
+        sessionId: sessionId,
+        userId: resp.user.user_id,
+        isAdmin: resp.user.is_admin,
+        username: resp.user.username,
+    }
+
 }
 
 /**

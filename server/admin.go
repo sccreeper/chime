@@ -127,7 +127,7 @@ func handle_change_username(ctx *gin.Context) {
 
 }
 
-type change_password_query struct {
+type changePasswordQuery struct {
 	OldPassword  string `json:"old_password"`
 	NewPassword0 string `json:"new_password_0"`
 	NewPassword1 string `json:"new_password_1"`
@@ -137,13 +137,13 @@ type change_password_query struct {
 func handle_change_password(ctx *gin.Context) {
 
 	// Verify user & request
-	verified, user_id := verify_user(ctx.Request)
+	verified, userId := verify_user(ctx.Request)
 	if !verified {
 		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
-	var query change_password_query
+	var query changePasswordQuery
 
 	if err := ctx.ShouldBindJSON(&query); err != nil {
 		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid request body"))
@@ -160,21 +160,26 @@ func handle_change_password(ctx *gin.Context) {
 	var user user_model
 	var count int64
 
-	if database.Table(table_users).Where("id = ?", user_id).Count(&count); count == 0 {
+	if database.Table(table_users).Where("id = ?", userId).Count(&count); count == 0 {
 		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Invalid user ID"))
 		return
 	}
 
 	// Finally verify current password and change
-	database.Table(table_users).Select("*").Where("id = ?", user_id).Find(&user)
+	database.Table(table_users).Select("*").Where("id = ?", userId).Find(&user)
+
+	if !verify_password(&user, query.OldPassword) {
+		ctx.Data(http.StatusBadRequest, gin.MIMEPlain, []byte("400: Password incorrect"))
+		return
+	}
 
 	var salt uint64 = random.Uint64()
-	var salt_bytes []byte = make([]byte, 8)
-	binary.LittleEndian.PutUint64(salt_bytes, salt)
+	var saltBytes []byte = make([]byte, 8)
+	binary.LittleEndian.PutUint64(saltBytes, salt)
 
-	hash, _ := scrypt.Key([]byte(query.NewPassword0), salt_bytes, 1<<15, 8, 1, 64)
+	hash, _ := scrypt.Key([]byte(query.NewPassword0), saltBytes, 1<<15, 8, 1, 64)
 
-	database.Table(table_users).Model(&user).Updates(&user_model{Password: base64.StdEncoding.EncodeToString(hash), Salt: salt_bytes})
+	database.Table(table_users).Model(&user).Updates(&user_model{Password: base64.StdEncoding.EncodeToString(hash), Salt: saltBytes})
 
 	ctx.Data(http.StatusOK, gin.MIMEPlain, []byte{})
 

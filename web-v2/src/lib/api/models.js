@@ -71,4 +71,31 @@
  * @property {string} cover
  */
 
+
+/** 
+ * @typedef {Object} Session
+ * @property {string} sessionId
+ * @property {string} userId
+ * @property {boolean} isAdmin
+ * @property {string} username
+ */
+
+/**
+ * @typedef {Object} StorageInformation
+ * @property {number} totalVolumeSpace
+ * @property {number} usedByOthers
+ * @property {number} usedByChime
+ * @property {Object} breakdown
+ * @property {number} breakdown.backups
+ * @property {number} breakdown.cache
+ * @property {number} breakdown.covers
+ * @property {number} breakdown.tracks
+ */
+
+/**
+ * @typedef {Object} User
+ * @property {string} id
+ * @property {string} username
+ * @property {boolean} isAdmin
+ */
 export {}

@@ -17,11 +17,10 @@ export const actions = {
         const auth = await loginUser(username, password)
 
         if (auth.successful) {
-            cookies.set("session_id", auth.sessionId, {path: "/", sameSite: false, httpOnly: false, secure: false, maxAge: MAX_COOKIE_AGE})
-            cookies.set("user_id", auth.userId, {path: "/", sameSite: false, httpOnly: false, secure: false, maxAge: MAX_COOKIE_AGE})
-            cookies.set("is_admin", auth.isAdmin, {path: "/", sameSite: false, httpOnly: false, secure: false, maxAge: MAX_COOKIE_AGE})
+            cookies.set("session_id", auth.session.sessionId, {path: "/", sameSite: false, httpOnly: false, secure: false, maxAge: MAX_COOKIE_AGE})
+            cookies.set("user_id", auth.session.userId, {path: "/", sameSite: false, httpOnly: false, secure: false, maxAge: MAX_COOKIE_AGE})
     
-            throw redirect(303, "/app/main")   
+            throw redirect(303, "/app/main")
         } else {
             throw redirect(303, "/app/login")   
         }
